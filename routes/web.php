@@ -1,31 +1,22 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
+Route::controller(UserController::class)->group(function(){
+    Route::get('/',  'showUsers')->name('home');
 
-Route::get('/', function () {
-    return view('welcome');
+Route::get('/user/{id}',  'singleUser')->name('view.user');
+
+Route::post('/addUser',  'addUser')->name('addUser');
+
+Route::post('/update/{id}',  'updateUser')->name('update.user');
+
+Route::get('/updatepage/{id}',  'updatePage')->name('update.page');
+
+Route::get('/delete/{id}',  'deleteUser')->name('delete.user');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::view('newuser', '/addUser');
 
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
-
-require __DIR__.'/auth.php';

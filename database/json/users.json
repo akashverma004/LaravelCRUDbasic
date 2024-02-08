@@ -1,0 +1,50 @@
+[
+    {
+        "name": "Sara",
+        "email": "sara@gmail.com",
+        "age": 25,
+        "city": "New vales"
+    },
+    {
+        "name": "Shubh",
+        "email": "shubh@gmail.com",
+        "age": 26,
+        "city": "New"
+    },
+    {
+        "name": "Shiv",
+        "email": "shiv@gmail.com",
+        "age": 27,
+        "city": "New India"
+    },
+    {
+        "name": "Sumu",
+        "email": "sumu@gmail.com",
+        "age": 28,
+        "city": "New Delhi"
+    },
+    {
+        "name": "Shaiv",
+        "email": "shaiv@gmail.com",
+        "age": 29,
+        "city": "New Mumbai"
+    },
+    {
+        "name": "Shivi",
+        "email": "shivi@gmail.com",
+        "age": 30,
+        "city": "New"
+    },
+    {
+        "name": "Sanju",
+        "email": "sanju@gmail.com",
+        "age": 31,
+        "city": "New Guinea"
+    },
+    {
+        "name": "Sandy",
+        "email": "sandy@gmail.com",
+        "age": 32,
+        "city": "New"
+    }
+]
