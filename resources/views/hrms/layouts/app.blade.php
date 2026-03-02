@@ -1,13 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'PeopleFlow HRMS')</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/theme.js'])
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        // Apply theme before rendering to avoid flash
+        const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        if (theme === 'dark') {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
 </head>
-<body class="min-h-screen bg-slate-950 text-slate-100">
+<body class="min-h-screen font-sans antialiased transition-colors duration-300 dark:bg-gradient-to-br dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 dark:text-slate-100 bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50 text-slate-900">
     @include('hrms.components.navbar')
 
     <div class="mx-auto max-w-7xl px-6 py-8">

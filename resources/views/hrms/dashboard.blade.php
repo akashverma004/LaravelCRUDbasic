@@ -6,154 +6,203 @@
 <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
     <div>
     </div>
-    <span class="rounded-full border border-cyan-400/30 bg-cyan-500/10 px-4 py-2 text-sm">{{ now()->format('d M Y') }}</span>
+    <span class="rounded-full transition-colors duration-300 dark:border-cyan-400/30 dark:bg-cyan-500/10 dark:text-cyan-300 border border-cyan-300/50 bg-cyan-100 text-cyan-700 px-4 py-2 text-sm">{{ now()->format('d M Y') }}</span>
 </div>
 
         @if (session('status'))
-            <div class="mb-6 rounded-xl border border-emerald-400/30 bg-emerald-400/10 px-4 py-3 text-emerald-200">{{ session('status') }}</div>
+            <div class="mb-6 rounded-xl transition-colors duration-300 dark:border-emerald-400/30 dark:bg-emerald-400/10 dark:text-emerald-200 border border-emerald-300/50 bg-emerald-100 text-emerald-700 px-4 py-3">{{ session('status') }}</div>
         @endif
 
+        <!-- Colorful Dashboard Cards -->
         <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <a href="{{ route('employees.index') }}" class="block rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-lg shadow-cyan-900/10 transition hover:border-cyan-400/50 hover:bg-slate-800">
-                <p class="text-sm text-slate-400">Total Employees</p>
-                <p class="mt-2 text-3xl font-semibold text-cyan-300">{{ $employeeCount }}</p>
-            </a>
-            <a href="{{ route('departments.index') }}" class="block rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-lg shadow-cyan-900/10 transition hover:border-cyan-400/50 hover:bg-slate-800">
-                <p class="text-sm text-slate-400">Departments</p>
-                <p class="mt-2 text-3xl font-semibold text-cyan-300">{{ $departmentCount }}</p>
-            </a>
-            <a href="{{ route('leaves.pending') }}" class="block rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-lg shadow-cyan-900/10 transition hover:border-cyan-400/50 hover:bg-slate-800">
-                <p class="text-sm text-slate-400">Pending Leave</p>
-                <p class="mt-2 text-3xl font-semibold text-cyan-300">{{ $leavePending }}</p>
-            </a>
-            <a href="{{ route('employees.index') }}" class="block rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-lg shadow-cyan-900/10 transition hover:border-cyan-400/50 hover:bg-slate-800">
-                <p class="text-sm text-slate-400">Attendance Today</p>
-                <p class="mt-2 text-3xl font-semibold text-cyan-300">{{ $attendanceToday }}</p>
-            </a>
-        </div>
+
+    <!-- Total Employees - Blue Card -->
+    <a href="{{ route('employees.index') }}"
+       class="block rounded-2xl p-5 transition-all duration-300
+       border border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100 shadow-lg shadow-blue-200/50 hover:shadow-xl hover:border-blue-300
+       dark:border-blue-800 dark:from-blue-900 dark:to-blue-800 dark:bg-gradient-to-br dark:shadow-blue-900/30 dark:hover:border-blue-500">
+
+        <p class="text-sm font-medium text-blue-700 dark:text-blue-300">
+            Total Employees
+        </p>
+
+        <p class="mt-2 text-3xl font-semibold text-blue-600 dark:text-blue-400">
+            {{ $employeeCount }}
+        </p>
+    </a>
+
+
+    <!-- Departments - Purple Card -->
+    <a href="{{ route('departments.index') }}"
+       class="block rounded-2xl p-5 transition-all duration-300
+       border border-purple-200 bg-gradient-to-br from-purple-50 to-purple-100 shadow-lg shadow-purple-200/50 hover:shadow-xl hover:border-purple-300
+       dark:border-purple-800 dark:from-purple-900 dark:to-purple-800 dark:bg-gradient-to-br dark:shadow-purple-900/30 dark:hover:border-purple-500">
+
+        <p class="text-sm font-medium text-purple-700 dark:text-purple-300">
+            Departments
+        </p>
+
+        <p class="mt-2 text-3xl font-semibold text-purple-600 dark:text-purple-400">
+            {{ $departmentCount }}
+        </p>
+    </a>
+
+
+    <!-- Pending Leave - Orange Card -->
+    <a href="{{ route('leaves.pending') }}"
+       class="block rounded-2xl p-5 transition-all duration-300
+       border border-orange-200 bg-gradient-to-br from-orange-50 to-orange-100 shadow-lg shadow-orange-200/50 hover:shadow-xl hover:border-orange-300
+       dark:border-orange-800 dark:from-orange-900 dark:to-orange-800 dark:bg-gradient-to-br dark:shadow-orange-900/30 dark:hover:border-orange-500">
+
+        <p class="text-sm font-medium text-orange-700 dark:text-orange-300">
+            Pending Leave
+        </p>
+
+        <p class="mt-2 text-3xl font-semibold text-orange-600 dark:text-orange-400">
+            {{ $leavePending }}
+        </p>
+    </a>
+
+
+    <!-- Attendance Today - Green Card -->
+    <a href="{{ route('employees.index') }}"
+       class="block rounded-2xl p-5 transition-all duration-300
+       border border-green-200 bg-gradient-to-br from-green-50 to-green-100 shadow-lg shadow-green-200/50 hover:shadow-xl hover:border-green-300
+       dark:border-green-800 dark:from-green-900 dark:to-green-800 dark:bg-gradient-to-br dark:shadow-green-900/30 dark:hover:border-green-500">
+
+        <p class="text-sm font-medium text-green-700 dark:text-green-300">
+            Attendance Today
+        </p>
+
+        <p class="mt-2 text-3xl font-semibold text-green-600 dark:text-green-400">
+            {{ $attendanceToday }}
+        </p>
+    </a>
+
+</div>
 
         <div class="mt-8 grid gap-6 lg:grid-cols-3">
-            <div class="rounded-2xl border border-slate-800 bg-slate-900 p-6 lg:col-span-2">
+            <div class="rounded-2xl transition-colors duration-300 dark:border-slate-800 dark:bg-slate-900 border-slate-200 border bg-white p-6 lg:col-span-2">
                 <div class="mb-4 flex items-center justify-between">
-                    <h2 class="text-lg font-semibold">Workforce Distribution</h2>
+                    <h2 class="transition-colors duration-300 dark:text-white text-slate-900 text-lg font-semibold">Workforce Distribution</h2>
                 </div>
                 <canvas id="departmentChart" class="max-h-72"></canvas>
             </div>
 
-            <div class="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-                <h2 class="mb-4 text-lg font-semibold">Quick Add Department</h2>
+            <div class="rounded-2xl transition-colors duration-300 dark:border-slate-800 dark:bg-slate-900 border-slate-200 border bg-white p-6">
+                <h2 class="mb-4 transition-colors duration-300 dark:text-white text-slate-900 text-lg font-semibold">Quick Add Department</h2>
                 <form method="POST" action="{{ route('hrms.departments.store') }}" class="space-y-3">
                     @csrf
-                    <input name="name" placeholder="Department name" class="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" required>
-                    <input name="code" placeholder="Code (e.g. ENG)" class="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" required>
-                    <input name="lead_name" placeholder="Department lead" class="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" required>
-                    <button class="w-full rounded-lg bg-cyan-500 py-2 font-semibold text-slate-900 transition hover:bg-cyan-400">Add Department</button>
+                    <input name="name" placeholder="Department name" class="transition-colors duration-300 w-full rounded-lg dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder-slate-400 border-slate-300 border bg-white text-slate-900 placeholder-slate-500 px-3 py-2 text-sm" required>
+                    <input name="code" placeholder="Code (e.g. ENG)" class="transition-colors duration-300 w-full rounded-lg dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder-slate-400 border-slate-300 border bg-white text-slate-900 placeholder-slate-500 px-3 py-2 text-sm" required>
+                    <input name="lead_name" placeholder="Department lead" class="transition-colors duration-300 w-full rounded-lg dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder-slate-400 border-slate-300 border bg-white text-slate-900 placeholder-slate-500 px-3 py-2 text-sm" required>
+                    <button class="w-full rounded-lg transition-all duration-300 dark:bg-cyan-500 dark:text-slate-900 dark:hover:bg-cyan-400 bg-blue-500 text-white hover:bg-blue-600 py-2 font-semibold">Add Department</button>
                 </form>
             </div>
         </div>
 
-        <div class="mt-8 rounded-2xl border border-slate-800 bg-slate-900 p-6" x-data="{tab: 'employees'}">
+        <div class="mt-8 rounded-2xl transition-colors duration-300 dark:border-slate-800 dark:bg-slate-900 border-slate-200 border bg-white p-6" x-data="{tab: 'employees'}">
             <div class="mb-4 flex gap-3">
-                <button @click="tab='employees'" :class="tab === 'employees' ? 'bg-cyan-500 text-slate-900' : 'bg-slate-800'" class="rounded-lg px-4 py-2 text-sm font-medium">Add Employee</button>
-                <button @click="tab='leave'" :class="tab === 'leave' ? 'bg-cyan-500 text-slate-900' : 'bg-slate-800'" class="rounded-lg px-4 py-2 text-sm font-medium">Add Leave Request</button>
+                <button @click="tab='employees'" :class="tab === 'employees' ? 'dark:bg-cyan-500 dark:text-slate-900 bg-blue-500 text-white' : 'dark:bg-slate-800 bg-slate-200'" class="rounded-lg px-4 py-2 text-sm font-medium transition-colors duration-200">Add Employee</button>
+                <button @click="tab='leave'" :class="tab === 'leave' ? 'dark:bg-cyan-500 dark:text-slate-900 bg-blue-500 text-white' : 'dark:bg-slate-800 bg-slate-200'" class="rounded-lg px-4 py-2 text-sm font-medium transition-colors duration-200">Add Leave Request</button>
             </div>
 
             <form x-show="tab === 'employees'" x-cloak method="POST" action="{{ route('hrms.employees.store') }}" class="grid gap-3 md:grid-cols-2">
                 @csrf
-                <input name="full_name" placeholder="Full name" class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" required>
-                <input type="email" name="email" placeholder="Email" class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" required>
-                <input name="phone" placeholder="Phone" class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" required>
-                <input name="job_title" placeholder="Job title" class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" required>
-                <select name="department_id" class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" required>
+                <input name="full_name" placeholder="Full name" class="transition-colors duration-300 rounded-lg dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder-slate-400 border-slate-300 border bg-white text-slate-900 placeholder-slate-500 px-3 py-2 text-sm" required>
+                <input type="email" name="email" placeholder="Email" class="transition-colors duration-300 rounded-lg dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder-slate-400 border-slate-300 border bg-white text-slate-900 placeholder-slate-500 px-3 py-2 text-sm" required>
+                <input name="phone" placeholder="Phone" class="transition-colors duration-300 rounded-lg dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder-slate-400 border-slate-300 border bg-white text-slate-900 placeholder-slate-500 px-3 py-2 text-sm" required>
+                <input name="job_title" placeholder="Job title" class="transition-colors duration-300 rounded-lg dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder-slate-400 border-slate-300 border bg-white text-slate-900 placeholder-slate-500 px-3 py-2 text-sm" required>
+                <select name="department_id" class="transition-colors duration-300 rounded-lg dark:border-slate-700 dark:bg-slate-950 dark:text-white border-slate-300 border bg-white text-slate-900 px-3 py-2 text-sm" required>
                     <option value="">Department</option>
                     @foreach ($departmentBreakdown as $department)
                         <option value="{{ $department->id }}">{{ $department->name }}</option>
                     @endforeach
                 </select>
-                <select name="employment_type" class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" required>
+                <select name="employment_type" class="transition-colors duration-300 rounded-lg dark:border-slate-700 dark:bg-slate-950 dark:text-white border-slate-300 border bg-white text-slate-900 px-3 py-2 text-sm" required>
                     <option value="full-time">Full-time</option>
                     <option value="part-time">Part-time</option>
                     <option value="contract">Contract</option>
                     <option value="intern">Intern</option>
                 </select>
-                <input type="number" step="0.01" min="0" name="salary" placeholder="Salary" class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" required>
+                <input type="number" step="0.01" min="0" name="salary" placeholder="Salary" class="transition-colors duration-300 rounded-lg dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder-slate-400 border-slate-300 border bg-white text-slate-900 placeholder-slate-500 px-3 py-2 text-sm" required>
                <input
                     type="date"
                     name="joined_on"
-                    class="rounded-lg border border-slate-600 bg-slate-900 text-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-auto"
+                    class="transition-colors duration-300 rounded-lg dark:border-slate-600 dark:bg-slate-900 dark:text-white border-slate-300 border bg-white text-slate-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 dark:focus:ring-cyan-500 focus:ring-blue-500 appearance-auto"
                     required
                 >
-                <select name="status" class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" required>
+                <select name="status" class="transition-colors duration-300 rounded-lg dark:border-slate-700 dark:bg-slate-950 dark:text-white border-slate-300 border bg-white text-slate-900 px-3 py-2 text-sm" required>
                     <option value="active">Active</option>
                     <option value="on-leave">On Leave</option>
                     <option value="resigned">Resigned</option>
                 </select>
-                <button class="rounded-lg bg-cyan-500 py-2 font-semibold text-slate-900 transition hover:bg-cyan-400">Create Employee</button>
+                <button class="rounded-lg transition-all duration-300 dark:bg-cyan-500 dark:text-slate-900 dark:hover:bg-cyan-400 bg-blue-500 text-white hover:bg-blue-600 py-2 font-semibold">Create Employee</button>
             </form>
 
             <form x-show="tab === 'leave'" x-cloak method="POST" action="{{ route('hrms.leave.store') }}" class="grid gap-3 md:grid-cols-2">
                 @csrf
-                <select name="employee_id" class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" required>
+                <select name="employee_id" class="transition-colors duration-300 rounded-lg dark:border-slate-700 dark:bg-slate-950 dark:text-white border-slate-300 border bg-white text-slate-900 px-3 py-2 text-sm" required>
                     <option value="">Employee</option>
                     @foreach ($employees as $employee)
                         <option value="{{ $employee->id }}">{{ $employee->full_name }}</option>
                     @endforeach
                 </select>
-                <select name="leave_type" class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" required>
+                <select name="leave_type" class="transition-colors duration-300 rounded-lg dark:border-slate-700 dark:bg-slate-950 dark:text-white border-slate-300 border bg-white text-slate-900 px-3 py-2 text-sm" required>
                     <option value="annual">Annual</option>
                     <option value="sick">Sick</option>
                     <option value="casual">Casual</option>
                     <option value="unpaid">Unpaid</option>
                 </select>
-                <input type="date" name="start_date" class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" required>
-                <input type="date" name="end_date" class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" required>
-                <select name="status" class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" required>
+                <input type="date" name="start_date" class="transition-colors duration-300 rounded-lg dark:border-slate-700 dark:bg-slate-950 dark:text-white border-slate-300 border bg-white text-slate-900 px-3 py-2 text-sm" required>
+                <input type="date" name="end_date" class="transition-colors duration-300 rounded-lg dark:border-slate-700 dark:bg-slate-950 dark:text-white border-slate-300 border bg-white text-slate-900 px-3 py-2 text-sm" required>
+                <select name="status" class="transition-colors duration-300 rounded-lg dark:border-slate-700 dark:bg-slate-950 dark:text-white border-slate-300 border bg-white text-slate-900 px-3 py-2 text-sm" required>
                     <option value="pending">Pending</option>
                     <option value="approved">Approved</option>
                     <option value="rejected">Rejected</option>
                 </select>
-                <input name="reason" placeholder="Reason" class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" required>
-                <button class="rounded-lg bg-cyan-500 py-2 font-semibold text-slate-900 transition hover:bg-cyan-400">Submit Leave</button>
+                <input name="reason" placeholder="Reason" class="transition-colors duration-300 rounded-lg dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder-slate-400 border-slate-300 border bg-white text-slate-900 placeholder-slate-500 px-3 py-2 text-sm" required>
+                <button class="rounded-lg transition-all duration-300 dark:bg-cyan-500 dark:text-slate-900 dark:hover:bg-cyan-400 bg-blue-500 text-white hover:bg-blue-600 py-2 font-semibold">Submit Leave</button>
             </form>
         </div>
 
         <div class="mt-8 grid gap-6 lg:grid-cols-2">
-            <div class="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-                <h3 class="mb-3 text-lg font-semibold">Recent Employees</h3>
+            <div class="rounded-2xl transition-colors duration-300 dark:border-slate-800 dark:bg-slate-900 border-slate-200 border bg-white p-6">
+                <h3 class="mb-3 transition-colors duration-300 dark:text-white text-slate-900 text-lg font-semibold">Recent Employees</h3>
                 <div class="space-y-3">
                     @forelse ($employees->take(4) as $employee)
-                        <div class="flex items-center justify-between rounded-xl bg-slate-950 px-4 py-3">
+                        <div class="flex items-center justify-between rounded-xl transition-colors duration-300 dark:bg-slate-950 bg-slate-100 px-4 py-3">
                             <div>
-                                <p class="font-medium">{{ $employee->full_name }}</p>
-                                <p class="text-xs text-slate-400">{{ $employee->job_title }} · {{ $employee->department->name }}</p>
+                                <p class="transition-colors duration-300 dark:text-white text-slate-900 font-medium">{{ $employee->full_name }}</p>
+                                <p class="transition-colors duration-300 dark:text-slate-400 text-slate-600 text-xs">{{ $employee->job_title }} · {{ $employee->department->name }}</p>
                             </div>
-                            <span class="rounded-full bg-cyan-500/10 px-3 py-1 text-xs text-cyan-300">{{ ucfirst($employee->status) }}</span>
+                            <span class="transition-colors duration-300 dark:bg-cyan-500/10 dark:text-cyan-300 rounded-full bg-blue-100 text-blue-600 px-3 py-1 text-xs font-medium">{{ ucfirst($employee->status) }}</span>
                         </div>
                     @empty
-                        <p class="text-sm text-slate-400">No employees yet.</p>
+                        <p class="transition-colors duration-300 dark:text-slate-400 text-slate-600 text-sm">No employees yet.</p>
                     @endforelse
                 </div>
                 @if ($employees->count() > 4)
-                    <a href="{{ route('employees.index') }}" class="mt-4 inline-flex items-center gap-1 text-sm text-cyan-400 hover:text-cyan-300">
+                    <a href="{{ route('employees.index') }}" class="mt-4 inline-flex items-center gap-1 transition-colors duration-300 dark:text-cyan-400 dark:hover:text-cyan-300 text-blue-600 hover:text-blue-700 text-sm">
                         View More →
                     </a>
                 @endif
             </div>
 
-            <div class="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-                <h3 class="mb-3 text-lg font-semibold">Latest Leave Requests</h3>
+            <div class="rounded-2xl transition-colors duration-300 dark:border-slate-800 dark:bg-slate-900 border-slate-200 border bg-white p-6">
+                <h3 class="mb-3 transition-colors duration-300 dark:text-white text-slate-900 text-lg font-semibold">Latest Leave Requests</h3>
                 <div class="space-y-3">
                     @forelse ($leaveRequests->take(4) as $leave)
-                        <div class="rounded-xl bg-slate-950 px-4 py-3">
-                            <p class="font-medium">{{ $leave->employee->full_name }} ({{ ucfirst($leave->leave_type) }})</p>
-                            <p class="text-xs text-slate-400">{{ $leave->start_date->format('d M') }} - {{ $leave->end_date->format('d M') }} · {{ ucfirst($leave->status) }}</p>
+                        <div class="rounded-xl transition-colors duration-300 dark:bg-slate-950 bg-slate-100 px-4 py-3">
+                            <p class="transition-colors duration-300 dark:text-white text-slate-900 font-medium">{{ $leave->employee->full_name }} ({{ ucfirst($leave->leave_type) }})</p>
+                            <p class="transition-colors duration-300 dark:text-slate-400 text-slate-600 text-xs">{{ $leave->start_date->format('d M') }} - {{ $leave->end_date->format('d M') }} · {{ ucfirst($leave->status) }}</p>
                         </div>
                     @empty
-                        <p class="text-sm text-slate-400">No leave requests yet.</p>
+                        <p class="transition-colors duration-300 dark:text-slate-400 text-slate-600 text-sm">No leave requests yet.</p>
                     @endforelse
                 </div>
                 @if ($leaveRequests->count() > 4)
-                    <a href="{{ route('leaves.index') }}" class="mt-4 inline-flex items-center gap-1 text-sm text-cyan-400 hover:text-cyan-300">
+                    <a href="{{ route('leaves.index') }}" class="mt-4 inline-flex items-center gap-1 transition-colors duration-300 dark:text-cyan-400 dark:hover:text-cyan-300 text-blue-600 hover:text-blue-700 text-sm">
                         View More →
                     </a>
                 @endif
@@ -162,57 +211,57 @@
 
         <!-- Leave Statistics -->
         <div class="mt-8 grid gap-6 lg:grid-cols-3">
-            <div class="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-                <h3 class="mb-4 text-lg font-semibold">Leave Status</h3>
+            <div class="rounded-2xl transition-colors duration-300 dark:border-slate-800 dark:bg-slate-900 border-slate-200 border bg-white p-6">
+                <h3 class="mb-4 transition-colors duration-300 dark:text-white text-slate-900 text-lg font-semibold">Leave Status</h3>
                 <div class="space-y-3">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-3">
                             <span class="inline-flex h-3 w-3 rounded-full bg-emerald-500"></span>
-                            <p class="text-sm text-slate-400">Approved</p>
+                            <p class="transition-colors duration-300 dark:text-slate-400 text-slate-600 text-sm">Approved</p>
                         </div>
-                        <p class="font-semibold text-emerald-300">{{ $leaveStats['approved'] }}</p>
+                        <p class="transition-colors duration-300 dark:text-emerald-300 text-emerald-600 font-semibold">{{ $leaveStats['approved'] }}</p>
                     </div>
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-3">
                             <span class="inline-flex h-3 w-3 rounded-full bg-yellow-500"></span>
-                            <p class="text-sm text-slate-400">Pending</p>
+                            <p class="transition-colors duration-300 dark:text-slate-400 text-slate-600 text-sm">Pending</p>
                         </div>
-                        <p class="font-semibold text-yellow-300">{{ $leaveStats['pending'] }}</p>
+                        <p class="transition-colors duration-300 dark:text-yellow-300 text-yellow-600 font-semibold">{{ $leaveStats['pending'] }}</p>
                     </div>
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-3">
                             <span class="inline-flex h-3 w-3 rounded-full bg-red-500"></span>
-                            <p class="text-sm text-slate-400">Rejected</p>
+                            <p class="transition-colors duration-300 dark:text-slate-400 text-slate-600 text-sm">Rejected</p>
                         </div>
-                        <p class="font-semibold text-red-300">{{ $leaveStats['rejected'] }}</p>
+                        <p class="transition-colors duration-300 dark:text-red-300 text-red-600 font-semibold">{{ $leaveStats['rejected'] }}</p>
                     </div>
                 </div>
             </div>
 
-            <div class="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-                <h3 class="mb-4 text-lg font-semibold">Employment Type</h3>
+            <div class="rounded-2xl transition-colors duration-300 dark:border-slate-800 dark:bg-slate-900 border-slate-200 border bg-white p-6">
+                <h3 class="mb-4 transition-colors duration-300 dark:text-white text-slate-900 text-lg font-semibold">Employment Type</h3>
                 <div class="space-y-3">
                     @forelse ($employmentBreakdown as $type)
                         <div class="flex items-center justify-between">
-                            <p class="text-sm text-slate-400 capitalize">{{ $type->employment_type }}</p>
-                            <span class="rounded-full bg-cyan-500/20 px-3 py-1 text-sm font-semibold text-cyan-300">{{ $type->count }}</span>
+                            <p class="transition-colors duration-300 dark:text-slate-400 text-slate-600 text-sm capitalize">{{ $type->employment_type }}</p>
+                            <span class="transition-colors duration-300 dark:bg-cyan-500/20 dark:text-cyan-300 rounded-full bg-blue-100 text-blue-600 px-3 py-1 text-sm font-semibold">{{ $type->count }}</span>
                         </div>
                     @empty
-                        <p class="text-sm text-slate-400">No data available</p>
+                        <p class="transition-colors duration-300 dark:text-slate-400 text-slate-600 text-sm">No data available</p>
                     @endforelse
                 </div>
             </div>
 
-            <div class="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-                <h3 class="mb-4 text-lg font-semibold">Employee Status</h3>
+            <div class="rounded-2xl transition-colors duration-300 dark:border-slate-800 dark:bg-slate-900 border-slate-200 border bg-white p-6">
+                <h3 class="mb-4 transition-colors duration-300 dark:text-white text-slate-900 text-lg font-semibold">Employee Status</h3>
                 <div class="space-y-3">
                     @forelse ($employeesByStatus as $status)
                         <div class="flex items-center justify-between">
-                            <p class="text-sm text-slate-400 capitalize">{{ $status->status }}</p>
-                            <span class="rounded-full bg-cyan-500/20 px-3 py-1 text-sm font-semibold text-cyan-300">{{ $status->count }}</span>
+                            <p class="transition-colors duration-300 dark:text-slate-400 text-slate-600 text-sm capitalize">{{ $status->status }}</p>
+                            <span class="transition-colors duration-300 dark:bg-cyan-500/20 dark:text-cyan-300 rounded-full bg-blue-100 text-blue-600 px-3 py-1 text-sm font-semibold">{{ $status->count }}</span>
                         </div>
                     @empty
-                        <p class="text-sm text-slate-400">No data available</p>
+                        <p class="transition-colors duration-300 dark:text-slate-400 text-slate-600 text-sm">No data available</p>
                     @endforelse
                 </div>
             </div>
@@ -225,32 +274,32 @@
 
         <!-- Managers Management Section -->
         <div class="mt-8 grid gap-6 lg:grid-cols-2">
-            <div class="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-                <h3 class="mb-4 text-lg font-semibold">Team Managers</h3>
+            <div class="rounded-2xl transition-colors duration-300 dark:border-slate-800 dark:bg-slate-900 border-slate-200 border bg-white p-6">
+                <h3 class="mb-4 transition-colors duration-300 dark:text-white text-slate-900 text-lg font-semibold">Team Managers</h3>
                 <div class="space-y-3">
                     @forelse ($teamHeads as $manager)
-                        <div class="flex items-center justify-between rounded-lg bg-slate-950 p-3">
+                        <div class="flex items-center justify-between rounded-lg transition-colors duration-300 dark:bg-slate-950 bg-slate-100 p-3">
                             <div class="flex-1">
-                                <p class="font-medium text-white">{{ $manager->full_name }}</p>
-                                <p class="text-xs text-slate-400">{{ $manager->job_title }}</p>
+                                <p class="transition-colors duration-300 dark:text-white text-slate-900 font-medium">{{ $manager->full_name }}</p>
+                                <p class="transition-colors duration-300 dark:text-slate-400 text-slate-600 text-xs">{{ $manager->job_title }}</p>
                             </div>
-                            <span class="ml-3 rounded-full bg-blue-500/20 px-3 py-1 text-sm font-semibold text-blue-300">
+                            <span class="transition-colors duration-300 dark:bg-cyan-500/20 dark:text-cyan-300 ml-3 rounded-full bg-blue-100 text-blue-600 px-3 py-1 text-sm font-semibold">
                                 {{ $manager->subordinates_count ?? count($manager->subordinates) }} reports
                             </span>
                         </div>
                     @empty
-                        <p class="text-sm text-slate-400">No managers assigned yet</p>
+                        <p class="transition-colors duration-300 dark:text-slate-400 text-slate-600 text-sm">No managers assigned yet</p>
                     @endforelse
                 </div>
             </div>
 
-            <div class="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-                <h3 class="mb-4 text-lg font-semibold">Assign Manager</h3>
+            <div class="rounded-2xl transition-colors duration-300 dark:border-slate-800 dark:bg-slate-900 border-slate-200 border bg-white p-6">
+                <h3 class="mb-4 transition-colors duration-300 dark:text-white text-slate-900 text-lg font-semibold">Assign Manager</h3>
                 <form action="{{ route('employees.assign-manager') }}" method="POST" class="space-y-3">
                     @csrf
                     <div>
-                        <label class="text-sm text-slate-400">Select Employee</label>
-                        <select name="employee_id" class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" required>
+                        <label class="transition-colors duration-300 dark:text-slate-400 text-slate-600 text-sm">Select Employee</label>
+                        <select name="employee_id" class="transition-colors duration-300 mt-2 w-full rounded-lg dark:border-slate-700 dark:bg-slate-950 dark:text-white border-slate-300 border bg-white text-slate-900 px-3 py-2 text-sm" required>
                             <option value="">-- Choose Employee --</option>
                             @forelse ($allEmployees as $emp)
                                 <option value="{{ $emp->id }}">{{ $emp->full_name }} ({{ $emp->department->name }})</option>
@@ -259,8 +308,8 @@
                         </select>
                     </div>
                     <div>
-                        <label class="text-sm text-slate-400">Select Manager</label>
-                        <select name="manager_id" class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" required>
+                        <label class="transition-colors duration-300 dark:text-slate-400 text-slate-600 text-sm">Select Manager</label>
+                        <select name="manager_id" class="transition-colors duration-300 mt-2 w-full rounded-lg dark:border-slate-700 dark:bg-slate-950 dark:text-white border-slate-300 border bg-white text-slate-900 px-3 py-2 text-sm" required>
                             <option value="">-- No Manager --</option>
                             @forelse ($allEmployees as $emp)
                                 <option value="{{ $emp->id }}">{{ $emp->full_name }}</option>
@@ -269,25 +318,25 @@
                         </select>
                     </div>
                     <div>
-                        <label class="text-sm text-slate-400">Effective Date</label>
-                        <input type="date" name="effective_date" class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" value="{{ now()->toDateString() }}" required>
+                        <label class="transition-colors duration-300 dark:text-slate-400 text-slate-600 text-sm">Effective Date</label>
+                        <input type="date" name="effective_date" class="transition-colors duration-300 mt-2 w-full rounded-lg dark:border-slate-700 dark:bg-slate-950 dark:text-white border-slate-300 border bg-white text-slate-900 px-3 py-2 text-sm" value="{{ now()->toDateString() }}" required>
                     </div>
-                    <button class="w-full rounded-lg bg-cyan-500 py-2 font-semibold text-slate-900 transition hover:bg-cyan-400">Assign Manager</button>
+                    <button class="w-full rounded-lg transition-all duration-300 dark:bg-cyan-500 dark:text-slate-900 dark:hover:bg-cyan-400 bg-blue-500 text-white hover:bg-blue-600 py-2 font-semibold">Assign Manager</button>
                 </form>
             </div>
         </div>
 
         <!-- Top Departments -->
         <div class="mt-8 grid gap-6 lg:grid-cols-2">
-            <div class="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-                <h3 class="mb-4 text-lg font-semibold">Top Departments by Headcount</h3>
+            <div class="rounded-2xl transition-colors duration-300 dark:border-slate-800 dark:bg-slate-900 border-slate-200 border bg-white p-6">
+                <h3 class="mb-4 transition-colors duration-300 dark:text-white text-slate-900 text-lg font-semibold">Top Departments by Headcount</h3>
                 <div class="space-y-3">
                     @forelse ($topDepartments->take(4) as $dept)
-                        <div class="flex items-center justify-between rounded-lg bg-slate-950 p-3">
+                        <div class="flex items-center justify-between rounded-lg transition-colors duration-300 dark:bg-slate-950 bg-slate-100 p-3">
                             <div class="flex-1">
-                                <p class="font-medium text-white">{{ $dept->name }}</p>
+                                <p class="transition-colors duration-300 dark:text-white text-slate-900 font-medium">{{ $dept->name }}</p>
                                 <div class="mt-1 flex items-center gap-2">
-                                    <div class="h-2 flex-1 rounded-full bg-slate-700">
+                                    <div class="h-2 flex-1 rounded-full transition-colors duration-300 dark:bg-slate-700 bg-slate-300">
                                         <div
                                             class="h-full rounded-full bg-gradient-to-r from-cyan-500 to-blue-500"
                                             style="width: {{ ($dept->employees_count / $employeeCount) * 100 }}%"
@@ -295,47 +344,46 @@
                                     </div>
                                 </div>
                             </div>
-                            <span class="ml-3 min-w-fit rounded-full bg-cyan-500/20 px-3 py-1 text-sm font-semibold text-cyan-300">
+                            <span class="ml-3 min-w-fit rounded-full transition-colors duration-300 dark:bg-cyan-500/20 dark:text-cyan-300 bg-blue-100 text-blue-600 px-3 py-1 text-sm font-semibold">
                                 {{ $dept->employees_count }}
                             </span>
                         </div>
                     @empty
-                        <p class="text-sm text-slate-400">No departments found</p>
+                        <p class="transition-colors duration-300 dark:text-slate-400 text-slate-600 text-sm">No departments found</p>
                     @endforelse
                 </div>
                 @if ($topDepartments->count() > 4)
-                    <a href="{{ route('departments.index') }}" class="mt-4 inline-flex items-center gap-1 text-sm text-cyan-400 hover:text-cyan-300">
+                    <a href="{{ route('departments.index') }}" class="mt-4 inline-flex items-center gap-1 transition-colors duration-300 dark:text-cyan-400 dark:hover:text-cyan-300 text-blue-600 hover:text-blue-700 text-sm">
                         View More →
                     </a>
                 @endif
             </div>
 
-            <div class="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-                <h3 class="mb-4 text-lg font-semibold">New Joinees</h3>
+            <div class="rounded-2xl transition-colors duration-300 dark:border-slate-800 dark:bg-slate-900 border-slate-200 border bg-white p-6">
+                <h3 class="mb-4 transition-colors duration-300 dark:text-white text-slate-900 text-lg font-semibold">New Joinees</h3>
                 <div class="space-y-3">
                     @forelse ($newJoinees->take(4) as $employee)
-                        <div class="flex items-center justify-between rounded-lg bg-slate-950 p-3">
+                        <div class="flex items-center justify-between rounded-lg transition-colors duration-300 dark:bg-slate-950 bg-slate-100 p-3">
                             <div>
-                                <p class="font-medium text-white">{{ $employee->full_name }}</p>
-                                <p class="text-xs text-slate-400">{{ $employee->job_title }} · {{ $employee->joined_on->format('d M Y') }}</p>
+                                <p class="transition-colors duration-300 dark:text-white text-slate-900 font-medium">{{ $employee->full_name }}</p>
+                                <p class="transition-colors duration-300 dark:text-slate-400 text-slate-600 text-xs">{{ $employee->job_title }} · {{ $employee->joined_on->format('d M Y') }}</p>
                             </div>
-                            <span class="rounded-full bg-emerald-500/20 px-3 py-1 text-xs text-emerald-300">New</span>
+                            <span class="rounded-full transition-colors duration-300 dark:bg-emerald-500/20 dark:text-emerald-300 bg-emerald-100 text-emerald-600 px-3 py-1 text-xs font-medium">New</span>
                         </div>
                     @empty
-                        <p class="text-sm text-slate-400">No new joinees</p>
+                        <p class="transition-colors duration-300 dark:text-slate-400 text-slate-600 text-sm">No new joinees</p>
                     @endforelse
                 </div>
                 @if ($newJoinees->count() > 4)
-                    <a href="{{ route('employees.index') }}" class="mt-4 inline-flex items-center gap-1 text-sm text-cyan-400 hover:text-cyan-300">
+                    <a href="{{ route('employees.index') }}" class="mt-4 inline-flex items-center gap-1 transition-colors duration-300 dark:text-cyan-400 dark:hover:text-cyan-300 text-blue-600 hover:text-blue-700 text-sm">
                         View More →
                     </a>
                 @endif
             </div>
         </div>
-    </div>
 
-        <div class="mt-8 rounded-2xl border border-slate-800 bg-slate-900 p-6">
-            <h3 class="mb-4 text-lg font-semibold">Department-wise Workforce</h3>
+        <div class="mt-8 rounded-2xl transition-colors duration-300 dark:border-slate-800 dark:bg-slate-900 border-slate-200 border bg-white p-6">
+            <h3 class="mb-4 transition-colors duration-300 dark:text-white text-slate-900 text-lg font-semibold">Department-wise Workforce</h3>
             <canvas id="departmentChart2" class="max-h-80"></canvas>
         </div>
     </div>
@@ -344,6 +392,7 @@
         // Department Workforce Chart
         const labels = @json($departmentBreakdown->pluck('name'));
         const data = @json($departmentBreakdown->pluck('employees_count'));
+        const isDarkMode = document.documentElement.classList.contains('dark');
 
         new Chart(document.getElementById('departmentChart'), {
             type: 'bar',
@@ -358,10 +407,10 @@
             },
             options: {
                 responsive: true,
-                plugins: {legend: {display: false}},
+                plugins: {legend: {display: false, labels: {color: isDarkMode ? '#cbd5e1' : '#475569'}}},
                 scales: {
-                    x: {ticks: {color: '#94a3b8'}},
-                    y: {ticks: {color: '#94a3b8'}, beginAtZero: true},
+                    x: {ticks: {color: isDarkMode ? '#94a3b8' : '#64748b'}},
+                    y: {ticks: {color: isDarkMode ? '#94a3b8' : '#64748b'}, beginAtZero: true},
                 },
             },
         });
@@ -384,7 +433,7 @@
             options: {
                 responsive: true,
                 plugins: {
-                    legend: {labels: {color: '#cbd5e1'}},
+                    legend: {labels: {color: isDarkMode ? '#cbd5e1' : '#475569'}},
                     tooltip: {callbacks: {label: ctx => ctx.raw}},
                 },
             },
