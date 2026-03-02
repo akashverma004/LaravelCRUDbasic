@@ -2,28 +2,55 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\File;
 use App\Models\User;
 
 class UserSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        $json = File::get(path:'database/json/users.json');
-        $users = collect(json_decode($json));
+        $users = [
+            [
+                'name' => 'Admin User',
+                'email' => 'admin@hrmsai.test',
+                'age' => '35',
+                'city' => 'New Delhi',
+            ],
+            [
+                'name' => 'HR Manager',
+                'email' => 'hr.manager@hrmsai.test',
+                'age' => '32',
+                'city' => 'Mumbai',
+            ],
+            [
+                'name' => 'Team Manager',
+                'email' => 'manager@hrmsai.test',
+                'age' => '38',
+                'city' => 'Bangalore',
+            ],
+            [
+                'name' => 'HR Officer',
+                'email' => 'hr.officer@hrmsai.test',
+                'age' => '28',
+                'city' => 'Hyderabad',
+            ],
+            [
+                'name' => 'Ava Thomas',
+                'email' => 'ava@hrmsai.test',
+                'age' => '26',
+                'city' => 'Pune',
+            ],
+        ];
 
-        $users->each(function($user){
-            user::create([
-                'name' => $user->name,
-                'email' => $user->email,
-                'age' => $user->age,
-                'city' => $user->city,
-            ]);
-        });
+        foreach ($users as $index => $user) {
+            User::create($user);
+        }
+
+        // Assign roles to users
+        User::find(1)->assignRole('admin');
+        User::find(2)->assignRole('hr_manager');
+        User::find(3)->assignRole('manager');
+        User::find(4)->assignRole('hr_officer');
+        User::find(5)->assignRole('employee');
     }
 }

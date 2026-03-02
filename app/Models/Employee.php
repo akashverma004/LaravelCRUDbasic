@@ -13,6 +13,7 @@ class Employee extends Model
 
     protected $fillable = [
         'department_id',
+        'manager_id',
         'full_name',
         'email',
         'phone',
@@ -31,6 +32,16 @@ class Employee extends Model
     public function department(): BelongsTo
     {
         return $this->belongsTo(Department::class);
+    }
+
+    public function manager(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class, 'manager_id');
+    }
+
+    public function subordinates(): HasMany
+    {
+        return $this->hasMany(Employee::class, 'manager_id');
     }
 
     public function leaveRequests(): HasMany
