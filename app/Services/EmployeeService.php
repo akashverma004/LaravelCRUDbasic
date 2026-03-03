@@ -24,9 +24,28 @@ class EmployeeService
         return $employee->delete();
     }
 
-    public function getAllEmployees()
+    public function getAllEmployees(array $filters = [])
     {
-        return Employee::with('department')->orderBy('full_name')->paginate(15);
+        return Employee::with(['department', 'role'])
+            ->when(
+                ! empty($filters['q']),
+                fn ($query) => $query->where(function ($innerQuery) use ($filters) {
+                    $innerQuery
+                        ->where('full_name', 'like', '%' . $filters['q'] . '%')
+                        ->orWhere('email', 'like', '%' . $filters['q'] . '%');
+                })
+            )
+            ->when(
+                ! empty($filters['department_id']),
+                fn ($query) => $query->where('department_id', (int) $filters['department_id'])
+            )
+            ->when(
+                ! empty($filters['role_id']),
+                fn ($query) => $query->where('role_id', (int) $filters['role_id'])
+            )
+            ->orderBy('full_name')
+            ->paginate(15)
+            ->withQueryString();
     }
 
     public function getEmployeeById(int $id): ?Employee

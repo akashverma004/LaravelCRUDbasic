@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Employee extends Model
@@ -14,6 +15,7 @@ class Employee extends Model
     protected $fillable = [
         'department_id',
         'manager_id',
+        'role_id',
         'full_name',
         'email',
         'phone',
@@ -34,6 +36,11 @@ class Employee extends Model
         return $this->belongsTo(Department::class);
     }
 
+    public function role(): BelongsTo
+    {
+        return $this->belongsTo(Role::class);
+    }
+
     public function manager(): BelongsTo
     {
         return $this->belongsTo(Employee::class, 'manager_id');
@@ -52,5 +59,10 @@ class Employee extends Model
     public function attendanceRecords(): HasMany
     {
         return $this->hasMany(AttendanceRecord::class);
+    }
+
+    public function leavePolicy(): HasOne
+    {
+        return $this->hasOne(EmployeeLeavePolicy::class);
     }
 }

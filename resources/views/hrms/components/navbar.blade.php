@@ -28,6 +28,11 @@
                 <a href="{{ route('leaves.index') }}" class="px-3 py-2 rounded-lg text-sm font-medium dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-700 text-slate-700 hover:text-slate-900 hover:bg-slate-200 transition-colors duration-200">
                     Leave Requests
                 </a>
+                @if (Auth::user()->hasAnyRole(['admin', 'hr_manager']))
+                    <a href="{{ route('policies.leave.edit') }}" class="px-3 py-2 rounded-lg text-sm font-medium dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-700 text-slate-700 hover:text-slate-900 hover:bg-slate-200 transition-colors duration-200">
+                        Policies
+                    </a>
+                @endif
             </div>
 
             <!-- Right Side - Theme Toggle & User Dropdown -->
@@ -128,6 +133,11 @@
             <a href="{{ route('leaves.index') }}" class="block px-3 py-2 rounded-lg text-sm font-medium dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-700 text-slate-700 hover:text-slate-900 hover:bg-slate-200 transition-colors duration-200">
                 Leave Requests
             </a>
+            @if (Auth::user()->hasAnyRole(['admin', 'hr_manager']))
+                <a href="{{ route('policies.leave.edit') }}" class="block px-3 py-2 rounded-lg text-sm font-medium dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-700 text-slate-700 hover:text-slate-900 hover:bg-slate-200 transition-colors duration-200">
+                    Policies
+                </a>
+            @endif
             <!-- Mobile User Menu -->
             <div class="pt-2 dark:border-slate-700 border-t border-slate-200">
                 <!-- Mobile Theme Toggle -->

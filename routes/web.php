@@ -4,6 +4,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\LeaveRequestController;
+use App\Http\Controllers\LeavePolicyController;
 use App\Http\Controllers\OrgChartController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserRoleController;
@@ -56,6 +57,12 @@ Route::middleware('auth')->group(function () {
         Route::patch('/{id}/reject', [LeaveRequestController::class, 'reject'])->name('leaves.reject');
     });
 
+    // Policies
+    Route::prefix('policies')->middleware('role:admin,hr_manager')->group(function () {
+        Route::get('/leave', [LeavePolicyController::class, 'edit'])->name('policies.leave.edit');
+        Route::patch('/leave', [LeavePolicyController::class, 'update'])->name('policies.leave.update');
+    });
+
     // Roles & Permissions Management
     Route::prefix('roles')->middleware('role:admin,hr_manager')->group(function () {
         Route::get('/', [RoleController::class, 'index'])->name('roles.index');
@@ -75,9 +82,4 @@ Route::middleware('auth')->group(function () {
         Route::post('/{user}/assign-role', [UserRoleController::class, 'assignRole'])->name('users.assign-role');
         Route::post('/{user}/remove-role', [UserRoleController::class, 'removeRole'])->name('users.remove-role');
     });
-
-    // LEGACY ROUTES - For backward compatibility with dashboard forms
-    Route::post('departments', [DepartmentController::class, 'store'])->name('hrms.departments.store');
-    Route::post('employees', [EmployeeController::class, 'store'])->name('hrms.employees.store');
-    Route::post('leave-requests', [LeaveRequestController::class, 'store'])->name('hrms.leave.store');
 });

@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreEmployeeRequest;
+use App\Models\Employee;
 use App\Services\EmployeeService;
 use App\Services\DepartmentService;
+use App\Models\Role;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -17,14 +19,21 @@ class EmployeeController extends Controller
 
     public function index(): View
     {
-        $employees = $this->employeeService->getAllEmployees();
-        return view('hrms.employees.index', compact('employees'));
+        $filters = request()->only(['q', 'role_id', 'department_id']);
+        $employees = $this->employeeService->getAllEmployees($filters);
+        $roles = Role::orderBy('name')->get();
+        $departments = $this->departmentService->getAllDepartments();
+
+        return view('hrms.employees.index', compact('employees', 'roles', 'departments', 'filters'));
     }
 
     public function create(): View
     {
         $departments = $this->departmentService->getAllDepartments();
-        return view('hrms.employees.create', compact('departments'));
+        $roles = Role::all();
+        $managers = Employee::with('department')->orderBy('full_name')->get();
+
+        return view('hrms.employees.create', compact('departments', 'roles', 'managers'));
     }
 
     public function store(StoreEmployeeRequest $request): RedirectResponse
@@ -43,7 +52,8 @@ class EmployeeController extends Controller
     {
         $employee = $this->employeeService->getEmployeeById($id);
         $departments = $this->departmentService->getAllDepartments();
-        return view('hrms.employees.edit', compact('employee', 'departments'));
+        $roles = Role::all();
+        return view('hrms.employees.edit', compact('employee', 'departments', 'roles'));
     }
 
     public function update(StoreEmployeeRequest $request, int $id): RedirectResponse

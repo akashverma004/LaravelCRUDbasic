@@ -91,7 +91,7 @@
 
             <div class="rounded-2xl transition-colors duration-300 dark:border-slate-800 dark:bg-slate-900 border-slate-200 border bg-white p-6">
                 <h2 class="mb-4 transition-colors duration-300 dark:text-white text-slate-900 text-lg font-semibold">Quick Add Department</h2>
-                <form method="POST" action="{{ route('hrms.departments.store') }}" class="space-y-3">
+                <form method="POST" action="{{ route('departments.store') }}" class="space-y-3">
                     @csrf
                     <input name="name" placeholder="Department name" class="transition-colors duration-300 w-full rounded-lg dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder-slate-400 border-slate-300 border bg-white text-slate-900 placeholder-slate-500 px-3 py-2 text-sm" required>
                     <input name="code" placeholder="Code (e.g. ENG)" class="transition-colors duration-300 w-full rounded-lg dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder-slate-400 border-slate-300 border bg-white text-slate-900 placeholder-slate-500 px-3 py-2 text-sm" required>
@@ -99,71 +99,6 @@
                     <button class="w-full rounded-lg transition-all duration-300 dark:bg-cyan-500 dark:text-slate-900 dark:hover:bg-cyan-400 bg-blue-500 text-white hover:bg-blue-600 py-2 font-semibold">Add Department</button>
                 </form>
             </div>
-        </div>
-
-        <div class="mt-8 rounded-2xl transition-colors duration-300 dark:border-slate-800 dark:bg-slate-900 border-slate-200 border bg-white p-6" x-data="{tab: 'employees'}">
-            <div class="mb-4 flex gap-3">
-                <button @click="tab='employees'" :class="tab === 'employees' ? 'dark:bg-cyan-500 dark:text-slate-900 bg-blue-500 text-white' : 'dark:bg-slate-800 bg-slate-200'" class="rounded-lg px-4 py-2 text-sm font-medium transition-colors duration-200">Add Employee</button>
-                <button @click="tab='leave'" :class="tab === 'leave' ? 'dark:bg-cyan-500 dark:text-slate-900 bg-blue-500 text-white' : 'dark:bg-slate-800 bg-slate-200'" class="rounded-lg px-4 py-2 text-sm font-medium transition-colors duration-200">Add Leave Request</button>
-            </div>
-
-            <form x-show="tab === 'employees'" x-cloak method="POST" action="{{ route('hrms.employees.store') }}" class="grid gap-3 md:grid-cols-2">
-                @csrf
-                <input name="full_name" placeholder="Full name" class="transition-colors duration-300 rounded-lg dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder-slate-400 border-slate-300 border bg-white text-slate-900 placeholder-slate-500 px-3 py-2 text-sm" required>
-                <input type="email" name="email" placeholder="Email" class="transition-colors duration-300 rounded-lg dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder-slate-400 border-slate-300 border bg-white text-slate-900 placeholder-slate-500 px-3 py-2 text-sm" required>
-                <input name="phone" placeholder="Phone" class="transition-colors duration-300 rounded-lg dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder-slate-400 border-slate-300 border bg-white text-slate-900 placeholder-slate-500 px-3 py-2 text-sm" required>
-                <input name="job_title" placeholder="Job title" class="transition-colors duration-300 rounded-lg dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder-slate-400 border-slate-300 border bg-white text-slate-900 placeholder-slate-500 px-3 py-2 text-sm" required>
-                <select name="department_id" class="transition-colors duration-300 rounded-lg dark:border-slate-700 dark:bg-slate-950 dark:text-white border-slate-300 border bg-white text-slate-900 px-3 py-2 text-sm" required>
-                    <option value="">Department</option>
-                    @foreach ($departmentBreakdown as $department)
-                        <option value="{{ $department->id }}">{{ $department->name }}</option>
-                    @endforeach
-                </select>
-                <select name="employment_type" class="transition-colors duration-300 rounded-lg dark:border-slate-700 dark:bg-slate-950 dark:text-white border-slate-300 border bg-white text-slate-900 px-3 py-2 text-sm" required>
-                    <option value="full-time">Full-time</option>
-                    <option value="part-time">Part-time</option>
-                    <option value="contract">Contract</option>
-                    <option value="intern">Intern</option>
-                </select>
-                <input type="number" step="0.01" min="0" name="salary" placeholder="Salary" class="transition-colors duration-300 rounded-lg dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder-slate-400 border-slate-300 border bg-white text-slate-900 placeholder-slate-500 px-3 py-2 text-sm" required>
-               <input
-                    type="date"
-                    name="joined_on"
-                    class="transition-colors duration-300 rounded-lg dark:border-slate-600 dark:bg-slate-900 dark:text-white border-slate-300 border bg-white text-slate-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 dark:focus:ring-cyan-500 focus:ring-blue-500 appearance-auto"
-                    required
-                >
-                <select name="status" class="transition-colors duration-300 rounded-lg dark:border-slate-700 dark:bg-slate-950 dark:text-white border-slate-300 border bg-white text-slate-900 px-3 py-2 text-sm" required>
-                    <option value="active">Active</option>
-                    <option value="on-leave">On Leave</option>
-                    <option value="resigned">Resigned</option>
-                </select>
-                <button class="rounded-lg transition-all duration-300 dark:bg-cyan-500 dark:text-slate-900 dark:hover:bg-cyan-400 bg-blue-500 text-white hover:bg-blue-600 py-2 font-semibold">Create Employee</button>
-            </form>
-
-            <form x-show="tab === 'leave'" x-cloak method="POST" action="{{ route('hrms.leave.store') }}" class="grid gap-3 md:grid-cols-2">
-                @csrf
-                <select name="employee_id" class="transition-colors duration-300 rounded-lg dark:border-slate-700 dark:bg-slate-950 dark:text-white border-slate-300 border bg-white text-slate-900 px-3 py-2 text-sm" required>
-                    <option value="">Employee</option>
-                    @foreach ($employees as $employee)
-                        <option value="{{ $employee->id }}">{{ $employee->full_name }}</option>
-                    @endforeach
-                </select>
-                <select name="leave_type" class="transition-colors duration-300 rounded-lg dark:border-slate-700 dark:bg-slate-950 dark:text-white border-slate-300 border bg-white text-slate-900 px-3 py-2 text-sm" required>
-                    <option value="annual">Annual</option>
-                    <option value="sick">Sick</option>
-                    <option value="casual">Casual</option>
-                    <option value="unpaid">Unpaid</option>
-                </select>
-                <input type="date" name="start_date" class="transition-colors duration-300 rounded-lg dark:border-slate-700 dark:bg-slate-950 dark:text-white border-slate-300 border bg-white text-slate-900 px-3 py-2 text-sm" required>
-                <input type="date" name="end_date" class="transition-colors duration-300 rounded-lg dark:border-slate-700 dark:bg-slate-950 dark:text-white border-slate-300 border bg-white text-slate-900 px-3 py-2 text-sm" required>
-                <select name="status" class="transition-colors duration-300 rounded-lg dark:border-slate-700 dark:bg-slate-950 dark:text-white border-slate-300 border bg-white text-slate-900 px-3 py-2 text-sm" required>
-                    <option value="pending">Pending</option>
-                    <option value="approved">Approved</option>
-                    <option value="rejected">Rejected</option>
-                </select>
-                <input name="reason" placeholder="Reason" class="transition-colors duration-300 rounded-lg dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder-slate-400 border-slate-300 border bg-white text-slate-900 placeholder-slate-500 px-3 py-2 text-sm" required>
-                <button class="rounded-lg transition-all duration-300 dark:bg-cyan-500 dark:text-slate-900 dark:hover:bg-cyan-400 bg-blue-500 text-white hover:bg-blue-600 py-2 font-semibold">Submit Leave</button>
-            </form>
         </div>
 
         <div class="mt-8 grid gap-6 lg:grid-cols-2">

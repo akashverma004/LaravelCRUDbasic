@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreDepartmentRequest;
+use App\Models\Employee;
 use App\Services\DepartmentService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
@@ -19,12 +20,21 @@ class DepartmentController extends Controller
 
     public function create(): View
     {
-        return view('hrms.departments.create');
+        $employees = Employee::orderBy('full_name')->get();
+
+        return view('hrms.departments.create', compact('employees'));
     }
 
     public function store(StoreDepartmentRequest $request): RedirectResponse
     {
-        $this->departmentService->createDepartment($request->validated());
+        $validated = $request->validated();
+        if (! empty($validated['lead_employee_id'])) {
+            $validated['lead_name'] = Employee::findOrFail($validated['lead_employee_id'])->full_name;
+        }
+        unset($validated['lead_employee_id']);
+
+        $this->departmentService->createDepartment($validated);
+
         return redirect()->route('departments.index')->with('status', 'Department created successfully.');
     }
 
@@ -37,13 +47,22 @@ class DepartmentController extends Controller
     public function edit(int $id): View
     {
         $department = $this->departmentService->getDepartmentById($id);
-        return view('hrms.departments.edit', compact('department'));
+        $employees = Employee::orderBy('full_name')->get();
+
+        return view('hrms.departments.edit', compact('department', 'employees'));
     }
 
     public function update(StoreDepartmentRequest $request, int $id): RedirectResponse
     {
         $department = $this->departmentService->getDepartmentById($id);
-        $this->departmentService->updateDepartment($department, $request->validated());
+        $validated = $request->validated();
+        if (! empty($validated['lead_employee_id'])) {
+            $validated['lead_name'] = Employee::findOrFail($validated['lead_employee_id'])->full_name;
+        }
+        unset($validated['lead_employee_id']);
+
+        $this->departmentService->updateDepartment($department, $validated);
+
         return redirect()->route('departments.show', $id)->with('status', 'Department updated successfully.');
     }
 
