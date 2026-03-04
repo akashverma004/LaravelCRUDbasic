@@ -9,6 +9,7 @@ export default defineConfig({
                 'resources/js/app.js',
                 'resources/js/theme.js'
             ],
+            buildDirectory: 'build',
             refresh: true,
         }),
     ],
