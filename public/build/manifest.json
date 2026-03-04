@@ -8,5 +8,10 @@
     "file": "assets/app-vZDQhnJA.js",
     "isEntry": true,
     "src": "resources/js/app.js"
+  },
+  "resources/js/theme.js": {
+    "file": "assets/theme-5OpoC5ex.js",
+    "isEntry": true,
+    "src": "resources/js/theme.js"
   }
 }
