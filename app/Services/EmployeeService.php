@@ -63,8 +63,11 @@ class EmployeeService
     public function searchEmployees(string $query)
     {
         return Employee::with('department')
-            ->where('full_name', 'like', "%{$query}%")
-            ->orWhere('email', 'like', "%{$query}%")
+            ->where(function ($innerQuery) use ($query) {
+                $innerQuery
+                    ->where('full_name', 'like', "%{$query}%")
+                    ->orWhere('email', 'like', "%{$query}%");
+            })
             ->orderBy('full_name')
             ->paginate(15);
     }

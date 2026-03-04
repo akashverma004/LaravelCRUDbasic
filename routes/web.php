@@ -3,16 +3,26 @@
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\HolidayCalendarController;
+use App\Http\Controllers\HolidayPolicyController;
 use App\Http\Controllers\LeaveRequestController;
 use App\Http\Controllers\LeavePolicyController;
+use App\Http\Controllers\PolicyManagementController;
 use App\Http\Controllers\OrgChartController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\TenantOnboardingController;
+use App\Http\Controllers\TenantUserController;
 use App\Http\Controllers\UserRoleController;
+use App\Http\Controllers\TenantManagementController;
 use Illuminate\Support\Facades\Route;
 
 // Protected routes - require authentication
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'tenant', 'tenant.active', 'tenant.setup'])->group(function () {
+    Route::get('/onboarding/setup', [TenantOnboardingController::class, 'show'])->name('onboarding.show');
+    Route::post('/onboarding/setup', [TenantOnboardingController::class, 'store'])->name('onboarding.store');
+
     // Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.home');
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
     // Organization Chart
@@ -59,8 +69,19 @@ Route::middleware('auth')->group(function () {
 
     // Policies
     Route::prefix('policies')->middleware('role:admin,hr_manager')->group(function () {
+        Route::get('/', [PolicyManagementController::class, 'index'])->name('policies.index');
+        Route::get('/holiday-policies', [HolidayPolicyController::class, 'index'])->name('policies.holiday-policies.index');
+        Route::post('/holiday-policies', [HolidayPolicyController::class, 'store'])->name('policies.holiday-policies.store');
+        Route::patch('/holiday-policies/{holidayPolicy}', [HolidayPolicyController::class, 'update'])->name('policies.holiday-policies.update');
+        Route::delete('/holiday-policies/{holidayPolicy}', [HolidayPolicyController::class, 'destroy'])->name('policies.holiday-policies.destroy');
+        Route::get('/holiday-calendar', [HolidayCalendarController::class, 'index'])->name('policies.holiday-calendar.index');
+        Route::post('/holiday-calendar/policies/{holidayPolicy}/dates', [HolidayCalendarController::class, 'storeDate'])->name('policies.holiday-calendar.dates.store');
+        Route::patch('/holiday-calendar/policies/{holidayPolicy}/dates/{holidayDate}', [HolidayCalendarController::class, 'updateDate'])->name('policies.holiday-calendar.dates.update');
+        Route::delete('/holiday-calendar/policies/{holidayPolicy}/dates/{holidayDate}', [HolidayCalendarController::class, 'destroyDate'])->name('policies.holiday-calendar.dates.destroy');
         Route::get('/leave', [LeavePolicyController::class, 'edit'])->name('policies.leave.edit');
         Route::patch('/leave', [LeavePolicyController::class, 'update'])->name('policies.leave.update');
+        Route::get('/{type}', [PolicyManagementController::class, 'edit'])->name('policies.edit');
+        Route::patch('/{type}', [PolicyManagementController::class, 'update'])->name('policies.update');
     });
 
     // Roles & Permissions Management
@@ -82,4 +103,20 @@ Route::middleware('auth')->group(function () {
         Route::post('/{user}/assign-role', [UserRoleController::class, 'assignRole'])->name('users.assign-role');
         Route::post('/{user}/remove-role', [UserRoleController::class, 'removeRole'])->name('users.remove-role');
     });
+
+    // Tenant users and invitations
+    Route::prefix('tenant-users')->middleware('role:admin,hr_manager')->group(function () {
+        Route::get('/', [TenantUserController::class, 'index'])->name('tenant-users.index');
+        Route::post('/create', [TenantUserController::class, 'store'])->name('tenant-users.store');
+        Route::post('/invite', [TenantUserController::class, 'invite'])->name('tenant-users.invite');
+    });
+});
+
+Route::middleware(['auth', 'can:manage-tenants'])->prefix('platform/tenants')->group(function () {
+    Route::get('/', [TenantManagementController::class, 'index'])->name('tenants.index');
+    Route::get('/create', [TenantManagementController::class, 'create'])->name('tenants.create');
+    Route::post('/', [TenantManagementController::class, 'store'])->name('tenants.store');
+    Route::get('/{tenant}/edit', [TenantManagementController::class, 'edit'])->name('tenants.edit');
+    Route::patch('/{tenant}', [TenantManagementController::class, 'update'])->name('tenants.update');
+    Route::delete('/{tenant}', [TenantManagementController::class, 'destroy'])->name('tenants.destroy');
 });

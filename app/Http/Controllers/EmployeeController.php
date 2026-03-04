@@ -32,8 +32,10 @@ class EmployeeController extends Controller
         $departments = $this->departmentService->getAllDepartments();
         $roles = Role::all();
         $managers = Employee::with('department')->orderBy('full_name')->get();
+        $countries = config('geo.countries', []);
+        $states = config('geo.states_in', []);
 
-        return view('hrms.employees.create', compact('departments', 'roles', 'managers'));
+        return view('hrms.employees.create', compact('departments', 'roles', 'managers', 'countries', 'states'));
     }
 
     public function store(StoreEmployeeRequest $request): RedirectResponse
@@ -53,7 +55,14 @@ class EmployeeController extends Controller
         $employee = $this->employeeService->getEmployeeById($id);
         $departments = $this->departmentService->getAllDepartments();
         $roles = Role::all();
-        return view('hrms.employees.edit', compact('employee', 'departments', 'roles'));
+        $managers = Employee::with('department')
+            ->where('id', '!=', $employee->id)
+            ->orderBy('full_name')
+            ->get();
+        $countries = config('geo.countries', []);
+        $states = config('geo.states_in', []);
+
+        return view('hrms.employees.edit', compact('employee', 'departments', 'roles', 'managers', 'countries', 'states'));
     }
 
     public function update(StoreEmployeeRequest $request, int $id): RedirectResponse

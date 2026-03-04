@@ -9,7 +9,9 @@ use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\CompanySignupController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\TenantInvitationController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -34,6 +36,16 @@ Route::middleware('guest')->group(function () {
 
     Route::post('reset-password', [NewPasswordController::class, 'store'])
                 ->name('password.store');
+
+    Route::get('company/signup', [CompanySignupController::class, 'create'])
+                ->name('company-signup.create');
+    Route::post('company/signup', [CompanySignupController::class, 'store'])
+                ->name('company-signup.store');
+
+    Route::get('invitation/{token}', [TenantInvitationController::class, 'show'])
+                ->name('tenant-invitations.accept');
+    Route::post('invitation/{token}', [TenantInvitationController::class, 'store'])
+                ->name('tenant-invitations.store-acceptance');
 });
 
 Route::middleware('auth')->group(function () {

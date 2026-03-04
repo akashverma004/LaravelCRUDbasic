@@ -16,11 +16,11 @@ class ReimbursementPolicyApiController extends BasePolicyApiController
 
     public function store(StoreReimbursementPolicyRequest $request): JsonResponse
     {
-        return parent::store($request);
+        return $this->storeValidated($request);
     }
 
     public function update(UpdateReimbursementPolicyRequest $request, int $id): JsonResponse
     {
-        return parent::update($request, $id);
+        return $this->updateValidated($request, $id);
     }
 }

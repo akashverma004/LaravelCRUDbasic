@@ -23,6 +23,10 @@
                 <span class="h-3 w-3 rounded-full bg-rose-300"></span>
                 <span>Unpaid</span>
             </div>
+            <div class="flex items-center gap-2">
+                <span class="h-3 w-3 rounded-full bg-slate-300"></span>
+                <span>Public holiday</span>
+            </div>
         </div>
     </div>
     <a href="{{ route('leaves.create') }}" class="rounded-lg bg-cyan-500 px-4 py-2 font-semibold text-slate-900 hover:bg-cyan-400">+ New Request</a>
@@ -112,10 +116,14 @@
                                     'sick' => 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300',
                                     'casual' => 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300',
                                     'unpaid' => 'bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300',
+                                    'holiday' => 'bg-slate-200 text-slate-700 dark:bg-slate-700/60 dark:text-slate-100',
                                     default => 'bg-slate-200 text-slate-700 dark:bg-slate-600/40 dark:text-slate-200',
                                 };
+                                $eventSizeClasses = $event['type'] === 'holiday'
+                                    ? 'my-4 text-[10px] font-medium opacity-80 z-0'
+                                    : 'my-3 text-xs font-semibold z-10';
                             @endphp
-                            <div class="z-10 mx-1 my-3 flex items-center rounded-full px-3 text-xs font-semibold {{ $eventClasses }}" style="grid-column: {{ $event['start_col'] }} / {{ $event['end_col'] }};">
+                            <div class="mx-1 flex items-center rounded-full px-3 {{ $eventClasses }} {{ $eventSizeClasses }}" style="grid-column: {{ $event['start_col'] }} / {{ $event['end_col'] }};">
                                 {{ $event['label'] }}
                             </div>
                         @endforeach

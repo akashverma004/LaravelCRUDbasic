@@ -16,11 +16,11 @@ class ProbationPolicyApiController extends BasePolicyApiController
 
     public function store(StoreProbationPolicyRequest $request): JsonResponse
     {
-        return parent::store($request);
+        return $this->storeValidated($request);
     }
 
     public function update(UpdateProbationPolicyRequest $request, int $id): JsonResponse
     {
-        return parent::update($request, $id);
+        return $this->updateValidated($request, $id);
     }
 }

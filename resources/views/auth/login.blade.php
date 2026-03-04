@@ -11,7 +11,7 @@
             <!-- Login Form Card -->
             <form method="POST" action="{{ route('login') }}" class="transition-colors duration-300 dark:bg-slate-800 bg-white dark:border-slate-700 border-slate-200 border rounded-2xl shadow-2xl overflow-hidden">
                 <!-- Card Header with Logo -->
-                <div class="transition-colors duration-300 dark:bg-gradient-to-r dark:from-slate-750 dark:to-slate-800 bg-gradient-to-r from-slate-100 to-slate-200 dark:border-slate-700 px-8 py-8 text-center border-b border-slate-200">
+                <div class="transition-colors duration-300 dark:bg-gradient-to-r dark:from-slate-800 dark:to-slate-900 bg-gradient-to-r from-slate-200 to-slate-400 dark:border-slate-700 px-8 py-8 text-center border-b border-slate-200">
                     <a href="{{ route('dashboard') }}" class="inline-block mb-4">
                         <div class="w-14 h-14 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-xl flex items-center justify-center">
                             <span class="text-white font-bold text-2xl">P</span>
@@ -30,6 +30,15 @@
                             <p class="text-sm dark:text-red-400 text-red-600">{{ $errors->first() }}</p>
                         </div>
                     @endif
+
+                    <!-- Email Address -->
+                    <div>
+                        <label for="company" class="block text-sm font-medium dark:text-slate-300 text-slate-700 mb-2">Company Code (Optional)</label>
+                        <input id="company" type="text" name="company" value="{{ old('company') }}" class="w-full rounded-lg transition-colors duration-300 dark:border-slate-600 dark:bg-slate-900 dark:text-white dark:placeholder-slate-400 dark:focus:ring-cyan-500 border-slate-300 bg-white text-slate-900 placeholder-slate-400 focus:ring-cyan-500 border px-4 py-3 focus:outline-none focus:ring-2" placeholder="e.g. ACME or acme-inc" autocomplete="organization" />
+                        @error('company')
+                            <p class="mt-2 text-sm dark:text-red-400 text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
 
                     <!-- Email Address -->
                     <div>
@@ -75,6 +84,11 @@
                                 {{ __('Create Account') }}
                             </a>
                         @endif
+                    </div>
+                    <div class="text-center text-sm">
+                        <a href="{{ route('company-signup.create') }}" class="dark:text-cyan-400 dark:hover:text-cyan-300 text-cyan-600 hover:text-cyan-700 transition">
+                            New company? Create workspace
+                        </a>
                     </div>
                 </div>
             </form>

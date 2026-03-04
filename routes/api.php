@@ -28,7 +28,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::middleware(['auth:sanctum', 'role:admin,hr_manager'])->prefix('policies')->group(function () {
+Route::middleware(['auth:sanctum', 'tenant', 'role:admin,hr_manager'])->prefix('policies')->group(function () {
     Route::apiResource('leave', LeavePolicyApiController::class)->parameters(['leave' => 'id']);
     Route::post('leave/{id}/evaluate', [LeavePolicyApiController::class, 'evaluate']);
     Route::post('leave/evaluate-active', [LeavePolicyApiController::class, 'evaluateActive']);

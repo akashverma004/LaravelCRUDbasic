@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use App\Models\Concerns\HasPolicyRules;
 use App\Support\PolicyType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class AttendancePolicy extends Model
 {
-    use HasFactory, HasPolicyRules, SoftDeletes;
+    use HasFactory, HasPolicyRules, BelongsToTenant, SoftDeletes;
 
     public const POLICY_TYPE = PolicyType::ATTENDANCE;
 

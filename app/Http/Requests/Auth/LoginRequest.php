@@ -4,10 +4,13 @@ namespace App\Http\Requests\Auth;
 
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use App\Models\User;
+use App\Models\Tenant;
 
 class LoginRequest extends FormRequest
 {
@@ -27,6 +30,7 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'company' => ['nullable', 'string', 'max:120'],
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
         ];
@@ -41,7 +45,35 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        $companyInput = trim((string) $this->input('company'));
+        $usersQuery = User::withoutGlobalScope('tenant')
+            ->where('email', $this->string('email')->toString());
+
+        if ($companyInput !== '') {
+            $normalizedCompany = Str::lower($companyInput);
+            $tenantId = Tenant::query()
+                ->whereRaw('LOWER(code) = ?', [$normalizedCompany])
+                ->orWhereRaw('LOWER(slug) = ?', [$normalizedCompany])
+                ->value('id');
+
+            if ($tenantId) {
+                $usersQuery->where('tenant_id', (int) $tenantId);
+            } else {
+                throw ValidationException::withMessages([
+                    'company' => 'Company code is invalid.',
+                ]);
+            }
+        }
+
+        $users = $usersQuery->get();
+        if ($users->count() > 1 && $companyInput === '') {
+            throw ValidationException::withMessages([
+                'company' => 'Multiple company accounts found for this email. Enter your company code.',
+            ]);
+        }
+
+        $user = $users->first();
+        if (! $user || ! Hash::check($this->string('password')->toString(), $user->password)) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
@@ -49,6 +81,7 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        Auth::login($user, $this->boolean('remember'));
         RateLimiter::clear($this->throttleKey());
     }
 
@@ -80,6 +113,7 @@ class LoginRequest extends FormRequest
      */
     public function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->input('email')).'|'.$this->ip());
+        $company = Str::lower((string) $this->input('company', ''));
+        return Str::transliterate(Str::lower($this->input('email')).'|'.$company.'|'.$this->ip());
     }
 }

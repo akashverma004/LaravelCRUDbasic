@@ -4,12 +4,19 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\User;
+use App\Models\Role;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 
 class UserSeeder extends Seeder
 {
     public function run(): void
     {
+        $tenantIds = DB::table('tenants')->pluck('id')->all();
+        if (empty($tenantIds)) {
+            $tenantIds = [1];
+        }
+
         $users = [
             [
                 'name' => 'Admin User',
@@ -48,15 +55,38 @@ class UserSeeder extends Seeder
             ],
         ];
 
-        foreach ($users as $index => $user) {
-            User::create($user);
-        }
+        foreach ($tenantIds as $tenantId) {
+            foreach ($users as $user) {
+                $isPlatformAdmin = (int) $tenantId === 1 && $user['email'] === 'admin@hrmsai.test';
+                User::query()->updateOrCreate(
+                    ['tenant_id' => $tenantId, 'email' => $user['email']],
+                    array_merge($user, ['tenant_id' => $tenantId, 'is_platform_admin' => $isPlatformAdmin])
+                );
+            }
 
-        // Assign roles to users
-        User::find(1)->assignRole('admin');
-        User::find(2)->assignRole('hr_manager');
-        User::find(3)->assignRole('manager');
-        User::find(4)->assignRole('hr_officer');
-        User::find(5)->assignRole('employee');
+            // Assign roles by stable email scoped per tenant.
+            $roleMap = [
+                'admin@hrmsai.test' => 'admin',
+                'hr.manager@hrmsai.test' => 'hr_manager',
+                'manager@hrmsai.test' => 'manager',
+                'hr.officer@hrmsai.test' => 'hr_officer',
+                'ava@hrmsai.test' => 'employee',
+            ];
+
+            foreach ($roleMap as $email => $roleName) {
+                $user = User::query()
+                    ->where('tenant_id', $tenantId)
+                    ->where('email', $email)
+                    ->first();
+                $role = Role::query()
+                    ->where('tenant_id', $tenantId)
+                    ->where('name', $roleName)
+                    ->first();
+
+                if ($user && $role) {
+                    $user->assignRole($role);
+                }
+            }
+        }
     }
 }

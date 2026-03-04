@@ -66,5 +66,8 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'role' => \App\Http\Middleware\CheckRole::class,
         'permission' => \App\Http\Middleware\CheckPermission::class,
+        'tenant' => \App\Http\Middleware\SetTenantContext::class,
+        'tenant.active' => \App\Http\Middleware\EnsureTenantIsActive::class,
+        'tenant.setup' => \App\Http\Middleware\RedirectIfTenantSetupIncomplete::class,
     ];
 }

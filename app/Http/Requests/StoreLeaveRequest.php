@@ -4,7 +4,9 @@ namespace App\Http\Requests;
 
 use App\Models\Employee;
 use App\Models\LeavePolicy;
+use App\Support\TenantContext;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 use Carbon\Carbon;
 
@@ -17,8 +19,10 @@ class StoreLeaveRequest extends FormRequest
 
     public function rules(): array
     {
+        $tenantId = TenantContext::id() ?? (int) auth()->user()?->tenant_id ?: 1;
+
         return [
-            'employee_id' => ['required', 'integer', 'exists:employees,id'],
+            'employee_id' => ['required', 'integer', Rule::exists('employees', 'id')->where(fn ($query) => $query->where('tenant_id', $tenantId))],
             'leave_type' => ['required', 'in:annual,sick,casual,unpaid'],
             'leave_session' => ['required', 'in:full_day,morning,evening'],
             'start_date' => ['required', 'date', 'after_or_equal:today'],

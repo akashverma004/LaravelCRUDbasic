@@ -58,6 +58,7 @@
                 <th class="px-4 py-3 text-left text-sm font-semibold">Name</th>
                 <th class="px-4 py-3 text-left text-sm font-semibold">Email</th>
                 <th class="px-4 py-3 text-left text-sm font-semibold">Department</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold">Location</th>
                 <th class="px-4 py-3 text-left text-sm font-semibold">Role</th>
                 <th class="px-4 py-3 text-left text-sm font-semibold">Status</th>
                 <th class="px-4 py-3 text-left text-sm font-semibold">Action</th>
@@ -69,6 +70,7 @@
                     <td class="px-4 py-3">{{ $employee->full_name }}</td>
                     <td class="px-4 py-3 text-sm text-slate-600 dark:text-slate-400">{{ $employee->email }}</td>
                     <td class="px-4 py-3 text-sm">{{ $employee->department->name }}</td>
+                    <td class="px-4 py-3 text-sm text-slate-600 dark:text-slate-400">{{ $employee->city }}, {{ $employee->state }}</td>
                     <td class="px-4 py-3 text-sm">{{ $employee->role?->display_name ?? ($employee->role ? ucfirst($employee->role->name) : '-') }}</td>
                     <td class="px-4 py-3">
                         <span class="rounded-full px-3 py-1 text-xs {{
@@ -106,7 +108,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="6" class="px-4 py-6 text-center text-slate-600 dark:text-slate-400">No employees found</td>
+                    <td colspan="7" class="px-4 py-6 text-center text-slate-600 dark:text-slate-400">No employees found</td>
                 </tr>
             @endforelse
         </tbody>

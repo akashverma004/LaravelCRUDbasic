@@ -16,11 +16,11 @@ class OvertimePolicyApiController extends BasePolicyApiController
 
     public function store(StoreOvertimePolicyRequest $request): JsonResponse
     {
-        return parent::store($request);
+        return $this->storeValidated($request);
     }
 
     public function update(UpdateOvertimePolicyRequest $request, int $id): JsonResponse
     {
-        return parent::update($request, $id);
+        return $this->updateValidated($request, $id);
     }
 }

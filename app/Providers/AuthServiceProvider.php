@@ -51,5 +51,6 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('view-reports', fn($user) => $user->hasPermission('report.view'));
 
         Gate::define('manage-roles', fn($user) => $user->hasPermission('role.manage'));
+        Gate::define('manage-tenants', fn($user) => (bool) $user->is_platform_admin);
     }
 }

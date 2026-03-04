@@ -16,11 +16,11 @@ class NoticePeriodPolicyApiController extends BasePolicyApiController
 
     public function store(StoreNoticePeriodPolicyRequest $request): JsonResponse
     {
-        return parent::store($request);
+        return $this->storeValidated($request);
     }
 
     public function update(UpdateNoticePeriodPolicyRequest $request, int $id): JsonResponse
     {
-        return parent::update($request, $id);
+        return $this->updateValidated($request, $id);
     }
 }

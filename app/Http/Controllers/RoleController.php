@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Role;
 use App\Models\Permission;
 use App\Services\AuthorizationService;
+use App\Support\TenantContext;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class RoleController extends Controller
@@ -30,12 +32,21 @@ class RoleController extends Controller
     public function store(Request $request)
     {
         $this->authorize('manage-roles');
+        $tenantId = TenantContext::id();
 
         $validated = $request->validate([
-            'name' => 'required|unique:roles,name|alpha_dash',
+            'name' => [
+                'required',
+                'alpha_dash',
+                Rule::unique('roles', 'name')->where(fn ($query) => $query->where('tenant_id', $tenantId)),
+            ],
             'display_name' => 'required|string',
             'description' => 'nullable|string',
             'permissions' => 'nullable|array',
+            'permissions.*' => [
+                'integer',
+                Rule::exists('permissions', 'id')->where(fn ($query) => $query->where('tenant_id', $tenantId)),
+            ],
         ]);
 
         $permissionIds = $request->get('permissions', []);
@@ -49,24 +60,37 @@ class RoleController extends Controller
         return redirect()->route('roles.index')->with('status', 'Role created successfully.');
     }
 
-    public function edit(Role $role): View
+    public function edit(int $role): View
     {
         $this->authorize('manage-roles');
+        $role = Role::query()->findOrFail($role);
         $permissions = $this->authorizationService->getAllPermissions();
         $permissionsByModule = $permissions->groupBy('module');
         $rolePermissions = $role->permissions()->pluck('id')->toArray();
         return view('hrms.roles.edit', compact('role', 'permissionsByModule', 'rolePermissions'));
     }
 
-    public function update(Request $request, Role $role)
+    public function update(Request $request, int $role)
     {
         $this->authorize('manage-roles');
+        $role = Role::query()->findOrFail($role);
+        $tenantId = TenantContext::id() ?? $role->tenant_id;
 
         $validated = $request->validate([
-            'name' => 'required|alpha_dash|unique:roles,name,' . $role->id,
+            'name' => [
+                'required',
+                'alpha_dash',
+                Rule::unique('roles', 'name')
+                    ->ignore($role->id)
+                    ->where(fn ($query) => $query->where('tenant_id', $tenantId)),
+            ],
             'display_name' => 'required|string',
             'description' => 'nullable|string',
             'permissions' => 'nullable|array',
+            'permissions.*' => [
+                'integer',
+                Rule::exists('permissions', 'id')->where(fn ($query) => $query->where('tenant_id', $tenantId)),
+            ],
         ]);
 
         $permissionIds = $request->get('permissions', []);
@@ -80,9 +104,10 @@ class RoleController extends Controller
         return redirect()->route('roles.index')->with('status', 'Role updated successfully.');
     }
 
-    public function destroy(Role $role)
+    public function destroy(int $role)
     {
         $this->authorize('manage-roles');
+        $role = Role::query()->findOrFail($role);
 
         if ($role->users()->exists()) {
             return redirect()->back()->with('error', 'Cannot delete role with assigned users.');
@@ -92,9 +117,10 @@ class RoleController extends Controller
         return redirect()->route('roles.index')->with('status', 'Role deleted successfully.');
     }
 
-    public function users(Role $role): View
+    public function users(int $role): View
     {
         $this->authorize('manage-roles');
+        $role = Role::query()->findOrFail($role);
         $users = $role->users()->get();
         return view('hrms.roles.users', compact('role', 'users'));
     }

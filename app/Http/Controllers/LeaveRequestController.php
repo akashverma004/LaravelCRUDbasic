@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreLeaveRequest;
 use App\Models\Department;
 use App\Models\Employee;
+use App\Models\HolidayPolicy;
 use App\Models\LeaveRequest;
 use App\Services\LeaveService;
 use Carbon\Carbon;
@@ -63,9 +64,28 @@ class LeaveRequestController extends Controller
 
         $employees = $employeesQuery->get();
 
+        $holidayPolicies = HolidayPolicy::query()
+            ->with([
+                'holidayDates' => fn ($query) => $query
+                    ->whereDate('holiday_date', '>=', $monthStart->toDateString())
+                    ->whereDate('holiday_date', '<=', $monthEnd->toDateString())
+                    ->orderBy('holiday_date'),
+            ])
+            ->where('is_active', true)
+            ->where(function ($query) use ($monthEnd) {
+                $query->whereNull('effective_from')
+                    ->orWhereDate('effective_from', '<=', $monthEnd->toDateString());
+            })
+            ->where(function ($query) use ($monthStart) {
+                $query->whereNull('effective_to')
+                    ->orWhereDate('effective_to', '>=', $monthStart->toDateString());
+            })
+            ->get()
+            ->keyBy(fn (HolidayPolicy $policy) => strtoupper((string) $policy->country_code) . '|' . strtoupper((string) $policy->state_code));
+
         $eventMap = [];
         foreach ($employees as $employee) {
-            $eventMap[$employee->id] = $employee->leaveRequests->map(function ($leave) use ($monthStart, $monthEnd) {
+            $leaveEvents = $employee->leaveRequests->map(function ($leave) use ($monthStart, $monthEnd) {
                 $clampedStart = $leave->start_date->lt($monthStart) ? $monthStart->copy() : $leave->start_date->copy();
                 $clampedEnd = $leave->end_date->gt($monthEnd) ? $monthEnd->copy() : $leave->end_date->copy();
 
@@ -77,8 +97,33 @@ class LeaveRequestController extends Controller
                     'end_col' => $endCol,
                     'type' => $leave->leave_type,
                     'label' => $this->buildLeaveLabel($leave->leave_type, $leave->leave_session),
+                    'priority' => 2,
                 ];
             })->values();
+
+            $policyKey = strtoupper((string) $employee->country) . '|' . strtoupper((string) $employee->state);
+            $holidayEvents = collect();
+
+            $matchedPolicy = $holidayPolicies->get($policyKey);
+            if ($matchedPolicy) {
+                $holidayEvents = $matchedPolicy->holidayDates->map(function ($holidayDate) use ($monthStart) {
+                    $dayOffset = $monthStart->diffInDays($holidayDate->holiday_date->copy());
+                    $startCol = $dayOffset + 1;
+
+                    return [
+                        'start_col' => $startCol,
+                        'end_col' => $startCol + 1,
+                        'type' => 'holiday',
+                        'label' => $holidayDate->name . ($holidayDate->is_optional ? ' (Optional)' : ''),
+                        'priority' => 1,
+                    ];
+                })->values();
+            }
+
+            $eventMap[$employee->id] = $holidayEvents
+                ->concat($leaveEvents)
+                ->sortBy('priority')
+                ->values();
         }
 
         $calendarDays = collect(range(1, $monthEnd->day))->map(function (int $day) use ($monthStart) {

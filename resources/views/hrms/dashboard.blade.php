@@ -9,10 +9,6 @@
     <span class="rounded-full transition-colors duration-300 dark:border-cyan-400/30 dark:bg-cyan-500/10 dark:text-cyan-300 border border-cyan-300/50 bg-cyan-100 text-cyan-700 px-4 py-2 text-sm">{{ now()->format('d M Y') }}</span>
 </div>
 
-        @if (session('status'))
-            <div class="mb-6 rounded-xl transition-colors duration-300 dark:border-emerald-400/30 dark:bg-emerald-400/10 dark:text-emerald-200 border border-emerald-300/50 bg-emerald-100 text-emerald-700 px-4 py-3">{{ session('status') }}</div>
-        @endif
-
         <!-- Colorful Dashboard Cards -->
         <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
 
@@ -254,7 +250,7 @@
                     </div>
                     <div>
                         <label class="transition-colors duration-300 dark:text-slate-400 text-slate-600 text-sm">Effective Date</label>
-                        <input type="date" name="effective_date" class="transition-colors duration-300 mt-2 w-full rounded-lg dark:border-slate-700 dark:bg-slate-950 dark:text-white border-slate-300 border bg-white text-slate-900 px-3 py-2 text-sm" value="{{ now()->toDateString() }}" required>
+                        <input type="date" name="effective_date" class="transition-colors duration-300 mt-2 w-full rounded-lg dark:border-slate-700 dark:bg-slate-950 dark:text-white border-slate-300 border bg-white text-slate-900 px-3 py-2 text-sm appearance-auto" value="{{ now()->toDateString() }}" required>
                     </div>
                     <button class="w-full rounded-lg transition-all duration-300 dark:bg-cyan-500 dark:text-slate-900 dark:hover:bg-cyan-400 bg-blue-500 text-white hover:bg-blue-600 py-2 font-semibold">Assign Manager</button>
                 </form>

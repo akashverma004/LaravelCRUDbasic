@@ -55,7 +55,7 @@
         <div class="grid gap-4 md:grid-cols-2">
             <div>
                 <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Start Date</label>
-                <input type="date" name="start_date" class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 dark:border-slate-700 dark:bg-slate-950 px-3 py-2 @error('start_date') border-red-500 @enderror" value="{{ old('start_date') }}" required>
+                        <input type="date" name="start_date" class="transition-colors duration-300 mt-1 w-full rounded-lg border border-slate-300 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-white px-3 py-2 appearance-auto @error('start_date') border-red-500 @enderror" value="{{ old('start_date') }}" required>
                 @error('start_date')
                     <p class="mt-1 text-sm text-red-400">{{ $message }}</p>
                 @enderror
@@ -63,7 +63,7 @@
 
             <div>
                 <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">End Date</label>
-                <input type="date" name="end_date" class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 dark:border-slate-700 dark:bg-slate-950 px-3 py-2 @error('end_date') border-red-500 @enderror" value="{{ old('end_date') }}" required>
+                        <input type="date" name="end_date" class="transition-colors duration-300 mt-1 w-full rounded-lg border border-slate-300 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-white px-3 py-2 appearance-auto @error('end_date') border-red-500 @enderror" value="{{ old('end_date') }}" required>
                 @error('end_date')
                     <p class="mt-1 text-sm text-red-400">{{ $message }}</p>
                 @enderror

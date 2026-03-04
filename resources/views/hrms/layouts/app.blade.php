@@ -18,18 +18,20 @@
 <body class="min-h-screen font-sans antialiased transition-colors duration-300 dark:bg-gradient-to-br dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 dark:text-slate-100 bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50 text-slate-900">
     @include('hrms.components.navbar')
 
-    <div class="mx-auto max-w-7xl px-6 py-8">
-        @if (session('status'))
-            @include('hrms.components.alert', ['type' => 'success', 'message' => session('status')])
-        @endif
+    <main class="min-h-screen lg:pl-72">
+        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+            @if (session('status'))
+                @include('hrms.components.alert', ['type' => 'success', 'message' => session('status')])
+            @endif
 
-        @if ($errors->any())
-            @include('hrms.components.alert', ['type' => 'error', 'message' => 'Please fix the errors below.'])
-        @endif
+            @if ($errors->any())
+                @include('hrms.components.alert', ['type' => 'error', 'message' => 'Please fix the errors below.'])
+            @endif
 
-        @yield('content')
-    </div>
+            @yield('content')
+        </div>
 
-    @include('hrms.components.footer')
+        @include('hrms.components.footer')
+    </main>
 </body>
 </html>

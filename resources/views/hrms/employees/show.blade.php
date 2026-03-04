@@ -47,6 +47,30 @@
                 <p class="mt-1 text-slate-900 dark:text-white">{{ $employee->joined_on->format('d M Y') }}</p>
             </div>
             <div>
+                <p class="text-sm text-slate-600 dark:text-slate-400">Location</p>
+                <p class="mt-1 text-slate-900 dark:text-white">{{ $employee->city }}, {{ $employee->state }}, {{ $employee->country }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-slate-600 dark:text-slate-400">Address</p>
+                <p class="mt-1 text-slate-900 dark:text-white">{{ $employee->address }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-slate-600 dark:text-slate-400">Food Preference</p>
+                <p class="mt-1 text-slate-900 dark:text-white">{{ $employee->food_preference ? ucfirst($employee->food_preference) : 'N/A' }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-slate-600 dark:text-slate-400">Hobbies</p>
+                <p class="mt-1 text-slate-900 dark:text-white">{{ $employee->hobbies ?: 'N/A' }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-slate-600 dark:text-slate-400">Likes</p>
+                <p class="mt-1 text-slate-900 dark:text-white">{{ $employee->likes ?: 'N/A' }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-slate-600 dark:text-slate-400">Health Issues</p>
+                <p class="mt-1 text-slate-900 dark:text-white">{{ $employee->health_issues ?: 'N/A' }}</p>
+            </div>
+            <div>
                 <p class="text-sm text-slate-400">Status</p>
                 <p class="mt-1">
                     <span class="rounded-full bg-cyan-500/10 px-3 py-1 text-sm text-cyan-300">{{ ucfirst($employee->status) }}</span>

@@ -29,6 +29,15 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        $user = $request->user();
+        if ($user && $user->is_platform_admin) {
+            return redirect()->intended(route('tenants.index'));
+        }
+
+        if ($user && $user->tenant && ! $user->tenant->setup_completed) {
+            return redirect()->intended(route('onboarding.show'));
+        }
+
         return redirect()->intended(RouteServiceProvider::HOME);
     }
 

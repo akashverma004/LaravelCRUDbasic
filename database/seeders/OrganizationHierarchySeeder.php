@@ -2,39 +2,42 @@
 
 namespace Database\Seeders;
 
-use App\Models\Employee;
 use App\Models\Department;
+use App\Models\Employee;
+use App\Support\TenantContext;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class OrganizationHierarchySeeder extends Seeder
 {
     public function run(): void
     {
-        // Get or create departments
-        $engineeringDept = Department::firstOrCreate(['code' => 'ENG'], [
-            'name' => 'Engineering',
-            'lead_name' => 'John Smith',
-        ]);
+        $tenantIds = DB::table('tenants')->pluck('id')->all();
+        if (empty($tenantIds)) {
+            $tenantIds = [1];
+        }
 
-        $salesDept = Department::firstOrCreate(['code' => 'SALES'], [
-            'name' => 'Sales',
-            'lead_name' => 'Sarah Johnson',
-        ]);
+        foreach ($tenantIds as $tenantId) {
+            TenantContext::set((int) $tenantId);
+            $this->seedForCurrentTenant();
+        }
 
-        $hrDept = Department::firstOrCreate(['code' => 'HR'], [
-            'name' => 'Human Resources',
-            'lead_name' => 'Mike Wilson',
-        ]);
+        TenantContext::set(null);
+        $this->command?->info('Organization hierarchy seeded for all tenants.');
+    }
 
-        $marketingDept = Department::firstOrCreate(['code' => 'MARKET'], [
-            'name' => 'Marketing',
-            'lead_name' => 'Lisa Brown',
-        ]);
+    private function seedForCurrentTenant(): void
+    {
+        $departments = [
+            'ENG' => Department::query()->firstOrCreate(['code' => 'ENG'], ['name' => 'Engineering', 'lead_name' => 'John Smith']),
+            'SALES' => Department::query()->firstOrCreate(['code' => 'SALES'], ['name' => 'Sales', 'lead_name' => 'Sarah Johnson']),
+            'HR' => Department::query()->firstOrCreate(['code' => 'HR'], ['name' => 'Human Resources', 'lead_name' => 'Mike Wilson']),
+            'MARKET' => Department::query()->firstOrCreate(['code' => 'MARKET'], ['name' => 'Marketing', 'lead_name' => 'Lisa Brown']),
+        ];
 
-        // CEO - No manager
-        $ceo = Employee::firstOrCreate(['email' => 'ceo@company.com'], [
+        $ceo = $this->upsertEmployee('ceo@company.com', [
             'full_name' => 'Rajesh Kumar',
-            'department_id' => $engineeringDept->id,
+            'department_id' => $departments['ENG']->id,
             'manager_id' => null,
             'phone' => '+91-98765-43210',
             'job_title' => 'Chief Executive Officer',
@@ -44,15 +47,11 @@ class OrganizationHierarchySeeder extends Seeder
             'status' => 'active',
         ]);
 
-        // Link any orphaned employees (without managers and not the CEO) to the CEO
-        Employee::whereNull('manager_id')
-            ->where('id', '!=', $ceo->id)
-            ->update(['manager_id' => $ceo->id]);
+        Employee::query()->whereNull('manager_id')->where('id', '!=', $ceo->id)->update(['manager_id' => $ceo->id]);
 
-        // Engineering Head - Reports to CEO
-        $engHead = Employee::firstOrCreate(['email' => 'john.smith@company.com'], [
+        $engHead = $this->upsertEmployee('john.smith@company.com', [
             'full_name' => 'John Smith',
-            'department_id' => $engineeringDept->id,
+            'department_id' => $departments['ENG']->id,
             'manager_id' => $ceo->id,
             'phone' => '+91-98765-43211',
             'job_title' => 'VP Engineering',
@@ -62,10 +61,9 @@ class OrganizationHierarchySeeder extends Seeder
             'status' => 'active',
         ]);
 
-        // Sales Head - Reports to CEO
-        $salesHead = Employee::firstOrCreate(['email' => 'sarah.johnson@company.com'], [
+        $salesHead = $this->upsertEmployee('sarah.johnson@company.com', [
             'full_name' => 'Sarah Johnson',
-            'department_id' => $salesDept->id,
+            'department_id' => $departments['SALES']->id,
             'manager_id' => $ceo->id,
             'phone' => '+91-98765-43212',
             'job_title' => 'VP Sales',
@@ -75,10 +73,9 @@ class OrganizationHierarchySeeder extends Seeder
             'status' => 'active',
         ]);
 
-        // HR Head - Reports to CEO
-        $hrHead = Employee::firstOrCreate(['email' => 'mike.wilson@company.com'], [
+        $hrHead = $this->upsertEmployee('mike.wilson@company.com', [
             'full_name' => 'Mike Wilson',
-            'department_id' => $hrDept->id,
+            'department_id' => $departments['HR']->id,
             'manager_id' => $ceo->id,
             'phone' => '+91-98765-43213',
             'job_title' => 'VP Human Resources',
@@ -88,10 +85,9 @@ class OrganizationHierarchySeeder extends Seeder
             'status' => 'active',
         ]);
 
-        // Marketing Head - Reports to CEO
-        $marketingHead = Employee::firstOrCreate(['email' => 'lisa.brown@company.com'], [
+        $marketingHead = $this->upsertEmployee('lisa.brown@company.com', [
             'full_name' => 'Lisa Brown',
-            'department_id' => $marketingDept->id,
+            'department_id' => $departments['MARKET']->id,
             'manager_id' => $ceo->id,
             'phone' => '+91-98765-43214',
             'job_title' => 'VP Marketing',
@@ -101,131 +97,28 @@ class OrganizationHierarchySeeder extends Seeder
             'status' => 'active',
         ]);
 
-        // Engineering Team Members - Report to John Smith
-        Employee::firstOrCreate(['email' => 'amit.patel@company.com'], [
-            'full_name' => 'Amit Patel',
-            'department_id' => $engineeringDept->id,
-            'manager_id' => $engHead->id,
-            'phone' => '+91-98765-43215',
-            'job_title' => 'Senior PHP Developer',
-            'employment_type' => 'full-time',
-            'salary' => 75000,
-            'joined_on' => now()->subYears(2),
-            'status' => 'active',
-        ]);
+        $employees = [
+            ['email' => 'amit.patel@company.com', 'full_name' => 'Amit Patel', 'department_id' => $departments['ENG']->id, 'manager_id' => $engHead->id, 'phone' => '+91-98765-43215', 'job_title' => 'Senior PHP Developer', 'employment_type' => 'full-time', 'salary' => 75000, 'joined_on' => now()->subYears(2), 'status' => 'active'],
+            ['email' => 'priya.sharma@company.com', 'full_name' => 'Priya Sharma', 'department_id' => $departments['ENG']->id, 'manager_id' => $engHead->id, 'phone' => '+91-98765-43216', 'job_title' => 'Frontend Developer', 'employment_type' => 'full-time', 'salary' => 65000, 'joined_on' => now()->subYears(1), 'status' => 'active'],
+            ['email' => 'rajesh.kumar@company.com', 'full_name' => 'Rajesh Kumar', 'department_id' => $departments['ENG']->id, 'manager_id' => $engHead->id, 'phone' => '+91-98765-43217', 'job_title' => 'DevOps Engineer', 'employment_type' => 'full-time', 'salary' => 70000, 'joined_on' => now()->subMonths(8), 'status' => 'active'],
+            ['email' => 'arjun.nair@company.com', 'full_name' => 'Arjun Nair', 'department_id' => $departments['SALES']->id, 'manager_id' => $salesHead->id, 'phone' => '+91-98765-43218', 'job_title' => 'Sales Manager - Enterprise', 'employment_type' => 'full-time', 'salary' => 80000, 'joined_on' => now()->subYears(2), 'status' => 'active'],
+            ['email' => 'neha.reddy@company.com', 'full_name' => 'Neha Reddy', 'department_id' => $departments['SALES']->id, 'manager_id' => $salesHead->id, 'phone' => '+91-98765-43219', 'job_title' => 'Sales Executive', 'employment_type' => 'full-time', 'salary' => 55000, 'joined_on' => now()->subMonths(6), 'status' => 'active'],
+            ['email' => 'vikram.singh@company.com', 'full_name' => 'Vikram Singh', 'department_id' => $departments['SALES']->id, 'manager_id' => $salesHead->id, 'phone' => '+91-98765-43220', 'job_title' => 'Account Executive', 'employment_type' => 'full-time', 'salary' => 50000, 'joined_on' => now()->subMonths(4), 'status' => 'active'],
+            ['email' => 'kavya.gupta@company.com', 'full_name' => 'Kavya Gupta', 'department_id' => $departments['HR']->id, 'manager_id' => $hrHead->id, 'phone' => '+91-98765-43221', 'job_title' => 'HR Manager', 'employment_type' => 'full-time', 'salary' => 65000, 'joined_on' => now()->subYears(1), 'status' => 'active'],
+            ['email' => 'ananya.sen@company.com', 'full_name' => 'Ananya Sen', 'department_id' => $departments['HR']->id, 'manager_id' => $hrHead->id, 'phone' => '+91-98765-43222', 'job_title' => 'Recruiter', 'employment_type' => 'full-time', 'salary' => 45000, 'joined_on' => now()->subMonths(3), 'status' => 'active'],
+            ['email' => 'ashok.desai@company.com', 'full_name' => 'Ashok Desai', 'department_id' => $departments['MARKET']->id, 'manager_id' => $marketingHead->id, 'phone' => '+91-98765-43223', 'job_title' => 'Digital Marketing Manager', 'employment_type' => 'full-time', 'salary' => 60000, 'joined_on' => now()->subYears(1), 'status' => 'active'],
+            ['email' => 'sneha.iyer@company.com', 'full_name' => 'Sneha Iyer', 'department_id' => $departments['MARKET']->id, 'manager_id' => $marketingHead->id, 'phone' => '+91-98765-43224', 'job_title' => 'Content Strategist', 'employment_type' => 'full-time', 'salary' => 55000, 'joined_on' => now()->subMonths(10), 'status' => 'active'],
+        ];
 
-        Employee::firstOrCreate(['email' => 'priya.sharma@company.com'], [
-            'full_name' => 'Priya Sharma',
-            'department_id' => $engineeringDept->id,
-            'manager_id' => $engHead->id,
-            'phone' => '+91-98765-43216',
-            'job_title' => 'Frontend Developer',
-            'employment_type' => 'full-time',
-            'salary' => 65000,
-            'joined_on' => now()->subYears(1),
-            'status' => 'active',
-        ]);
+        foreach ($employees as $employee) {
+            $email = $employee['email'];
+            unset($employee['email']);
+            $this->upsertEmployee($email, $employee);
+        }
+    }
 
-        Employee::firstOrCreate(['email' => 'rajesh.kumar@company.com'], [
-            'full_name' => 'Rajesh Kumar',
-            'department_id' => $engineeringDept->id,
-            'manager_id' => $engHead->id,
-            'phone' => '+91-98765-43217',
-            'job_title' => 'DevOps Engineer',
-            'employment_type' => 'full-time',
-            'salary' => 70000,
-            'joined_on' => now()->subMonths(8),
-            'status' => 'active',
-        ]);
-
-        // Sales Team Members - Report to Sarah Johnson
-        Employee::firstOrCreate(['email' => 'arjun.nair@company.com'], [
-            'full_name' => 'Arjun Nair',
-            'department_id' => $salesDept->id,
-            'manager_id' => $salesHead->id,
-            'phone' => '+91-98765-43218',
-            'job_title' => 'Sales Manager - Enterprise',
-            'employment_type' => 'full-time',
-            'salary' => 80000,
-            'joined_on' => now()->subYears(2),
-            'status' => 'active',
-        ]);
-
-        Employee::firstOrCreate(['email' => 'neha.reddy@company.com'], [
-            'full_name' => 'Neha Reddy',
-            'department_id' => $salesDept->id,
-            'manager_id' => $salesHead->id,
-            'phone' => '+91-98765-43219',
-            'job_title' => 'Sales Executive',
-            'employment_type' => 'full-time',
-            'salary' => 55000,
-            'joined_on' => now()->subMonths(6),
-            'status' => 'active',
-        ]);
-
-        // Sales Team under Arjun
-        Employee::firstOrCreate(['email' => 'vikram.singh@company.com'], [
-            'full_name' => 'Vikram Singh',
-            'department_id' => $salesDept->id,
-            'manager_id' => $salesHead->id,
-            'phone' => '+91-98765-43220',
-            'job_title' => 'Account Executive',
-            'employment_type' => 'full-time',
-            'salary' => 50000,
-            'joined_on' => now()->subMonths(4),
-            'status' => 'active',
-        ]);
-
-        // HR Team Members - Report to Mike Wilson
-        Employee::firstOrCreate(['email' => 'kavya.gupta@company.com'], [
-            'full_name' => 'Kavya Gupta',
-            'department_id' => $hrDept->id,
-            'manager_id' => $hrHead->id,
-            'phone' => '+91-98765-43221',
-            'job_title' => 'HR Manager',
-            'employment_type' => 'full-time',
-            'salary' => 65000,
-            'joined_on' => now()->subYears(1),
-            'status' => 'active',
-        ]);
-
-        Employee::firstOrCreate(['email' => 'ananya.sen@company.com'], [
-            'full_name' => 'Ananya Sen',
-            'department_id' => $hrDept->id,
-            'manager_id' => $hrHead->id,
-            'phone' => '+91-98765-43222',
-            'job_title' => 'Recruiter',
-            'employment_type' => 'full-time',
-            'salary' => 45000,
-            'joined_on' => now()->subMonths(3),
-            'status' => 'active',
-        ]);
-
-        // Marketing Team Members - Report to Lisa Brown
-        Employee::firstOrCreate(['email' => 'ashok.desai@company.com'], [
-            'full_name' => 'Ashok Desai',
-            'department_id' => $marketingDept->id,
-            'manager_id' => $marketingHead->id,
-            'phone' => '+91-98765-43223',
-            'job_title' => 'Digital Marketing Manager',
-            'employment_type' => 'full-time',
-            'salary' => 60000,
-            'joined_on' => now()->subYears(1),
-            'status' => 'active',
-        ]);
-
-        Employee::firstOrCreate(['email' => 'sneha.iyer@company.com'], [
-            'full_name' => 'Sneha Iyer',
-            'department_id' => $marketingDept->id,
-            'manager_id' => $marketingHead->id,
-            'phone' => '+91-98765-43224',
-            'job_title' => 'Content Strategist',
-            'employment_type' => 'full-time',
-            'salary' => 55000,
-            'joined_on' => now()->subMonths(10),
-            'status' => 'active',
-        ]);
-
-        echo "✓ Organization hierarchy seeded successfully with 17 employees!";
+    private function upsertEmployee(string $email, array $attributes): Employee
+    {
+        return Employee::query()->firstOrCreate(['email' => $email], $attributes);
     }
 }

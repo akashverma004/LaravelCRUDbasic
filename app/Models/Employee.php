@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
+use App\Support\GeoLookup;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,9 +12,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Employee extends Model
 {
-    use HasFactory;
+    use HasFactory, BelongsToTenant;
 
     protected $fillable = [
+        'tenant_id',
         'department_id',
         'manager_id',
         'role_id',
@@ -24,6 +27,14 @@ class Employee extends Model
         'salary',
         'joined_on',
         'status',
+        'country',
+        'state',
+        'city',
+        'address',
+        'hobbies',
+        'likes',
+        'food_preference',
+        'health_issues',
     ];
 
     protected $casts = [
@@ -64,5 +75,15 @@ class Employee extends Model
     public function leavePolicy(): HasOne
     {
         return $this->hasOne(EmployeeLeavePolicy::class);
+    }
+
+    public function setCountryAttribute(?string $value): void
+    {
+        $this->attributes['country'] = GeoLookup::normalizeCountryCode($value);
+    }
+
+    public function setStateAttribute(?string $value): void
+    {
+        $this->attributes['state'] = GeoLookup::normalizeIndianStateCode($value);
     }
 }

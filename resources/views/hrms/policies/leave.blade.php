@@ -8,12 +8,6 @@
     <p class="text-slate-600 dark:text-slate-400">Set global leave limits for all employees</p>
 </div>
 
-@if (session('status'))
-    <div class="mb-6 rounded-xl border border-emerald-300/50 bg-emerald-100 px-4 py-3 text-emerald-700 dark:border-emerald-400/30 dark:bg-emerald-400/10 dark:text-emerald-200">
-        {{ session('status') }}
-    </div>
-@endif
-
 <div class="max-w-2xl rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
     <form method="POST" action="{{ route('policies.leave.update') }}" class="grid gap-4 md:grid-cols-2">
         @csrf

@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\User;
 use App\Models\Role;
 use App\Models\Permission;
+use App\Support\TenantContext;
 
 class AuthorizationService
 {
@@ -40,7 +41,11 @@ class AuthorizationService
 
     public function syncRoles(User $user, array $roleNames): void
     {
-        $roleIds = Role::whereIn('name', $roleNames)->pluck('id')->toArray();
+        $tenantId = TenantContext::id() ?? $user->tenant_id;
+        $roleIds = Role::whereIn('name', $roleNames)
+            ->when($tenantId !== null, fn ($query) => $query->where('tenant_id', $tenantId))
+            ->pluck('id')
+            ->toArray();
         $user->syncRoles($roleIds);
     }
 

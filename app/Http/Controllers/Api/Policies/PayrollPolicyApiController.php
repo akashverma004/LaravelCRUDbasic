@@ -16,11 +16,11 @@ class PayrollPolicyApiController extends BasePolicyApiController
 
     public function store(StorePayrollPolicyRequest $request): JsonResponse
     {
-        return parent::store($request);
+        return $this->storeValidated($request);
     }
 
     public function update(UpdatePayrollPolicyRequest $request, int $id): JsonResponse
     {
-        return parent::update($request, $id);
+        return $this->updateValidated($request, $id);
     }
 }

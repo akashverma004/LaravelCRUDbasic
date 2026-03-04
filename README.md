@@ -63,3 +63,8 @@ php artisan view:cache
 - Tables are normalized with indexed relationships and unique constraints.
 - Designed for extension with payroll, performance, and recruitment modules.
 
+## Operations & UAT
+
+- Production rollout guide: `docs/PHASE4_PROD_ROLLOUT.md`
+- Multi-tenant UAT checklist: `docs/UAT_MULTITENANT_CHECKLIST.md`
+- Smoke checks script (PowerShell): `scripts/phase4-smoke.ps1`
