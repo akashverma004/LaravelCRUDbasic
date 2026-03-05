@@ -79,16 +79,17 @@
                             </a>
                         @endif
 
-                        @if (Route::has('register'))
+                        @if (Route::has('company-signup.create'))
+                            <a href="{{ route('company-signup.create') }}" class="dark:text-cyan-400 dark:hover:text-cyan-300 text-cyan-600 hover:text-cyan-700 transition">
+                                New company? Create workspace
+                            </a>
+                         @endif
+
+                        {{-- @if (Route::has('register'))
                             <a href="{{ route('register') }}" class="dark:text-cyan-400 dark:hover:text-cyan-300 text-cyan-600 hover:text-cyan-700 transition">
                                 {{ __('Create Account') }}
                             </a>
-                        @endif
-                    </div>
-                    <div class="text-center text-sm">
-                        <a href="{{ route('company-signup.create') }}" class="dark:text-cyan-400 dark:hover:text-cyan-300 text-cyan-600 hover:text-cyan-700 transition">
-                            New company? Create workspace
-                        </a>
+                        @endif --}}
                     </div>
                 </div>
             </form>
