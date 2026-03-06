@@ -86,15 +86,50 @@
             </div>
 
             <div class="rounded-2xl transition-colors duration-300 dark:border-slate-800 dark:bg-slate-900 border-slate-200 border bg-white p-6">
-                <h2 class="mb-4 transition-colors duration-300 dark:text-white text-slate-900 text-lg font-semibold">Quick Add Department</h2>
+
+                <h2 class="mb-4 transition-colors duration-300 dark:text-white text-slate-900 text-lg font-semibold">
+                Quick Add Department
+                </h2>
+
                 <form method="POST" action="{{ route('departments.store') }}" class="space-y-3">
-                    @csrf
-                    <input name="name" placeholder="Department name" class="transition-colors duration-300 w-full rounded-lg dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder-slate-400 border-slate-300 border bg-white text-slate-900 placeholder-slate-500 px-3 py-2 text-sm" required>
-                    <input name="code" placeholder="Code (e.g. ENG)" class="transition-colors duration-300 w-full rounded-lg dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder-slate-400 border-slate-300 border bg-white text-slate-900 placeholder-slate-500 px-3 py-2 text-sm" required>
-                    <input name="lead_name" placeholder="Department lead" class="transition-colors duration-300 w-full rounded-lg dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder-slate-400 border-slate-300 border bg-white text-slate-900 placeholder-slate-500 px-3 py-2 text-sm" required>
-                    <button class="w-full rounded-lg transition-all duration-300 dark:bg-cyan-500 dark:text-slate-900 dark:hover:bg-cyan-400 bg-blue-500 text-white hover:bg-blue-600 py-2 font-semibold">Add Department</button>
+                @csrf
+
+                <input name="name" placeholder="Department name"
+                class="transition-colors duration-300 w-full rounded-lg
+                dark:border-slate-700 dark:bg-slate-950 dark:text-white
+                border-slate-300 border bg-white text-slate-900
+                px-3 py-2 text-sm" required>
+
+                <input name="code" placeholder="Code (e.g. ENG)"
+                class="transition-colors duration-300 w-full rounded-lg
+                dark:border-slate-700 dark:bg-slate-950 dark:text-white
+                border-slate-300 border bg-white text-slate-900
+                px-3 py-2 text-sm" required>
+
+                <select name="lead_id"
+                class="transition-colors duration-300 w-full rounded-lg
+                dark:border-slate-700 dark:bg-slate-950 dark:text-white
+                border-slate-300 border bg-white text-slate-900
+                px-3 py-2 text-sm" required>
+
+                <option value="">Select Department Lead</option>
+
+                @foreach($allEmployees as $employee)
+                <option value="{{ $employee->id }}">
+                {{ $employee->full_name }}
+                </option>
+                @endforeach
+
+                </select>
+
+                <button class="w-full rounded-lg transition-all duration-300
+                dark:bg-cyan-500 dark:text-slate-900 dark:hover:bg-cyan-400
+                bg-blue-500 text-white hover:bg-blue-600 py-2 font-semibold">
+                Add Department
+                </button>
+
                 </form>
-            </div>
+                </div>
         </div>
 
         <div class="mt-8 grid gap-6 lg:grid-cols-2">
