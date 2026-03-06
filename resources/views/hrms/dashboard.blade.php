@@ -270,7 +270,7 @@
                                     <div class="h-2 flex-1 rounded-full transition-colors duration-300 dark:bg-slate-700 bg-slate-300">
                                         <div
                                             class="h-full rounded-full bg-gradient-to-r from-cyan-500 to-blue-500"
-                                            style="width: {{ ($dept->employees_count / $employeeCount) * 100 }}%"
+                                            style="width: {{ $employeeCount > 0 ? ($dept->employees_count / $employeeCount) * 100 : 0 }}%"
                                         ></div>
                                     </div>
                                 </div>
