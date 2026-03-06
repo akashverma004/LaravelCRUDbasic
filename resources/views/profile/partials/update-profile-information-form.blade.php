@@ -7,49 +7,163 @@
         @csrf
         @method('patch')
 
+        <!-- Name -->
         <div>
-            <label for="name" class="block text-sm font-medium text-slate-300 mb-2">{{ __('Name') }}</label>
-            <input id="name" name="name" type="text" class="w-full rounded-lg border border-slate-600 bg-slate-900 px-4 py-2 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition" value="{{ old('name', $user->name) }}" required autofocus autocomplete="name" />
-            @error('name')
-                <p class="mt-2 text-sm text-red-400">{{ $message }}</p>
-            @enderror
+            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
+                {{ __('Name') }}
+            </label>
+
+            <input
+                name="name"
+                type="text"
+                value="{{ old('name', $user->name) }}"
+                class="w-full rounded-lg border border-gray-300 dark:border-slate-600
+                bg-white dark:bg-slate-900
+                px-4 py-2
+                text-gray-900 dark:text-white
+                placeholder-gray-400 dark:placeholder-slate-400
+                focus:ring-2 focus:ring-cyan-500"
+                required
+            >
         </div>
 
+        <!-- Email -->
         <div>
-            <label for="email" class="block text-sm font-medium text-slate-300 mb-2">{{ __('Email') }}</label>
-            <input id="email" name="email" type="email" class="w-full rounded-lg border border-slate-600 bg-slate-900 px-4 py-2 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition" value="{{ old('email', $user->email) }}" required autocomplete="username" />
-            @error('email')
-                <p class="mt-2 text-sm text-red-400">{{ $message }}</p>
-            @enderror
+            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
+                {{ __('Email') }}
+            </label>
 
-            @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
-                <div class="mt-4 p-4 rounded-lg bg-amber-900/20 border border-amber-700/50">
-                    <p class="text-sm text-amber-300">
-                        {{ __('Your email address is unverified.') }}
-                        <button form="send-verification" class="inline-block ml-2 text-amber-400 hover:text-amber-300 underline">
-                            {{ __('Click here to re-send the verification email.') }}
-                        </button>
-                    </p>
-
-                    @if (session('status') === 'verification-link-sent')
-                        <p class="mt-2 text-sm font-medium text-emerald-400">
-                            {{ __('A new verification link has been sent to your email address.') }}
-                        </p>
-                    @endif
-                </div>
-            @endif
+            <input
+                name="email"
+                type="email"
+                value="{{ old('email', $user->email) }}"
+                class="w-full rounded-lg border border-gray-300 dark:border-slate-600
+                bg-white dark:bg-slate-900
+                px-4 py-2
+                text-gray-900 dark:text-white
+                focus:ring-2 focus:ring-cyan-500"
+                required
+            >
         </div>
 
+        <!-- Phone -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
+                {{ __('Phone') }}
+            </label>
+
+            <input
+                name="phone"
+                type="text"
+                value="{{ old('phone', $user->phone ?? '') }}"
+                class="w-full rounded-lg border border-gray-300 dark:border-slate-600
+                bg-white dark:bg-slate-900 px-4 py-2
+                text-gray-900 dark:text-white focus:ring-2 focus:ring-cyan-500"
+            >
+        </div>
+
+        <!-- Employee ID -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
+                {{ __('Employee ID') }}
+            </label>
+
+            <input
+                name="employee_id"
+                type="text"
+                value="{{ old('employee_id', $user->employee_id ?? '') }}"
+                class="w-full rounded-lg border border-gray-300 dark:border-slate-600
+                bg-white dark:bg-slate-900 px-4 py-2
+                text-gray-900 dark:text-white focus:ring-2 focus:ring-cyan-500"
+            >
+        </div>
+
+        <!-- Department -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
+                {{ __('Department') }}
+            </label>
+
+            <input
+                name="department"
+                type="text"
+                value="{{ old('department', $user->department ?? '') }}"
+                class="w-full rounded-lg border border-gray-300 dark:border-slate-600
+                bg-white dark:bg-slate-900 px-4 py-2
+                text-gray-900 dark:text-white focus:ring-2 focus:ring-cyan-500"
+            >
+        </div>
+
+        <!-- Designation -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
+                {{ __('Designation') }}
+            </label>
+
+            <input
+                name="designation"
+                type="text"
+                value="{{ old('designation', $user->designation ?? '') }}"
+                class="w-full rounded-lg border border-gray-300 dark:border-slate-600
+                bg-white dark:bg-slate-900 px-4 py-2
+                text-gray-900 dark:text-white focus:ring-2 focus:ring-cyan-500"
+            >
+        </div>
+
+        <!-- Joining Date -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
+                {{ __('Joining Date') }}
+            </label>
+
+            <input
+                name="joining_date"
+                type="date"
+                value="{{ old('joining_date', $user->joining_date ?? '') }}"
+                class="w-full rounded-lg border border-gray-300 dark:border-slate-600
+                bg-white dark:bg-slate-900 px-4 py-2
+                text-gray-900 dark:text-white focus:ring-2 focus:ring-cyan-500"
+            >
+        </div>
+
+        <!-- Address -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
+                {{ __('Address') }}
+            </label>
+
+            <textarea
+                name="address"
+                rows="3"
+                class="w-full rounded-lg border border-gray-300 dark:border-slate-600
+                bg-white dark:bg-slate-900 px-4 py-2
+                text-gray-900 dark:text-white focus:ring-2 focus:ring-cyan-500"
+            >{{ old('address', $user->address ?? '') }}</textarea>
+        </div>
+
+        <!-- Save Button -->
         <div class="flex items-center gap-4 pt-4">
-            <button type="submit" style="background: linear-gradient(to right, #06b6d4, #0891b2); color: #0f172a; padding: 10px 24px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.2s;" onmouseover="this.style.boxShadow='0 0 20px rgba(6,182,212,0.4)'" onmouseout="this.style.boxShadow='none'">
+            <button
+                type="submit"
+                class="px-6 py-2.5 rounded-lg font-semibold text-sm
+                bg-gradient-to-r from-cyan-500 to-cyan-600
+                text-slate-900 hover:shadow-lg hover:shadow-cyan-500/30 transition"
+            >
                 {{ __('Save Changes') }}
             </button>
 
             @if (session('status') === 'profile-updated')
-                <p class="text-sm text-emerald-400" x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 2000)">
+                <p
+                    class="text-sm text-emerald-600 dark:text-emerald-400"
+                    x-data="{ show: true }"
+                    x-show="show"
+                    x-transition
+                    x-init="setTimeout(() => show = false, 2000)"
+                >
                     {{ __('✓ Saved successfully.') }}
                 </p>
             @endif
         </div>
+
     </form>
 </section>
