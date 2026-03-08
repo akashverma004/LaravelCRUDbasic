@@ -12,15 +12,22 @@
     <form method="POST" action="{{ route('leaves.store') }}" class="space-y-4">
         @csrf
 
-        <div>
+        <div @if(!$isAdminOrHR) class="hidden" @endif>
             <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Employee</label>
-            <select name="employee_id" class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 dark:border-slate-700 dark:bg-slate-950 px-3 py-2 @error('employee_id') border-red-500 @enderror" required>
-                <option value="">Select Employee</option>
-                @forelse ($employees as $employee)
-                    <option value="{{ $employee->id }}" @selected(old('employee_id') == $employee->id)>{{ $employee->full_name }}</option>
-                @empty
-                @endforelse
-            </select>
+            @if($isAdminOrHR)
+                <select name="employee_id" class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 dark:border-slate-700 dark:bg-slate-950 px-3 py-2 @error('employee_id') border-red-500 @enderror" required>
+                    <option value="">Select Employee</option>
+                    @foreach ($employees as $employee)
+                        <option value="{{ $employee->id }}" @selected(old('employee_id') == $employee->id)>{{ $employee->full_name }}</option>
+                    @endforeach
+                </select>
+            @else
+                @php $currentEmp = $employees->first(); @endphp
+                <input type="hidden" name="employee_id" value="{{ $currentEmp->id }}">
+                <div class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-100 dark:border-slate-700 dark:bg-slate-800 px-3 py-2 text-slate-700 dark:text-slate-300">
+                    {{ $currentEmp->full_name }}
+                </div>
+            @endif
             @error('employee_id')
                 <p class="mt-1 text-sm text-red-400">{{ $message }}</p>
             @enderror
@@ -78,13 +85,20 @@
             @enderror
         </div>
 
-        <div>
+        <div @if(!$isAdminOrHR) class="hidden" @endif>
             <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Status</label>
-            <select name="status" class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 dark:border-slate-700 dark:bg-slate-950 px-3 py-2 @error('status') border-red-500 @enderror" required>
-                <option value="pending" @selected(old('status') === 'pending' || !old('status'))>Pending</option>
-                <option value="approved" @selected(old('status') === 'approved')>Approved</option>
-                <option value="rejected" @selected(old('status') === 'rejected')>Rejected</option>
-            </select>
+            @if($isAdminOrHR)
+                <select name="status" class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 dark:border-slate-700 dark:bg-slate-950 px-3 py-2 @error('status') border-red-500 @enderror" required>
+                    <option value="pending" @selected(old('status') === 'pending' || !old('status'))>Pending</option>
+                    <option value="approved" @selected(old('status') === 'approved')>Approved</option>
+                    <option value="rejected" @selected(old('status') === 'rejected')>Rejected</option>
+                </select>
+            @else
+                <input type="hidden" name="status" value="pending">
+                <div class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-100 dark:border-slate-700 dark:bg-slate-800 px-3 py-2 text-slate-500 dark:text-slate-400">
+                    Pending Approval
+                </div>
+            @endif
             @error('status')
                 <p class="mt-1 text-sm text-red-400">{{ $message }}</p>
             @enderror
@@ -92,7 +106,7 @@
 
         <div class="flex gap-3 pt-4">
             <button type="submit" class="rounded-lg bg-cyan-500 px-6 py-2 font-semibold text-slate-900 hover:bg-cyan-400">Submit Request</button>
-            <a href="{{ route('leaves.index') }}" class="rounded-lg border border-slate-300 px-6 py-2 font-semibold text-slate-700 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 hover:bg-slate-100">Cancel</a>
+            <a href="{{ $isAdminOrHR ? route('leaves.index') : route('leaves.my') }}" class="rounded-lg border border-slate-300 px-6 py-2 font-semibold text-slate-700 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 hover:bg-slate-100">Cancel</a>
         </div>
     </form>
 </div>

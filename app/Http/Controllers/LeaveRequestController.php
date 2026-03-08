@@ -162,13 +162,39 @@ class LeaveRequestController extends Controller
 
     public function create(): View
     {
-        $employees = Employee::orderBy('full_name')->get();
-        return view('hrms.leaves.create', compact('employees'));
+        $user = auth()->user();
+        $isAdminOrHR = $user->hasAnyRole(['admin', 'hr_manager']);
+        
+        if ($isAdminOrHR) {
+            $employees = Employee::orderBy('full_name')->get();
+        } else {
+            // For regular employees, they can only see themselves.
+            $employees = Employee::where('email', $user->email)
+                ->where('tenant_id', $user->tenant_id)
+                ->get();
+        }
+
+        return view('hrms.leaves.create', compact('employees', 'isAdminOrHR'));
     }
 
     public function store(StoreLeaveRequest $request): RedirectResponse
     {
-        $this->leaveService->createLeaveRequest($request->validated());
+        $user = auth()->user();
+        $isAdminOrHR = $user->hasAnyRole(['admin', 'hr_manager']);
+        $data = $request->validated();
+
+        if (! $isAdminOrHR) {
+            // Security: Force employee_id to the authenticated user's employee record
+            $employee = Employee::where('email', $user->email)
+                ->where('tenant_id', $user->tenant_id)
+                ->firstOrFail();
+            
+            $data['employee_id'] = $employee->id;
+            // Security: Force status to pending regardless of what was sent
+            $data['status'] = 'pending';
+        }
+
+        $this->leaveService->createLeaveRequest($data);
         return redirect()->route('leaves.index')->with('status', 'Leave request submitted successfully.');
     }
 
@@ -192,6 +218,100 @@ class LeaveRequestController extends Controller
         return redirect()->back()->with('status', 'Leave request rejected.');
     }
 
+    public function my(): View
+    {
+        $user = auth()->user();
+        $employee = Employee::where('email', $user->email)
+            ->where('tenant_id', $user->tenant_id)
+            ->firstOrFail();
+
+        $leaves = LeaveRequest::where('employee_id', $employee->id)
+            ->latest()
+            ->paginate(15);
+
+        return view('hrms.leaves.my', compact('leaves', 'employee'));
+    }
+
+    public function edit(int $id): View
+    {
+        $user = auth()->user();
+        $leave = LeaveRequest::with('employee')->findOrFail($id);
+
+        // Security check
+        if (! $user->hasAnyRole(['admin', 'hr_manager'])) {
+            $employee = Employee::where('email', $user->email)
+                ->where('tenant_id', $user->tenant_id)
+                ->firstOrFail();
+
+            if ($leave->employee_id !== $employee->id) {
+                abort(403, 'Unauthorized action.');
+            }
+
+            if ($leave->status !== 'pending') {
+                return redirect()->route('leaves.my')->with('error', 'Only pending requests can be edited.');
+            }
+        }
+
+        $employees = Employee::orderBy('full_name')->get();
+        $isAdminOrHR = $user->hasAnyRole(['admin', 'hr_manager']);
+
+        return view('hrms.leaves.edit', compact('leave', 'employees', 'isAdminOrHR'));
+    }
+
+    public function update(StoreLeaveRequest $request, int $id): RedirectResponse
+    {
+        $user = auth()->user();
+        $leave = LeaveRequest::findOrFail($id);
+        $data = $request->validated();
+
+        // Security check
+        if (! $user->hasAnyRole(['admin', 'hr_manager'])) {
+            $employee = Employee::where('email', $user->email)
+                ->where('tenant_id', $user->tenant_id)
+                ->firstOrFail();
+
+            if ($leave->employee_id !== $employee->id) {
+                abort(403, 'Unauthorized action.');
+            }
+
+            if ($leave->status !== 'pending') {
+                return redirect()->route('leaves.my')->with('error', 'Only pending requests can be updated.');
+            }
+
+            // Force employee_id and status for regular employees
+            $data['employee_id'] = $employee->id;
+            $data['status'] = 'pending';
+        }
+
+        $this->leaveService->updateLeaveRequest($leave, $data);
+        return redirect()->route($user->hasAnyRole(['admin', 'hr_manager']) ? 'leaves.index' : 'leaves.my')
+            ->with('status', 'Leave request updated successfully.');
+    }
+
+    public function destroy(int $id): RedirectResponse
+    {
+        $user = auth()->user();
+        $leave = LeaveRequest::findOrFail($id);
+
+        // Security check
+        if (! $user->hasAnyRole(['admin', 'hr_manager'])) {
+            $employee = Employee::where('email', $user->email)
+                ->where('tenant_id', $user->tenant_id)
+                ->firstOrFail();
+
+            if ($leave->employee_id !== $employee->id) {
+                abort(403, 'Unauthorized action.');
+            }
+
+            if ($leave->status !== 'pending') {
+                return redirect()->back()->with('error', 'Only pending requests can be deleted.');
+            }
+        }
+
+        $this->leaveService->deleteLeaveRequest($leave);
+        return redirect()->back()->with('status', 'Leave request deleted successfully.');
+    }
+
     private function buildLeaveLabel(string $leaveType, ?string $leaveSession): string
     {
         $type = ucfirst($leaveType);
@@ -206,7 +326,6 @@ class LeaveRequestController extends Controller
 
     public function events(): View
     {
-        dd("akash");
         return view('hrms.events.index');
     }
 }

@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Policies;
+
+use App\Http\Controllers\Controller;
 
 use App\Models\HolidayPolicy;
 use App\Models\HolidayPolicyDate;

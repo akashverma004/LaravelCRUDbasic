@@ -60,6 +60,110 @@
 
     <div class="lg:col-span-2 flex flex-col gap-6">
         <!-- Quick Actions & Stats -->
+        
+        <!-- Attendance Punch In/Out Card -->
+        <div class="rounded-2xl border border-slate-200 bg-white p-6 transition-colors duration-300 dark:border-slate-800 dark:bg-slate-900 flex flex-col items-center justify-center text-center shadow-lg bg-gradient-to-br from-indigo-50 to-white dark:from-slate-800 dark:to-slate-900">
+            <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-2">Today's Attendance</h3>
+            
+            @if(!$todayAttendance)
+                <p class="text-slate-500 dark:text-slate-400 text-sm mb-4">You have not clocked in yet today. Ready to start?</p>
+                <form action="{{ route('attendance.punch-in') }}" method="POST">
+                    @csrf
+                    <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-6 py-3 text-lg font-bold text-white shadow-lg transition-all hover:scale-105 hover:from-emerald-400 hover:to-emerald-500 hover:shadow-emerald-500/25">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        Start Shift
+                    </button>
+                </form>
+            @elseif($todayAttendance->status !== 'completed')
+                <div class="flex flex-wrap items-center justify-center gap-4 mb-6">
+                    <div class="flex flex-col items-center">
+                        <span class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Status</span>
+                        <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset {{ $todayAttendance->status === 'clocked_in' ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20' : 'bg-amber-50 text-amber-700 ring-amber-600/20' }} capitalize">
+                            {{ str_replace('_', ' ', $todayAttendance->status) }}
+                        </span>
+                    </div>
+                    <div class="w-px h-8 bg-slate-200 dark:bg-slate-700"></div>
+                    <div class="flex flex-col items-center">
+                        <span class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Total Worked</span>
+                        @php
+                            $completedSeconds = $todayAttendance->getCompletedWorkSeconds();
+                            $status = $todayAttendance->status;
+                            $lastStartMs = 0;
+                            if ($status === 'clocked_in') {
+                                $lastWork = collect($todayAttendance->intervals)->where('type', 'work')->where('end', null)->last();
+                                if ($lastWork) {
+                                    $lastStartMs = \Carbon\Carbon::parse($lastWork['start'])->getPreciseTimestamp(3); // milliseconds
+                                }
+                            }
+                        @endphp
+                        <span id="attendance-total-timer" class="font-mono font-bold text-slate-700 dark:text-slate-300" 
+                              data-base-seconds="{{ $completedSeconds }}"
+                              data-status="{{ $status }}"
+                              data-last-start-ms="{{ $lastStartMs }}"
+                              data-server-now-ms="{{ now()->getPreciseTimestamp(3) }}">
+                            @php
+                                $total = $todayAttendance->getTotalWorkedSeconds();
+                                $h = floor($total / 3600);
+                                $m = floor(($total % 3600) / 60);
+                                $s = $total % 60;
+                            @endphp
+                            {{ sprintf('%02d:%02d:%02d', $h, $m, $s) }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap gap-3 justify-center">
+                    @if($todayAttendance->status === 'clocked_in')
+                        <form action="{{ route('attendance.pause') }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="type" value="lunch">
+                            <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-lg bg-orange-100 px-4 py-2 text-sm font-bold text-orange-600 transition-all hover:bg-orange-200">
+                                🍕 Lunch Break
+                            </button>
+                        </form>
+                        <form action="{{ route('attendance.pause') }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="type" value="break">
+                            <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-100 px-4 py-2 text-sm font-bold text-blue-600 transition-all hover:bg-blue-200">
+                                ☕ Short Break
+                            </button>
+                        </form>
+                    @else
+                        <form action="{{ route('attendance.resume') }}" method="POST">
+                            @csrf
+                            <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-100 px-4 py-2 text-sm font-bold text-emerald-600 transition-all hover:bg-emerald-200">
+                                ▶️ Resume Work
+                            </button>
+                        </form>
+                    @endif
+
+                    <form action="{{ route('attendance.punch-out') }}" method="POST" onsubmit="return confirm('Are you sure you want to mark the shift as completed? No more work can be logged for today.')">
+                        @csrf
+                        <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-lg bg-rose-500 px-4 py-2 text-sm font-bold text-white transition-all hover:bg-rose-600 shadow-sm">
+                            🏁 Complete Shift
+                        </button>
+                    </form>
+                </div>
+            @else
+                <p class="text-emerald-600 dark:text-emerald-400 font-bold text-lg mb-2">Shift Completed! 🎉</p>
+                <div class="flex gap-4 mb-4 justify-center">
+                    <div class="flex flex-col">
+                        <span class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Started</span>
+                        <span class="font-mono text-slate-700 dark:text-slate-300">{{ \Carbon\Carbon::parse($todayAttendance->clock_in_at)->format('H:i A') }}</span>
+                    </div>
+                    <div class="w-px bg-slate-200 dark:bg-slate-700"></div>
+                    <div class="flex flex-col">
+                        <span class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Ended</span>
+                        <span class="font-mono text-slate-700 dark:text-slate-300">{{ \Carbon\Carbon::parse($todayAttendance->clock_out_at)->format('H:i A') }}</span>
+                    </div>
+                </div>
+                <div class="inline-flex px-4 py-2 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-semibold text-sm">
+                    @php $s = $todayAttendance->getTotalWorkedSeconds(); @endphp
+                    Total Effort: {{ floor($s / 3600) }}h {{ floor(($s % 3600) / 60) }}m {{ $s % 60 }}s
+                </div>
+            @endif
+        </div>
+
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <a href="{{ route('leaves.create') }}" class="group flex flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white p-4 transition-all hover:border-cyan-300 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900 dark:hover:border-cyan-700">
                 <div class="mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 group-hover:scale-110 shadow-sm transition-transform">
@@ -68,9 +172,9 @@
                 <span class="text-sm font-semibold text-slate-700 dark:text-slate-300 text-center">Request Leave</span>
             </a>
             
-            <a href="{{ route('leaves.index') }}" class="group flex flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white p-4 transition-all hover:border-cyan-300 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900 dark:hover:border-cyan-700">
+            <a href="{{ route('leaves.my') }}" class="group flex flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white p-4 transition-all hover:border-cyan-300 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900 dark:hover:border-cyan-700">
                 <div class="mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 group-hover:scale-110 shadow-sm transition-transform">
-                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 002-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                 </div>
                 <span class="text-sm font-semibold text-slate-700 dark:text-slate-300 text-center">My Leave History</span>
             </a>
@@ -95,7 +199,7 @@
         <div class="rounded-2xl border border-slate-200 bg-white p-6 transition-colors duration-300 dark:border-slate-800 dark:bg-slate-900 flex-1">
             <div class="mb-4 flex items-center justify-between">
                 <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Recent Leave Requests</h3>
-                <a href="{{ route('leaves.index') }}" class="text-sm font-medium text-cyan-600 hover:text-cyan-700 dark:text-cyan-400 dark:hover:text-cyan-300">View All</a>
+                <a href="{{ route('leaves.my') }}" class="text-sm font-medium text-cyan-600 hover:text-cyan-700 dark:text-cyan-400 dark:hover:text-cyan-300">View All</a>
             </div>
             
             <div class="space-y-3">
@@ -120,6 +224,83 @@
                         <p class="text-sm font-medium text-slate-500 dark:text-slate-400">You haven't requested any leaves yet.</p>
                     </div>
                 @endforelse
+            </div>
+        </div>
+
+                <!-- Policy Hub (Zoho/BambooHR Style) -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                    <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    Company Guidelines
+                </h2>
+                <a href="{{ route('policies.viewer') }}" class="text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">View All Policies</a>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Notice Period Policy Card -->
+                <div class="relative overflow-hidden rounded-2xl border border-slate-200 bg-white/80 p-5 backdrop-blur-md transition-all hover:shadow-xl dark:border-slate-700 dark:bg-slate-800/80">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="rounded-xl bg-amber-100 p-2 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        </div>
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Exit Policy</span>
+                    </div>
+                    <h3 class="mb-1 text-base font-bold text-slate-800 dark:text-white">Notice Period</h3>
+                    @if(isset($noticePolicy) && $noticePolicy)
+                        <p class="text-sm text-slate-500 dark:text-slate-400 mb-4 line-clamp-2">{{ $noticePolicy->description }}</p>
+                        <div class="flex items-center gap-2 mt-auto">
+                            <span class="text-2xl font-black text-amber-600 dark:text-amber-400">{{ $noticePolicy->notice_days }}</span>
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-tighter leading-tight">Days<br>Required</span>
+                        </div>
+                    @else
+                        <p class="text-sm italic text-slate-400 mb-4">Standard notice period applies as per your contract.</p>
+                        <span class="text-xs font-semibold text-slate-500">Contact HR if resigning</span>
+                    @endif
+                </div>
+
+                <!-- WFH Policy Card -->
+                <div class="relative overflow-hidden rounded-2xl border border-slate-200 bg-white/80 p-5 backdrop-blur-md transition-all hover:shadow-xl dark:border-slate-700 dark:bg-slate-800/80">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="rounded-xl bg-blue-100 p-2 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                        </div>
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Work Mode</span>
+                    </div>
+                    <h3 class="mb-1 text-base font-bold text-slate-800 dark:text-white">Remote Work</h3>
+                    @if(isset($wfhPolicy) && $wfhPolicy)
+                        <p class="text-sm text-slate-500 dark:text-slate-400 mb-4 line-clamp-2">{{ $wfhPolicy->description }}</p>
+                        <div class="flex items-center gap-3">
+                            <span class="rounded-full bg-blue-100 px-3 py-1 text-xs font-bold text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
+                                {{ $wfhPolicy->is_active ? 'Hybrid Allowed' : 'Onsite Only' }}
+                            </span>
+                        </div>
+                    @else
+                        <p class="text-sm italic text-slate-400 mb-4">Refer to your department's specific WFH guidelines.</p>
+                        <span class="text-xs font-semibold text-slate-500 capitalize">Shared office model</span>
+                    @endif
+                </div>
+
+                <!-- Attendance Policy Card -->
+                <div class="relative overflow-hidden rounded-2xl border border-slate-200 bg-white/80 p-5 backdrop-blur-md transition-all hover:shadow-xl dark:border-slate-700 dark:bg-slate-800/80">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="rounded-xl bg-purple-100 p-2 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Timekeeping</span>
+                    </div>
+                    <h3 class="mb-1 text-base font-bold text-slate-800 dark:text-white">Attendance Rules</h3>
+                    @if(isset($attendancePolicy) && $attendancePolicy)
+                        <p class="text-sm text-slate-500 dark:text-slate-400 mb-4 line-clamp-2">{{ $attendancePolicy->description }}</p>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900/40 px-2 py-0.5 rounded uppercase tracking-wider">Mandatory Punch</span>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Active</span>
+                        </div>
+                    @else
+                        <p class="text-sm italic text-slate-400 mb-4">Standard 9-to-6 rules with strict punctuality tracking.</p>
+                        <span class="text-xs font-semibold text-slate-500">Live system sync</span>
+                    @endif
+                </div>
             </div>
         </div>
     </div>
@@ -184,3 +365,46 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const timerElement = document.getElementById('attendance-total-timer');
+        
+        if (timerElement) {
+            const status = timerElement.getAttribute('data-status');
+            const baseSeconds = parseInt(timerElement.getAttribute('data-base-seconds') || 0);
+            const lastStartMs = parseInt(timerElement.getAttribute('data-last-start-ms') || 0);
+            const serverNowMs = parseInt(timerElement.getAttribute('data-server-now-ms') || 0);
+            
+            // Calculate clock drift between server and client
+            // If positive, client clock is ahead. If negative, server clock is ahead.
+            const driftOffset = Date.now() - serverNowMs;
+
+            function updateTimer() {
+                let currentSessionSeconds = 0;
+                
+                if (status === 'clocked_in' && lastStartMs > 0) {
+                    const adjNowMs = Date.now() - driftOffset;
+                    currentSessionSeconds = Math.max(0, Math.floor((adjNowMs - lastStartMs) / 1000));
+                }
+
+                const totalSeconds = baseSeconds + currentSessionSeconds;
+
+                const hours = Math.floor(totalSeconds / 3600);
+                const mins = Math.floor((totalSeconds % 3600) / 60);
+                const secs = totalSeconds % 60;
+
+                const pad = (num) => String(num).padStart(2, '0');
+                timerElement.innerText = `${pad(hours)}:${pad(mins)}:${pad(secs)}`;
+            }
+
+            // Run once immediately, then every second
+            updateTimer();
+            if (status === 'clocked_in') {
+                setInterval(updateTimer, 1000);
+            }
+        }
+    });
+</script>
+@endpush

@@ -34,12 +34,25 @@ class DashboardController extends Controller
                     ->where('id', '!=', $employee->id)
                     ->take(5)
                     ->get();
+                    
+                $todayAttendance = \App\Models\AttendanceRecord::where('employee_id', $employee->id)
+                    ->where('attendance_date', now()->toDateString())
+                    ->first();
+
+                // Fetch Active Policies (Zoho/BambooHR style)
+                $noticePolicy = \App\Models\NoticePeriodPolicy::active()->effectiveOn()->first();
+                $wfhPolicy = \App\Models\WfhPolicy::active()->effectiveOn()->first();
+                $attendancePolicy = \App\Models\AttendancePolicy::active()->effectiveOn()->first();
 
                 return view('hrms.employee-dashboard', [
                     'employee' => $employee,
                     'myLeaves' => $myLeaves,
                     'upcomingHolidays' => $upcomingHolidays,
                     'colleagues' => $colleagues,
+                    'todayAttendance' => $todayAttendance,
+                    'noticePolicy' => $noticePolicy,
+                    'wfhPolicy' => $wfhPolicy,
+                    'attendancePolicy' => $attendancePolicy,
                 ]);
             }
         }
@@ -72,5 +85,36 @@ class DashboardController extends Controller
             'allEmployees' => $allEmployees,
             'avgSalary' => $avgSalary,
         ]);
+    }
+
+    public function myPolicies(): View
+    {
+        $user = auth()->user();
+        $employee = \App\Models\Employee::where('email', $user->email)
+            ->where('tenant_id', $user->tenant_id)
+            ->firstOrFail();
+
+        $definitions = \App\Support\PolicyDefinitions::all();
+        $policies = [];
+
+        foreach ($definitions as $slug => $definition) {
+            $modelClass = $definition['model'];
+            
+            // Fetch the active and currently effective policy for this tenant
+            // The BelongsToTenant global scope handles tenant filtering.
+            $policy = $modelClass::active()->effectiveOn()->first();
+
+            if ($policy) {
+                $policies[] = [
+                    'slug' => $slug,
+                    'title' => $definition['title'],
+                    'description' => $policy->description ?? $definition['description'],
+                    'record' => $policy,
+                    'fields' => $definition['fields'],
+                ];
+            }
+        }
+
+        return view('hrms.policies.viewer', compact('employee', 'policies'));
     }
 }

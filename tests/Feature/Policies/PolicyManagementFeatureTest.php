@@ -18,8 +18,8 @@ class PolicyManagementFeatureTest extends TestCase
     {
         parent::setUp();
 
-        $this->withoutMiddleware(VerifyCsrfToken::class);
-        $this->withoutMiddleware(ThrottleRequests::class);
+        $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
+        $this->withoutMiddleware(\Illuminate\Routing\Middleware\ThrottleRequests::class);
     }
 
     public function test_admin_can_create_policy_for_each_module_via_api(): void
@@ -84,7 +84,12 @@ class PolicyManagementFeatureTest extends TestCase
 
     public function test_non_privileged_user_cannot_access_policy_api(): void
     {
-        $user = User::factory()->create();
+        $tenantId = $this->getTenantId();
+        $user = User::factory()->create([
+            'tenant_id' => $tenantId,
+            'is_platform_admin' => false,
+            'password_changed_at' => now(),
+        ]);
         Sanctum::actingAs($user);
 
         $this->getJson('/api/policies/leave')->assertForbidden();
@@ -93,7 +98,7 @@ class PolicyManagementFeatureTest extends TestCase
     public function test_admin_can_view_and_update_policy_pages_with_reload_flow(): void
     {
         $admin = $this->createUserWithRole('admin');
-        $this->actingAs($admin);
+        $this->actingAs($admin)->withSession(['tenant_id' => $admin->tenant_id]);
 
         $this->get('/policies')->assertOk()->assertSee('Policies');
 
@@ -124,7 +129,12 @@ class PolicyManagementFeatureTest extends TestCase
 
     public function test_non_privileged_user_cannot_access_policy_pages(): void
     {
-        $user = User::factory()->create();
+        $tenantId = $this->getTenantId();
+        $user = User::factory()->create([
+            'tenant_id' => $tenantId,
+            'is_platform_admin' => false,
+            'password_changed_at' => now(),
+        ]);
         $this->actingAs($user);
 
         $this->get('/policies')->assertForbidden();
@@ -138,6 +148,14 @@ class PolicyManagementFeatureTest extends TestCase
         return $admin;
     }
 
+    private function getTenantId(): int
+    {
+        if (!\App\Models\Tenant::count()) {
+            \App\Models\Tenant::factory()->create(['status' => 'active', 'onboarding_completed' => true]);
+        }
+        return \App\Models\Tenant::first()->id;
+    }
+
     private function createUserWithRole(string $roleName): User
     {
         $role = Role::query()->firstOrCreate([
@@ -147,7 +165,13 @@ class PolicyManagementFeatureTest extends TestCase
             'description' => 'Test role',
         ]);
 
-        $user = User::factory()->create();
+        $tenantId = $this->getTenantId();
+
+        $user = User::factory()->create([
+            'tenant_id' => $tenantId,
+            'is_platform_admin' => false,
+            'password_changed_at' => now(),
+        ]);
         $user->assignRole($role);
 
         return $user;

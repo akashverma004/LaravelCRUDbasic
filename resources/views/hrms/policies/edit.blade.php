@@ -19,41 +19,45 @@
         @foreach ($definition['fields'] as $field)
             <div class="{{ in_array($field['type'], ['textarea', 'json'], true) ? 'md:col-span-2' : '' }}">
                 @php
-                    $name = $field['name'];
-                    $label = $field['label'];
-                    $type = $field['type'];
-                    $options = $field['options'] ?? [];
-                    $current = old($name, $policy->{$name});
+                    $name     = $field['name'];
+                    $label    = $field['label'];
+                    $type     = $field['type'];
+                    $options  = $field['options'] ?? [];
+                    $required = $field['required'] ?? false;
+                    $min      = $field['min'] ?? ($type === 'integer' || $type === 'number' ? '0' : null);
+                    $max      = $field['max'] ?? null;
+                    $step     = $field['step'] ?? ($type === 'number' ? '0.01' : ($type === 'integer' ? '1' : null));
+                    $current  = old($name, $policy->{$name});
                 @endphp
 
                 @if ($type === 'boolean')
                     <label class="inline-flex items-center gap-2 pt-7">
                         <input type="hidden" name="{{ $name }}" value="0">
                         <input type="checkbox" name="{{ $name }}" value="1" class="h-4 w-4 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500" @checked((bool) old($name, (bool) $policy->{$name}))>
-                        <span class="text-sm font-medium text-slate-700 dark:text-slate-300">{{ $label }}</span>
+                        <span class="text-sm font-medium text-slate-700 dark:text-slate-300">{{ $label }} @if($required) <span class="text-red-500">*</span> @endif</span>
                     </label>
                 @elseif ($type === 'textarea')
-                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">{{ $label }}</label>
-                    <textarea name="{{ $name }}" rows="5" class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-950 @error($name) border-red-500 @enderror">{{ $current }}</textarea>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">{{ $label }} @if($required) <span class="text-red-500">*</span> @endif</label>
+                    <textarea name="{{ $name }}" rows="5" class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-950 @error($name) border-red-500 @enderror" @if($required) required @endif>{{ $current }}</textarea>
                 @elseif ($type === 'json')
-                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">{{ $label }}</label>
-                    <textarea name="{{ $name }}" rows="6" class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 font-mono text-xs dark:border-slate-700 dark:bg-slate-950 @error($name) border-red-500 @enderror">{{ is_array($current) ? json_encode($current, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES) : $current }}</textarea>
-                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Enter valid JSON format</p>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">{{ $label }} @if($required) <span class="text-red-500">*</span> @endif</label>
+                    <textarea name="{{ $name }}" rows="6" class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 font-mono text-xs dark:border-slate-700 dark:bg-slate-950 @error($name) border-red-500 @enderror" placeholder="{&#10;  &quot;key&quot;: &quot;value&quot;&#10;}" @if($required) required @endif>{{ is_array($current) ? json_encode($current, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES) : $current }}</textarea>
+                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Must be valid JSON.</p>
                 @elseif ($type === 'select')
-                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">{{ $label }}</label>
-                    <select name="{{ $name }}" class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-950 @error($name) border-red-500 @enderror">
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">{{ $label }} @if($required) <span class="text-red-500">*</span> @endif</label>
+                    <select name="{{ $name }}" class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-950 @error($name) border-red-500 @enderror" @if($required) required @endif>
                         <option value="">Select {{ $label }}</option>
                         @foreach ($options as $option)
                             <option value="{{ $option }}" @selected((string) $current === (string) $option)>{{ ucfirst($option) }}</option>
                         @endforeach
                     </select>
                 @else
-                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">{{ $label }}</label>
-                    <input type="{{ $type === 'integer' ? 'number' : $type }}" name="{{ $name }}" value="{{ $current }}" class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-950 @if($type === 'date') transition-colors duration-300 bg-white text-slate-900 dark:text-white appearance-auto @endif @error($name) border-red-500 @enderror" @if(in_array($type, ['integer', 'number'], true)) min="0" step="{{ $type === 'number' ? '0.01' : '1' }}" @endif>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">{{ $label }} @if($required) <span class="text-red-500">*</span> @endif</label>
+                    <input type="{{ $type === 'integer' ? 'number' : $type }}" name="{{ $name }}" value="{{ $current }}" class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-950 @if($type === 'date') transition-colors duration-300 bg-white text-slate-900 dark:text-white appearance-auto @endif @error($name) border-red-500 @enderror" @if($required) required @endif @if($min !== null) min="{{ $min }}" @endif @if($max !== null) max="{{ $max }}" @endif @if($step !== null) step="{{ $step }}" @endif>
                 @endif
 
                 @error($name)
-                    <p class="mt-1 text-sm text-red-400">{{ $message }}</p>
+                    <p class="mt-1 text-sm text-red-500 font-medium">{{ $message }}</p>
                 @enderror
             </div>
         @endforeach

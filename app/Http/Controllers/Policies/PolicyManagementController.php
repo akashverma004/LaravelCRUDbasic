@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Policies;
+
+use App\Http\Controllers\Controller;
 
 use App\Support\PolicyDefinitions;
 use Illuminate\Http\RedirectResponse;
@@ -149,8 +151,22 @@ class PolicyManagementController extends Controller
                 continue;
             }
 
-            if (($field['type'] ?? '') === 'json' && is_string($validated[$name])) {
-                $validated[$name] = json_decode($validated[$name], true);
+            if (($field['type'] ?? '') === 'json') {
+                $value = $validated[$name] ?? null;
+                // Treat empty strings as pure null so the DB handles it instead of throwing syntax errors on `{}` mapping.
+                if ($value === '' || $value === null) {
+                    $validated[$name] = null;
+                } elseif (is_string($value)) {
+                    $decoded = json_decode($value, true);
+                    // Standardize empty json inputs to null for the database column
+                    if ($decoded === null && json_last_error() !== JSON_ERROR_NONE) {
+                        // The Request validation 'json' rule already passed, so this shouldn't technically happen,
+                        // but better safe than sorry.
+                        $validated[$name] = null;
+                    } else {
+                        $validated[$name] = $decoded;
+                    }
+                }
             }
         }
 

@@ -34,6 +34,14 @@ Route::middleware(['auth', 'must.change.password', 'tenant', 'tenant.active', 't
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.home');
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
+    // Attendance Punch In / Out
+    Route::prefix('attendance')->group(function () {
+        Route::post('/punch-in', [\App\Http\Controllers\AttendanceController::class, 'punchIn'])->name('attendance.punch-in');
+        Route::post('/pause', [\App\Http\Controllers\AttendanceController::class, 'pause'])->name('attendance.pause');
+        Route::post('/resume', [\App\Http\Controllers\AttendanceController::class, 'resume'])->name('attendance.resume');
+        Route::post('/punch-out', [\App\Http\Controllers\AttendanceController::class, 'punchOut'])->name('attendance.punch-out');
+    });
+
     // Organization Chart
     Route::prefix('org-chart')->group(function () {
         Route::get('/', [OrgChartController::class, 'index'])->name('org-chart.index');
@@ -77,36 +85,52 @@ Route::middleware(['auth', 'must.change.password', 'tenant', 'tenant.active', 't
 
     // Leave Requests
     Route::prefix('leaves')->group(function () {
-        // Public (All Employees)
-        Route::get('/', [LeaveRequestController::class, 'index'])->name('leaves.index');
-        Route::get('/create', [LeaveRequestController::class, 'create'])->name('leaves.create');
-        Route::post('/', [LeaveRequestController::class, 'store'])->name('leaves.store');
-        Route::get('/events', [LeaveRequestController::class, 'events'])->name('leaves.events');
-        Route::get('/{id}', [LeaveRequestController::class, 'show'])->name('leaves.show');
-
         // Protected (Admin/HR only)
         Route::middleware('role:admin,hr_manager')->group(function () {
             Route::get('/pending', [LeaveRequestController::class, 'pending'])->name('leaves.pending');
+        });
+
+        // Public (All Employees)
+        Route::get('/', [LeaveRequestController::class, 'index'])->name('leaves.index');
+        Route::get('/my', [LeaveRequestController::class, 'my'])->name('leaves.my');
+        Route::get('/create', [LeaveRequestController::class, 'create'])->name('leaves.create');
+        Route::post('/', [LeaveRequestController::class, 'store'])->name('leaves.store');
+        Route::get('/events', [LeaveRequestController::class, 'events'])->name('leaves.events');
+        
+        // Resource-like routes (scoped by ownership in controller)
+        Route::get('/{id}', [LeaveRequestController::class, 'show'])->name('leaves.show')->where('id', '[0-9]+');
+        Route::get('/{id}/edit', [LeaveRequestController::class, 'edit'])->name('leaves.edit')->where('id', '[0-9]+');
+        Route::patch('/{id}', [LeaveRequestController::class, 'update'])->name('leaves.update')->where('id', '[0-9]+');
+        Route::delete('/{id}', [LeaveRequestController::class, 'destroy'])->name('leaves.destroy')->where('id', '[0-9]+');
+
+        // Actions requiring specific role
+        Route::middleware('role:admin,hr_manager')->group(function () {
             Route::patch('/{id}/approve', [LeaveRequestController::class, 'approve'])->name('leaves.approve');
             Route::patch('/{id}/reject', [LeaveRequestController::class, 'reject'])->name('leaves.reject');
         });
     });
 
     // Policies
-    Route::prefix('policies')->middleware('role:admin,hr_manager')->group(function () {
-        Route::get('/', [PolicyManagementController::class, 'index'])->name('policies.index');
-        Route::get('/holiday-policies', [HolidayPolicyController::class, 'index'])->name('policies.holiday-policies.index');
-        Route::post('/holiday-policies', [HolidayPolicyController::class, 'store'])->name('policies.holiday-policies.store');
-        Route::patch('/holiday-policies/{holidayPolicy}', [HolidayPolicyController::class, 'update'])->name('policies.holiday-policies.update');
-        Route::delete('/holiday-policies/{holidayPolicy}', [HolidayPolicyController::class, 'destroy'])->name('policies.holiday-policies.destroy');
-        Route::get('/holiday-calendar', [HolidayCalendarController::class, 'index'])->name('policies.holiday-calendar.index');
-        Route::post('/holiday-calendar/policies/{holidayPolicy}/dates', [HolidayCalendarController::class, 'storeDate'])->name('policies.holiday-calendar.dates.store');
-        Route::patch('/holiday-calendar/policies/{holidayPolicy}/dates/{holidayDate}', [HolidayCalendarController::class, 'updateDate'])->name('policies.holiday-calendar.dates.update');
-        Route::delete('/holiday-calendar/policies/{holidayPolicy}/dates/{holidayDate}', [HolidayCalendarController::class, 'destroyDate'])->name('policies.holiday-calendar.dates.destroy');
-        Route::get('/leave', [LeavePolicyController::class, 'edit'])->name('policies.leave.edit');
-        Route::patch('/leave', [LeavePolicyController::class, 'update'])->name('policies.leave.update');
-        Route::get('/{type}', [PolicyManagementController::class, 'edit'])->name('policies.edit');
-        Route::patch('/{type}', [PolicyManagementController::class, 'update'])->name('policies.update');
+    Route::prefix('policies')->group(function () {
+        // Public (All Employees) - Policy Viewer
+        Route::get('/my-policies', [\App\Http\Controllers\DashboardController::class, 'myPolicies'])->name('policies.viewer');
+
+        // Protected (Admin/HR only) - Policy Management
+        Route::middleware('role:admin,hr_manager')->namespace('App\Http\Controllers\Policies')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Policies\PolicyManagementController::class, 'index'])->name('policies.index');
+            Route::get('/holiday-policies', [\App\Http\Controllers\Policies\HolidayPolicyController::class, 'index'])->name('policies.holiday-policies.index');
+            Route::post('/holiday-policies', [\App\Http\Controllers\Policies\HolidayPolicyController::class, 'store'])->name('policies.holiday-policies.store');
+            Route::patch('/holiday-policies/{holidayPolicy}', [\App\Http\Controllers\Policies\HolidayPolicyController::class, 'update'])->name('policies.holiday-policies.update');
+            Route::delete('/holiday-policies/{holidayPolicy}', [\App\Http\Controllers\Policies\HolidayPolicyController::class, 'destroy'])->name('policies.holiday-policies.destroy');
+            Route::get('/holiday-calendar', [\App\Http\Controllers\Policies\HolidayCalendarController::class, 'index'])->name('policies.holiday-calendar.index');
+            Route::post('/holiday-calendar/policies/{holidayPolicy}/dates', [\App\Http\Controllers\Policies\HolidayCalendarController::class, 'storeDate'])->name('policies.holiday-calendar.dates.store');
+            Route::patch('/holiday-calendar/policies/{holidayPolicy}/dates/{holidayDate}', [\App\Http\Controllers\Policies\HolidayCalendarController::class, 'updateDate'])->name('policies.holiday-calendar.dates.update');
+            Route::delete('/holiday-calendar/policies/{holidayPolicy}/dates/{holidayDate}', [\App\Http\Controllers\Policies\HolidayCalendarController::class, 'destroyDate'])->name('policies.holiday-calendar.dates.destroy');
+            Route::get('/leave', [\App\Http\Controllers\Policies\LeavePolicyController::class, 'edit'])->name('policies.leave.edit');
+            Route::patch('/leave', [\App\Http\Controllers\Policies\LeavePolicyController::class, 'update'])->name('policies.leave.update');
+            Route::get('/{type}', [\App\Http\Controllers\Policies\PolicyManagementController::class, 'edit'])->name('policies.edit')->where('type', '[a-z\-]+');
+            Route::patch('/{type}', [\App\Http\Controllers\Policies\PolicyManagementController::class, 'update'])->name('policies.update')->where('type', '[a-z\-]+');
+        });
     });
 
     // Roles & Permissions Management
