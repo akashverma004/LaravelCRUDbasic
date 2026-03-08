@@ -203,4 +203,10 @@ class LeaveRequestController extends Controller
 
         return $session ? $type . ' (' . $session . ')' : $type;
     }
+
+    public function events(): View
+    {
+        dd("akash");
+        return view('hrms.events.index');
+    }
 }

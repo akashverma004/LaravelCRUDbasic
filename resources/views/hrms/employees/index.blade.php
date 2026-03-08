@@ -8,7 +8,9 @@
         <h1 class="text-3xl font-bold">Employees</h1>
         <p class="text-slate-600 dark:text-slate-400">Manage your workforce</p>
     </div>
-    <a href="{{ route('employees.create') }}" class="rounded-lg bg-cyan-500 px-4 py-2 font-semibold text-slate-900 hover:bg-cyan-400">+ Add Employee</a>
+    @if (Auth::user()->hasAnyRole(['admin', 'hr_manager']))
+        <a href="{{ route('employees.create') }}" class="rounded-lg bg-cyan-500 px-4 py-2 font-semibold text-slate-900 hover:bg-cyan-400">+ Add Employee</a>
+    @endif
 </div>
 
 <div class="mb-4 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
@@ -93,16 +95,18 @@
                                     <path d="M10 3C5 3 1.73 7.11.46 9.12a1.62 1.62 0 0 0 0 1.76C1.73 12.89 5 17 10 17s8.27-4.11 9.54-6.12a1.62 1.62 0 0 0 0-1.76C18.27 7.11 15 3 10 3Zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8Z" />
                                 </svg>
                             </a>
-                            <a
-                                href="{{ route('employees.edit', $employee->id) }}"
-                                class="text-amber-400 hover:text-amber-300"
-                                title="Edit employee"
-                                aria-label="Edit employee"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="m13.586 3.586 2.828 2.828a2 2 0 0 1 0 2.829l-7.6 7.6a2 2 0 0 1-.878.514l-3.11.889a.75.75 0 0 1-.928-.928l.889-3.11a2 2 0 0 1 .514-.878l7.6-7.6a2 2 0 0 1 2.829 0ZM12.525 6.06 6.12 12.464a.5.5 0 0 0-.129.22l-.59 2.066 2.066-.59a.5.5 0 0 0 .22-.129l6.404-6.404-1.566-1.566Z" />
-                                </svg>
-                            </a>
+                            @if (Auth::user()->hasAnyRole(['admin', 'hr_manager']))
+                                <a
+                                    href="{{ route('employees.edit', $employee->id) }}"
+                                    class="text-amber-400 hover:text-amber-300"
+                                    title="Edit employee"
+                                    aria-label="Edit employee"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                        <path d="m13.586 3.586 2.828 2.828a2 2 0 0 1 0 2.829l-7.6 7.6a2 2 0 0 1-.878.514l-3.11.889a.75.75 0 0 1-.928-.928l.889-3.11a2 2 0 0 1 .514-.878l7.6-7.6a2 2 0 0 1 2.829 0ZM12.525 6.06 6.12 12.464a.5.5 0 0 0-.129.22l-.59 2.066 2.066-.59a.5.5 0 0 0 .22-.129l6.404-6.404-1.566-1.566Z" />
+                                    </svg>
+                                </a>
+                            @endif
                         </div>
                     </td>
                 </tr>

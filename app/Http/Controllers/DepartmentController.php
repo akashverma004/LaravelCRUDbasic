@@ -28,9 +28,12 @@ class DepartmentController extends Controller
     public function store(StoreDepartmentRequest $request): RedirectResponse
     {
         $validated = $request->validated();
+
+        // Resolve lead_name from the chosen employee when one is selected.
         if (! empty($validated['lead_employee_id'])) {
             $validated['lead_name'] = Employee::findOrFail($validated['lead_employee_id'])->full_name;
         }
+        // lead_employee_id is not a real DB column — remove it before persisting.
         unset($validated['lead_employee_id']);
 
         $this->departmentService->createDepartment($validated);
@@ -55,7 +58,9 @@ class DepartmentController extends Controller
     public function update(StoreDepartmentRequest $request, int $id): RedirectResponse
     {
         $department = $this->departmentService->getDepartmentById($id);
-        $validated = $request->validated();
+        $validated  = $request->validated();
+
+        // Resolve lead_name from the chosen employee when one is selected.
         if (! empty($validated['lead_employee_id'])) {
             $validated['lead_name'] = Employee::findOrFail($validated['lead_employee_id'])->full_name;
         }
@@ -65,6 +70,7 @@ class DepartmentController extends Controller
 
         return redirect()->route('departments.show', $id)->with('status', 'Department updated successfully.');
     }
+
 
     public function destroy(int $id): RedirectResponse
     {

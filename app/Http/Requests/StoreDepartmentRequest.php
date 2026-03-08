@@ -21,8 +21,9 @@ class StoreDepartmentRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'code' => ['required', 'string', 'max:30', Rule::unique('departments', 'code')->ignore($departmentId)->where(fn ($query) => $query->where('tenant_id', $tenantId))],
+            // Lead is fully optional — useful when no employees exist yet in a fresh company.
             'lead_employee_id' => ['nullable', 'integer', Rule::exists('employees', 'id')->where(fn ($query) => $query->where('tenant_id', $tenantId))],
-            'lead_name' => ['required_without:lead_employee_id', 'nullable', 'string', 'max:255'],
+            'lead_name'        => ['nullable', 'string', 'max:255'],
         ];
     }
 
@@ -31,8 +32,8 @@ class StoreDepartmentRequest extends FormRequest
         return [
             'name.required' => 'Department name is required.',
             'code.required' => 'Department code is required.',
-            'code.unique' => 'This department code already exists.',
-            'lead_name.required_without' => 'Department lead is required.',
+            'code.unique'   => 'This department code already exists.',
         ];
     }
 }
+

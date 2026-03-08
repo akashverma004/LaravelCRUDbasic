@@ -69,5 +69,6 @@ class Kernel extends HttpKernel
         'tenant' => \App\Http\Middleware\SetTenantContext::class,
         'tenant.active' => \App\Http\Middleware\EnsureTenantIsActive::class,
         'tenant.setup' => \App\Http\Middleware\RedirectIfTenantSetupIncomplete::class,
+        'must.change.password' => \App\Http\Middleware\MustChangePassword::class,
     ];
 }

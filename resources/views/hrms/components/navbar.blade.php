@@ -34,7 +34,14 @@
                     </div>
                     <div>
                         <p class="text-base font-bold text-slate-900 dark:text-white">PeopleFlow</p>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">HRMS Navigation</p>
+                        @auth
+                            @php $tenantName = Auth::user()->tenant?->name; @endphp
+                            @if($tenantName)
+                                <p class="truncate text-xs font-medium text-cyan-600 dark:text-cyan-400 max-w-[140px]">{{ $tenantName }}</p>
+                            @else
+                                <p class="text-xs text-slate-500 dark:text-slate-400">HRMS Navigation</p>
+                            @endif
+                        @endauth
                     </div>
                 </a>
 

@@ -64,10 +64,12 @@
         </div>
         <button type="submit" class="rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-cyan-400">Apply</button>
         <a href="{{ route('leaves.index', ['month' => $monthStart->format('Y-m')]) }}" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">Reset</a>
-        <div class="ml-auto flex items-center gap-2">
-            <a href="{{ route('leaves.pending', ['tab' => 'all']) }}" class="rounded-lg px-4 py-2 text-sm font-medium {{ request()->routeIs('leaves.pending') && request('tab', 'pending') === 'all' ? 'bg-cyan-500 text-slate-900' : 'border border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800' }}">All Requests</a>
-            <a href="{{ route('leaves.pending', ['tab' => 'pending']) }}" class="rounded-lg px-4 py-2 text-sm font-medium {{ request()->routeIs('leaves.pending') && request('tab', 'pending') === 'pending' ? 'bg-cyan-500 text-slate-900' : 'border border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800' }}">Pending</a>
-        </div>
+        @if (Auth::user()->hasAnyRole(['admin', 'hr_manager']))
+            <div class="ml-auto flex items-center gap-2">
+                <a href="{{ route('leaves.pending', ['tab' => 'all']) }}" class="rounded-lg px-4 py-2 text-sm font-medium {{ request()->routeIs('leaves.pending') && request('tab', 'pending') === 'all' ? 'bg-cyan-500 text-slate-900' : 'border border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800' }}">All Requests</a>
+                <a href="{{ route('leaves.pending', ['tab' => 'pending']) }}" class="rounded-lg px-4 py-2 text-sm font-medium {{ request()->routeIs('leaves.pending') && request('tab', 'pending') === 'pending' ? 'bg-cyan-500 text-slate-900' : 'border border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800' }}">Pending</a>
+            </div>
+        @endif
     </form>
 </div>
 

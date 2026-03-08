@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Department;
+use App\Support\TenantContext;
 use Closure;
 use Illuminate\Http\Request;
 
@@ -33,8 +35,18 @@ class RedirectIfTenantSetupIncomplete
             }
         }
 
+        // Step 1: Company info not completed yet
         if (! $tenant->setup_completed) {
             return redirect()->route('onboarding.show');
+        }
+
+        // Step 2: Company info done but no departments created yet
+        TenantContext::set((int) $tenant->id);
+        $hasDepartments = Department::query()->exists();
+        TenantContext::set(null);
+
+        if (! $hasDepartments) {
+            return redirect()->route('onboarding.departments.show');
         }
 
         return $next($request);

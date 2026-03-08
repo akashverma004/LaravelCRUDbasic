@@ -10,12 +10,76 @@ class EmployeeService
 {
     public function createEmployee(array $data): Employee
     {
-        return Employee::create($data);
+        $password = $data['password'] ?? null;
+        unset($data['password']);
+
+        $employee = Employee::create($data);
+
+        if (!empty($password)) {
+            $user = \App\Models\User::updateOrCreate(
+                [
+                    'email' => $data['email'],
+                    'tenant_id' => \App\Support\TenantContext::id() ?? 1
+                ],
+                [
+                    'name' => $data['full_name'],
+                    'password' => \Illuminate\Support\Facades\Hash::make($password),
+                    'require_password_change' => true,
+                ]
+            );
+
+            if (!empty($data['role_id'])) {
+                $role = \App\Models\Role::find($data['role_id']);
+                if ($role) {
+                    $user->assignRole($role);
+                }
+            }
+        }
+
+        return $employee;
     }
 
     public function updateEmployee(Employee $employee, array $data): Employee
     {
+        $password = $data['password'] ?? null;
+        $roleId = $data['role_id'] ?? null;
+        unset($data['password']);
+
         $employee->update($data);
+
+        if (!empty($password)) {
+            $user = \App\Models\User::updateOrCreate(
+                [
+                    'email' => $employee->email,
+                    'tenant_id' => $employee->tenant_id
+                ],
+                [
+                    'name' => $employee->full_name,
+                    'password' => \Illuminate\Support\Facades\Hash::make($password),
+                    'require_password_change' => true,
+                ]
+            );
+
+            if (!empty($roleId)) {
+                $role = \App\Models\Role::find($roleId);
+                if ($role) {
+                    $user->syncRoles([$role->id]);
+                }
+            }
+        } elseif (!empty($roleId)) {
+            // Unchanged password, but role might have changed
+            $user = \App\Models\User::where('email', $employee->email)
+                ->where('tenant_id', $employee->tenant_id)
+                ->first();
+            
+            if ($user) {
+                $role = \App\Models\Role::find($roleId);
+                if ($role) {
+                    $user->syncRoles([$role->id]);
+                }
+            }
+        }
+
         return $employee;
     }
 

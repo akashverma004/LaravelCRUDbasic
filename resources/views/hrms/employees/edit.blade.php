@@ -29,6 +29,15 @@
                 </div>
 
                 <div>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                        Reset Password 
+                        <span class="font-normal text-slate-400 text-xs ml-1">(Leave blank to keep current)</span>
+                    </label>
+                    <input type="text" name="password" minlength="8" placeholder="New temporary password..." class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 dark:border-slate-700 dark:bg-slate-950 px-3 py-2 @error('password') border-red-500 @enderror" autocomplete="off" autocorrect="off">
+                    @error('password')<p class="mt-1 text-sm text-red-400">{{ $message }}</p>@enderror
+                </div>
+
+                <div>
                     <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Phone</label>
                     <input type="tel" name="phone" class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 dark:border-slate-700 dark:bg-slate-950 px-3 py-2 @error('phone') border-red-500 @enderror" value="{{ old('phone', $employee->phone) }}" required>
                     @error('phone')<p class="mt-1 text-sm text-red-400">{{ $message }}</p>@enderror

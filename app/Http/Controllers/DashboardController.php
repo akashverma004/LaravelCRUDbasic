@@ -11,6 +11,40 @@ class DashboardController extends Controller
 
     public function index(): View
     {
+        $user = auth()->user();
+
+        // If user is a regular employee (not admin or hr_manager)
+        if (! $user->hasAnyRole(['admin', 'hr_manager'])) {
+            $employee = \App\Models\Employee::where('email', $user->email)
+                ->where('tenant_id', $user->tenant_id)
+                ->first();
+
+            if ($employee) {
+                $myLeaves = \App\Models\LeaveRequest::where('employee_id', $employee->id)
+                    ->latest()
+                    ->take(5)
+                    ->get();
+
+                $upcomingHolidays = \App\Models\HolidayPolicyDate::where('holiday_date', '>=', now()->toDateString())
+                    ->orderBy('holiday_date', 'asc')
+                    ->take(5)
+                    ->get();
+
+                $colleagues = \App\Models\Employee::where('department_id', $employee->department_id)
+                    ->where('id', '!=', $employee->id)
+                    ->take(5)
+                    ->get();
+
+                return view('hrms.employee-dashboard', [
+                    'employee' => $employee,
+                    'myLeaves' => $myLeaves,
+                    'upcomingHolidays' => $upcomingHolidays,
+                    'colleagues' => $colleagues,
+                ]);
+            }
+        }
+
+        // Standard HR/Admin Dashboard
         $stats = $this->dashboardService->getDashboardStats();
         $departmentBreakdown = $this->dashboardService->getDepartmentBreakdown();
         $employees = $this->dashboardService->getRecentEmployees();

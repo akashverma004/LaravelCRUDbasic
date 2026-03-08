@@ -28,7 +28,7 @@ class StoreEmployeeRequest extends FormRequest
             'phone' => ['required', 'string', 'max:30'],
             'job_title' => ['required', 'string', 'max:255'],
             'employment_type' => ['required', 'in:full-time,part-time,contract,intern'],
-            'salary' => ['required', 'numeric', 'min:0'],
+            'salary' => ['required', 'numeric', 'min:0', 'max:9999999999999'],
             'joined_on' => ['required', 'date', 'before_or_equal:today'],
             'status' => ['required', 'in:active,on-leave,resigned'],
             'country' => ['required', Rule::in(array_keys(config('geo.countries', [])))],
@@ -39,6 +39,7 @@ class StoreEmployeeRequest extends FormRequest
             'likes' => ['nullable', 'string'],
             'food_preference' => ['nullable', 'in:veg,non-veg'],
             'health_issues' => ['nullable', 'string'],
+            'password' => [$employeeId ? 'nullable' : 'required', 'string', 'min:8'],
         ];
     }
 
