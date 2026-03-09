@@ -14,9 +14,31 @@
                 <span class="text-base font-bold text-slate-900 dark:text-white">PeopleFlow</span>
             </a>
 
-            <button id="theme-toggle" type="button" class="rounded-lg border border-slate-300 p-2 text-slate-700 dark:border-slate-600 dark:text-slate-200">
-                <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
-            </button>
+            <div class="flex items-center gap-1">
+                {{-- Mobile Notification Bell --}}
+                @auth
+                <div x-data="notificationBell()" x-init="init()" class="relative">
+                    <button @click="toggleDropdown()" class="relative rounded-lg border border-slate-300 p-2 text-slate-700 dark:border-slate-600 dark:text-slate-200">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                        </svg>
+                        <span x-show="unreadCount > 0" x-text="unreadCount > 9 ? '9+' : unreadCount" class="absolute -right-1 -top-1 flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white" style="display:none;"></span>
+                    </button>
+                    {{-- Mobile Dropdown --}}
+                    <div
+                        x-show="isOpen" x-transition @click.outside="isOpen = false"
+                        class="absolute right-0 top-full mt-2 w-80 rounded-xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-800 z-[60] max-h-[28rem] flex flex-col"
+                        style="display:none;"
+                    >
+                        @include('hrms.components.notification-dropdown-content')
+                    </div>
+                </div>
+                @endauth
+
+                <button id="theme-toggle" type="button" class="rounded-lg border border-slate-300 p-2 text-slate-700 dark:border-slate-600 dark:text-slate-200">
+                    <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                </button>
+            </div>
         </div>
     </header>
 
@@ -117,6 +139,9 @@
                 </div>
 
                 <div class="space-y-2">
+                    {{-- Sidebar Notification Bell --}}
+                    @include('hrms.components.notification-dropdown')
+
                     <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200 dark:text-slate-300 dark:hover:bg-slate-800">
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
                         <span>Profile</span>

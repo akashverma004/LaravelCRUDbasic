@@ -7,9 +7,14 @@ use App\Models\Department;
 use App\Models\Employee;
 use App\Models\HolidayPolicy;
 use App\Models\LeaveRequest;
+use App\Models\User;
+use App\Notifications\LeaveApproved;
+use App\Notifications\LeaveRejected;
+use App\Notifications\LeaveSubmitted;
 use App\Services\LeaveService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\View\View;
 
 class LeaveRequestController extends Controller
@@ -194,7 +199,19 @@ class LeaveRequestController extends Controller
             $data['status'] = 'pending';
         }
 
-        $this->leaveService->createLeaveRequest($data);
+        $leave = $this->leaveService->createLeaveRequest($data);
+
+        // Notify admin/HR users about the new leave request
+        $employee = Employee::find($data['employee_id']);
+        $adminUsers = User::where('tenant_id', auth()->user()->tenant_id)
+            ->whereHas('roles', fn($q) => $q->whereIn('name', ['admin', 'hr_manager']))
+            ->where('id', '!=', auth()->id())
+            ->get();
+
+        if ($employee && $adminUsers->isNotEmpty()) {
+            Notification::send($adminUsers, new LeaveSubmitted($leave, $employee->full_name));
+        }
+
         return redirect()->route('leaves.index')->with('status', 'Leave request submitted successfully.');
     }
 
@@ -206,15 +223,29 @@ class LeaveRequestController extends Controller
 
     public function approve(int $id): RedirectResponse
     {
-        $leave = LeaveRequest::findOrFail($id);
+        $leave = LeaveRequest::with('employee')->findOrFail($id);
         $this->leaveService->approveLeaveRequest($leave);
+
+        // Notify the employee
+        $employeeUser = User::where('email', $leave->employee->email)
+            ->where('tenant_id', auth()->user()->tenant_id)
+            ->first();
+        $employeeUser?->notify(new LeaveApproved($leave));
+
         return redirect()->back()->with('status', 'Leave request approved.');
     }
 
     public function reject(int $id): RedirectResponse
     {
-        $leave = LeaveRequest::findOrFail($id);
+        $leave = LeaveRequest::with('employee')->findOrFail($id);
         $this->leaveService->rejectLeaveRequest($leave);
+
+        // Notify the employee
+        $employeeUser = User::where('email', $leave->employee->email)
+            ->where('tenant_id', auth()->user()->tenant_id)
+            ->first();
+        $employeeUser?->notify(new LeaveRejected($leave));
+
         return redirect()->back()->with('status', 'Leave request rejected.');
     }
 
