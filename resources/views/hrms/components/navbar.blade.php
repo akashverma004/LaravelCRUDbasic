@@ -107,6 +107,11 @@
                 </a>
                 @endif
 
+                <a href="{{ route('self-service.profile') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium {{ request()->routeIs('self-service.*') ? 'bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-300' : 'text-slate-700 hover:bg-slate-200 dark:text-slate-300 dark:hover:bg-slate-800' }}">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span>My Profile</span>
+                </a>
+
                 @if (Auth::user()->hasAnyRole(['admin', 'hr_manager']))
                     <a href="{{ route('policies.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium {{ request()->routeIs('policies.*') ? 'bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-300' : 'text-slate-700 hover:bg-slate-200 dark:text-slate-300 dark:hover:bg-slate-800' }}">
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 3a1.5 1.5 0 00-1.5 1.5v.443a6.015 6.015 0 00-1.447.6l-.314-.314a1.5 1.5 0 00-2.122 0L3.23 6.366a1.5 1.5 0 000 2.122l.314.314a6.014 6.014 0 00-.6 1.447H2.5A1.5 1.5 0 001 11.75v1.5A1.5 1.5 0 002.5 14.75h.443c.14.512.34.997.6 1.447l-.314.314a1.5 1.5 0 000 2.122l1.136 1.136a1.5 1.5 0 002.122 0l.314-.314c.45.26.935.46 1.447.6v.443a1.5 1.5 0 001.5 1.5h1.5a1.5 1.5 0 001.5-1.5v-.443c.512-.14.997-.34 1.447-.6l.314.314a1.5 1.5 0 002.122 0l1.136-1.136a1.5 1.5 0 000-2.122l-.314-.314c.26-.45.46-.935.6-1.447h.443a1.5 1.5 0 001.5-1.5v-1.5a1.5 1.5 0 00-1.5-1.5h-.443a6.014 6.014 0 00-.6-1.447l.314-.314a1.5 1.5 0 000-2.122l-1.136-1.136a1.5 1.5 0 00-2.122 0l-.314.314a6.015 6.015 0 00-1.447-.6V4.5a1.5 1.5 0 00-1.5-1.5h-1.5z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15a3 3 0 100-6 3 3 0 000 6z"></path></svg>
@@ -138,19 +143,8 @@
                     </div>
                 </div>
 
+
                 <div class="space-y-2">
-                    {{-- Sidebar Notification Bell --}}
-                    @include('hrms.components.notification-dropdown')
-
-                    <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200 dark:text-slate-300 dark:hover:bg-slate-800">
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                        <span>Profile</span>
-                    </a>
-
-                    <button id="theme-toggle" type="button" class="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200 dark:text-slate-300 dark:hover:bg-slate-800">
-                        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
-                        <span>Toggle Theme</span>
-                    </button>
 
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf

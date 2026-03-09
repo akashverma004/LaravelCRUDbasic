@@ -114,7 +114,11 @@ class EmployeeService
 
     public function getEmployeeById(int $id): ?Employee
     {
-        return Employee::with('department', 'leaveRequests', 'attendanceRecords')->findOrFail($id);
+        return Employee::with([
+            'department', 'role', 'manager',
+            'leaveRequests', 'attendanceRecords',
+            'educations', 'experiences', 'skills',
+        ])->findOrFail($id);
     }
 
     public function getEmployeesByDepartment(int $departmentId): Collection

@@ -12,7 +12,7 @@ function initializeTheme() {
 
     // Setup toggle button - use delegation to handle dynamically added buttons
     document.addEventListener('click', (e) => {
-        const themeToggle = e.target.closest('#theme-toggle');
+        const themeToggle = e.target.closest('#theme-toggle') || e.target.closest('#theme-toggle-topbar');
         if (themeToggle) {
             const isDark = html.classList.contains('dark');
             setTheme(isDark ? 'light' : 'dark');

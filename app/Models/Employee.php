@@ -20,6 +20,7 @@ class Employee extends Model
         'manager_id',
         'role_id',
         'full_name',
+        'profile_photo',
         'email',
         'phone',
         'job_title',
@@ -35,10 +36,36 @@ class Employee extends Model
         'likes',
         'food_preference',
         'health_issues',
+        // Personal Details
+        'date_of_birth',
+        'gender',
+        'marital_status',
+        'blood_group',
+        'nationality',
+        'personal_email',
+        // Emergency Contact
+        'emergency_contact_name',
+        'emergency_contact_phone',
+        'emergency_contact_relationship',
+        // Identity Documents
+        'pan_number',
+        'aadhaar_number',
+        'passport_number',
+        'passport_expiry',
+        // Bank Details
+        'bank_name',
+        'bank_account_number',
+        'bank_ifsc',
+        // Social / Bio
+        'linkedin_url',
+        'pronouns',
+        'bio',
     ];
 
     protected $casts = [
         'joined_on' => 'date',
+        'date_of_birth' => 'date',
+        'passport_expiry' => 'date',
         'salary' => 'decimal:2',
     ];
 
@@ -75,6 +102,21 @@ class Employee extends Model
     public function leavePolicy(): HasOne
     {
         return $this->hasOne(EmployeeLeavePolicy::class);
+    }
+
+    public function educations(): HasMany
+    {
+        return $this->hasMany(EmployeeEducation::class);
+    }
+
+    public function experiences(): HasMany
+    {
+        return $this->hasMany(EmployeeExperience::class);
+    }
+
+    public function skills(): HasMany
+    {
+        return $this->hasMany(EmployeeSkill::class);
     }
 
     public function setCountryAttribute(?string $value): void
