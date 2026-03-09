@@ -53,7 +53,7 @@ Route::middleware(['auth', 'must.change.password', 'tenant', 'tenant.active', 't
     Route::prefix('departments')->group(function () {
         // Public (All Employees)
         Route::get('/', [DepartmentController::class, 'index'])->name('departments.index');
-        Route::get('/{id}', [DepartmentController::class, 'show'])->name('departments.show');
+        Route::get('/{id}', [DepartmentController::class, 'show'])->name('departments.show')->where('id', '[0-9]+');
 
         // Protected (Admin/HR only)
         Route::middleware('role:admin,hr_manager')->group(function () {
@@ -70,7 +70,7 @@ Route::middleware(['auth', 'must.change.password', 'tenant', 'tenant.active', 't
         // Public (All Employees)
         Route::get('/', [EmployeeController::class, 'index'])->name('employees.index');
         Route::get('/search', [EmployeeController::class, 'search'])->name('employees.search');
-        Route::get('/{id}', [EmployeeController::class, 'show'])->name('employees.show');
+        Route::get('/{id}', [EmployeeController::class, 'show'])->name('employees.show')->where('id', '[0-9]+');
 
         // Protected (Admin/HR only)
         Route::middleware('role:admin,hr_manager')->group(function () {
