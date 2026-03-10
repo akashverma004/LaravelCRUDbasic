@@ -21,9 +21,39 @@ class MyProfileController extends Controller
     {
         $user = auth()->user();
 
-        return Employee::where('email', $user->email)
+        $employee = Employee::where('email', $user->email)
             ->where('tenant_id', $user->tenant_id)
-            ->firstOrFail();
+            ->first();
+
+        // If HR/Admin user doesn't have an employee record yet, dynamically create one
+        if (!$employee && $user->hasAnyRole(['admin', 'hr_manager'])) {
+            $dept = \App\Models\Department::where('tenant_id', $user->tenant_id)->first();
+            
+            if ($dept) {
+                $employee = Employee::create([
+                    'tenant_id' => $user->tenant_id,
+                    'department_id' => $dept->id,
+                    'full_name' => $user->name,
+                    'email' => $user->email,
+                    'phone' => '0000000000',
+                    'job_title' => 'Administrator',
+                    'employment_type' => 'full-time',
+                    'salary' => 0,
+                    'status' => 'active',
+                    'country' => 'IN',
+                    'state' => 'MH',
+                    'city' => 'Unknown',
+                    'address' => 'Unknown',
+                    'joined_on' => now(),
+                ]);
+            }
+        }
+
+        if (!$employee) {
+            abort(404, 'Employee profile not found.');
+        }
+
+        return $employee;
     }
 
     public function show(): View

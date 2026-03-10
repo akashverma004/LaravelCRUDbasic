@@ -15,7 +15,11 @@ class EmployeeController extends Controller
     public function __construct(
         private EmployeeService $employeeService,
         private DepartmentService $departmentService
-    ) {}
+    ) {
+        $this->middleware('auth');
+        // Only Admin/HR can create/edit/delete
+        $this->middleware('role:admin,hr_manager')->except(['index', 'show', 'search']);
+    }
 
     public function index(): View
     {
@@ -46,29 +50,62 @@ class EmployeeController extends Controller
 
     public function show(int $id): View
     {
+        $user = auth()->user();
         $employee = $this->employeeService->getEmployeeById($id);
-        return view('hrms.employees.show', compact('employee'));
+        
+        $currentUserEmployee = Employee::where('email', $user->email)->where('tenant_id', $user->tenant_id)->first();
+
+        $isAdmin = $user->hasAnyRole(['admin', 'hr_manager']);
+        $isManager = $currentUserEmployee && $employee->manager_id === $currentUserEmployee->id;
+        $isSelf = $currentUserEmployee && $employee->id === $currentUserEmployee->id;
+
+        if (!$isAdmin && !$isManager && !$isSelf) {
+            abort(403, 'You do not have permission to view this profile.');
+        }
+
+        // Hide sensitive data if not Admin/HR or Self
+        if (!$isAdmin && !$isSelf) {
+            $employee->salary = null;
+            $employee->pan_number = '********';
+            $employee->aadhaar_number = '********';
+            $employee->bank_account_number = '********';
+        }
+
+        $departments = collect();
+        $roles = collect();
+        $managers = collect();
+        $countries = [];
+        $states = [];
+
+        // For inline editing on the show page
+        if ($isAdmin || $isSelf) {
+            $departments = $this->departmentService->getAllDepartments();
+            $roles = Role::all();
+            $managers = Employee::with('department')->where('id', '!=', $employee->id)->orderBy('full_name')->get();
+            $countries = config('geo.countries', []);
+            $states = config('geo.states_in', []);
+        }
+
+        return view('hrms.employees.show', compact(
+            'employee', 'isAdmin', 'isManager', 'isSelf',
+            'departments', 'roles', 'managers', 'countries', 'states'
+        ));
     }
 
     public function edit(int $id): View
     {
-        $employee = $this->employeeService->getEmployeeById($id);
-        $departments = $this->departmentService->getAllDepartments();
-        $roles = Role::all();
-        $managers = Employee::with('department')
-            ->where('id', '!=', $employee->id)
-            ->orderBy('full_name')
-            ->get();
-        $countries = config('geo.countries', []);
-        $states = config('geo.states_in', []);
-
-        return view('hrms.employees.edit', compact('employee', 'departments', 'roles', 'managers', 'countries', 'states'));
+        return $this->show($id);
     }
 
-    public function update(StoreEmployeeRequest $request, int $id): RedirectResponse
+    public function update(StoreEmployeeRequest $request, int $id)
     {
         $employee = $this->employeeService->getEmployeeById($id);
         $this->employeeService->updateEmployee($employee, $request->validated());
+        
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Employee updated successfully.']);
+        }
+        
         return redirect()->route('employees.show', $id)->with('status', 'Employee updated successfully.');
     }
 

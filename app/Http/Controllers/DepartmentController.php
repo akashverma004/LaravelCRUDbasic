@@ -44,18 +44,18 @@ class DepartmentController extends Controller
     public function show(int $id): View
     {
         $department = $this->departmentService->getDepartmentWithEmployees($id);
-        return view('hrms.departments.show', compact('department'));
+        $employees = Employee::orderBy('full_name')->get();
+
+        return view('hrms.departments.show', compact('department', 'employees'));
     }
 
     public function edit(int $id): View
     {
-        $department = $this->departmentService->getDepartmentById($id);
-        $employees = Employee::orderBy('full_name')->get();
-
-        return view('hrms.departments.edit', compact('department', 'employees'));
+        // View replaced by inline editing in `show` block. Still keeping logic if needed.
+        return $this->show($id);
     }
 
-    public function update(StoreDepartmentRequest $request, int $id): RedirectResponse
+    public function update(StoreDepartmentRequest $request, int $id)
     {
         $department = $this->departmentService->getDepartmentById($id);
         $validated  = $request->validated();
@@ -67,6 +67,10 @@ class DepartmentController extends Controller
         unset($validated['lead_employee_id']);
 
         $this->departmentService->updateDepartment($department, $validated);
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Department updated successfully.']);
+        }
 
         return redirect()->route('departments.show', $id)->with('status', 'Department updated successfully.');
     }

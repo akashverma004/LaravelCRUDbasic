@@ -32,6 +32,7 @@ class Employee extends Model
         'state',
         'city',
         'address',
+        'zip_code',
         'hobbies',
         'likes',
         'food_preference',
