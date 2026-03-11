@@ -182,7 +182,36 @@ class LeaveRequestController extends Controller
         return view('hrms.leaves.create', compact('employees', 'isAdminOrHR'));
     }
 
-    public function store(StoreLeaveRequest $request): RedirectResponse
+    public function data(): \Illuminate\Http\JsonResponse
+    {
+        $user = auth()->user();
+        if ($user->hasAnyRole(['admin', 'hr_manager'])) {
+            $employees = Employee::orderBy('full_name')->get(['id', 'full_name']);
+        } else {
+            $employees = Employee::where('email', $user->email)
+                ->where('tenant_id', $user->tenant_id)
+                ->get(['id', 'full_name']);
+        }
+
+        $employee = Employee::where('email', $user->email)
+            ->where('tenant_id', $user->tenant_id)
+            ->first();
+
+        $leaves = [];
+        if ($employee) {
+            $leaves = LeaveRequest::where('employee_id', $employee->id)
+                ->latest()
+                ->get();
+        }
+
+        return response()->json([
+            'leaves' => $leaves,
+            'employees' => $employees,
+            'isAdmin' => $user->hasAnyRole(['admin', 'hr_manager'])
+        ]);
+    }
+
+    public function store(StoreLeaveRequest $request): \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
     {
         $user = auth()->user();
         $isAdminOrHR = $user->hasAnyRole(['admin', 'hr_manager']);
@@ -210,6 +239,10 @@ class LeaveRequestController extends Controller
 
         if ($employee && $adminUsers->isNotEmpty()) {
             Notification::send($adminUsers, new LeaveSubmitted($leave, $employee->full_name));
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'leave' => $leave->load('employee'), 'message' => 'Leave request submitted successfully.']);
         }
 
         return redirect()->route('leaves.index')->with('status', 'Leave request submitted successfully.');
@@ -289,7 +322,7 @@ class LeaveRequestController extends Controller
         return view('hrms.leaves.edit', compact('leave', 'employees', 'isAdminOrHR'));
     }
 
-    public function update(StoreLeaveRequest $request, int $id): RedirectResponse
+    public function update(StoreLeaveRequest $request, int $id): \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
     {
         $user = auth()->user();
         $leave = LeaveRequest::findOrFail($id);
@@ -306,6 +339,7 @@ class LeaveRequestController extends Controller
             }
 
             if ($leave->status !== 'pending') {
+                if ($request->wantsJson()) return response()->json(['error' => 'Only pending requests can be updated.'], 403);
                 return redirect()->route('leaves.my')->with('error', 'Only pending requests can be updated.');
             }
 
@@ -315,11 +349,16 @@ class LeaveRequestController extends Controller
         }
 
         $this->leaveService->updateLeaveRequest($leave, $data);
+        
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'leave' => $leave->fresh()->load('employee'), 'message' => 'Leave request updated successfully.']);
+        }
+
         return redirect()->route($user->hasAnyRole(['admin', 'hr_manager']) ? 'leaves.index' : 'leaves.my')
             ->with('status', 'Leave request updated successfully.');
     }
 
-    public function destroy(int $id): RedirectResponse
+    public function destroy(int $id): \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
     {
         $user = auth()->user();
         $leave = LeaveRequest::findOrFail($id);
@@ -335,11 +374,17 @@ class LeaveRequestController extends Controller
             }
 
             if ($leave->status !== 'pending') {
+                if (request()->wantsJson()) return response()->json(['error' => 'Only pending requests can be deleted.'], 403);
                 return redirect()->back()->with('error', 'Only pending requests can be deleted.');
             }
         }
 
         $this->leaveService->deleteLeaveRequest($leave);
+        
+        if (request()->wantsJson()) {
+            return response()->json(['success' => true, 'message' => 'Leave request deleted successfully.']);
+        }
+        
         return redirect()->back()->with('status', 'Leave request deleted successfully.');
     }
 

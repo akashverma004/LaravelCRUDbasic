@@ -621,13 +621,126 @@ Alpine.data('auditManager', () => ({
     }
 }));
 
+// ── Leave Manager Component (Employee View) ─────────────────────────
+Alpine.data('leaveManager', () => ({
+    loading: true,
+    leaves: [],
+    employees: [],
+    isAdmin: false,
+    showModal: false,
+    isEditing: false,
+    editLeaveId: null,
+    form: {
+        employee_id: '',
+        leave_type: '',
+        leave_session: 'full_day',
+        start_date: '',
+        end_date: '',
+        reason: '',
+        status: 'pending'
+    },
+    toast: { show: false, message: '', type: 'success' },
+
+    async init() {
+        await this.fetchData();
+    },
+
+    async fetchData() {
+        this.loading = true;
+        try {
+            const { data } = await axios.get('/leaves/data');
+            this.leaves = data.leaves;
+            this.employees = data.employees;
+            this.isAdmin = data.isAdmin;
+        } catch (e) {
+            console.error('Failed to load leaves', e);
+        } finally {
+            this.loading = false;
+        }
+    },
+
+    openModal() {
+        this.isEditing = false;
+        this.editLeaveId = null;
+        this.form = {
+            employee_id: this.employees.length > 0 && !this.isAdmin ? this.employees[0].id : '',
+            leave_type: '',
+            leave_session: 'full_day',
+            start_date: '',
+            end_date: '',
+            reason: '',
+            status: 'pending'
+        };
+        this.showModal = true;
+    },
+
+    editLeave(leave) {
+        if (leave.status !== 'pending') return;
+        this.isEditing = true;
+        this.editLeaveId = leave.id;
+        this.form = {
+            employee_id: leave.employee_id,
+            leave_type: leave.leave_type,
+            leave_session: leave.leave_session,
+            start_date: leave.start_date.split('T')[0],
+            end_date: leave.end_date.split('T')[0],
+            reason: leave.reason,
+            status: leave.status
+        };
+        this.showModal = true;
+    },
+
+    async saveLeave() {
+        try {
+            if (this.isEditing) {
+                await axios.patch(`/leaves/${this.editLeaveId}`, this.form);
+                this.showToast('Leave request updated successfully!');
+            } else {
+                await axios.post('/leaves', this.form);
+                this.showToast('Leave request submitted successfully!');
+            }
+            this.showModal = false;
+            await this.fetchData();
+        } catch (e) {
+            this.showToast(e.response?.data?.error || 'Failed to save leave request.', 'error');
+        }
+    },
+
+    async deleteLeave(id) {
+        if (!confirm('Are you sure you want to cancel this leave request?')) return;
+        try {
+            await axios.delete(`/leaves/${id}`);
+            this.showToast('Leave request cancelled successfully!');
+            await this.fetchData();
+        } catch (e) {
+            this.showToast(e.response?.data?.error || 'Failed to cancel leave request.', 'error');
+        }
+    },
+
+    showToast(message, type = 'success') {
+        this.toast = { show: true, message, type };
+        setTimeout(() => { this.toast.show = false; }, 3000);
+    },
+
+    formatDateShort(dateStr) {
+        return new Date(dateStr).toLocaleString('en-GB', { day: '2-digit', month: 'short' });
+    },
+
+    formatDateFull(dateStr) {
+        return new Date(dateStr).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+}));
+
 // ── Asset Manager Component ──────────────────────────────────────────
 Alpine.data('assetManager', () => ({
     loading: true,
     isAdmin: false,
     assets: [],
     categories: {},
+    employees: [],
     showAddModal: false,
+    isEditing: false,
+    editAssetId: null,
     addForm: { name: '', category: 'laptop', serial_number: '', status: 'available', employee_id: '' },
     toast: { show: false, message: '', type: 'success' },
 
@@ -642,6 +755,7 @@ Alpine.data('assetManager', () => ({
             this.assets = data.assets;
             this.categories = data.categories;
             this.isAdmin = data.isAdmin;
+            this.employees = data.employees || [];
         } catch (e) {
             console.error('Failed to load assets', e);
         } finally {
@@ -649,12 +763,43 @@ Alpine.data('assetManager', () => ({
         }
     },
 
+    openAddModal() {
+        this.isEditing = false;
+        this.editAssetId = null;
+        this.addForm = { name: '', category: 'laptop', serial_number: '', status: 'available', employee_id: '' };
+        this.showAddModal = true;
+    },
+
+    editAsset(asset) {
+        this.isEditing = true;
+        this.editAssetId = asset.id;
+        this.addForm = { 
+            name: asset.name, 
+            category: asset.category, 
+            serial_number: asset.serial_number || '', 
+            status: asset.status, 
+            employee_id: asset.employee_id || '' 
+        };
+        this.showAddModal = true;
+    },
+
     async saveAsset() {
         try {
-            await axios.post('/assets', this.addForm);
+            if (this.isEditing) {
+                await axios.patch(`/assets/${this.editAssetId}`, {
+                    status: this.addForm.status,
+                    employee_id: this.addForm.employee_id || null,
+                    notes: this.addForm.notes || ''
+                });
+                this.showToast('Asset updated successfully!');
+            } else {
+                await axios.post('/assets', {
+                    ...this.addForm,
+                    employee_id: this.addForm.employee_id || null
+                });
+                this.showToast('Asset registered successfully!');
+            }
             this.showAddModal = false;
-            this.addForm = { name: '', category: 'laptop', serial_number: '', status: 'available', employee_id: '' };
-            this.showToast('Asset registered successfully!');
             await this.fetchData();
         } catch (e) {
             this.showToast('Failed to save asset.', 'error');
@@ -678,6 +823,9 @@ Alpine.data('payrollManager', () => ({
     showGenerateModal: false,
     showStructureModal: false,
     toast: { show: false, message: '', type: 'success' },
+    generating: false,
+    generateMonth: '',
+    structureForm: { employee_id: '', base_salary: '' },
 
     async init() {
         await this.fetchData();
@@ -711,6 +859,33 @@ Alpine.data('payrollManager', () => ({
         }
     },
 
+    async generatePayslips() {
+        if (!this.generateMonth) return;
+        this.generating = true;
+        try {
+            const { data } = await axios.post('/payroll/generate', { month: this.generateMonth });
+            this.showGenerateModal = false;
+            this.showToast(data.message);
+            await this.fetchData();
+        } catch (e) {
+            this.showToast('Failed to generate payslips.', 'error');
+        } finally {
+            this.generating = false;
+        }
+    },
+
+    async saveStructure() {
+        try {
+            await axios.post('/payroll/structures', this.structureForm);
+            this.showStructureModal = false;
+            this.structureForm = { employee_id: '', base_salary: '' };
+            this.showToast('Structure added!');
+            await this.fetchData();
+        } catch (e) {
+            this.showToast('Failed to add structure.', 'error');
+        }
+    },
+
     viewPayslip(ps) {
         // Logic to show detailed breakdown in a modal
         alert(`Details for ${ps.month}:\nBase: $${ps.base_salary}\nAllowances: $${ps.total_allowances}\nDeductions: $${ps.total_deductions}\nNet: $${ps.net_pay}`);
@@ -736,6 +911,7 @@ Alpine.data('shiftManager', () => ({
     showShiftModal: false,
     showAssignModal: false,
     assignForm: { employee_id: '', shift_id: '', date: '', notes: '' },
+    shiftForm: { name: '', start_time: '', end_time: '', color: '#0ea5e9' },
     toast: { show: false, message: '', type: 'success' },
 
     async init() {
@@ -797,9 +973,25 @@ Alpine.data('shiftManager', () => ({
             const { data } = await axios.post('/shifts/assign', this.assignForm);
             this.schedules.push(data.schedule);
             this.showAssignModal = false;
+            this.assignForm = { employee_id: '', shift_id: '', date: '', notes: '' };
             this.showToast('Shift assigned!');
         } catch (e) {
             this.showToast('Failed to assign shift.', 'error');
+        } finally {
+            this.toggling = false;
+        }
+    },
+
+    async saveShift() {
+        this.toggling = true;
+        try {
+            const { data } = await axios.post('/shifts/templates', this.shiftForm);
+            this.shifts.push(data.shift);
+            this.showShiftModal = false;
+            this.shiftForm = { name: '', start_time: '', end_time: '', color: '#0ea5e9' };
+            this.showToast('Shift template created!');
+        } catch (e) {
+            this.showToast('Failed to create shift template.', 'error');
         } finally {
             this.toggling = false;
         }
@@ -822,6 +1014,637 @@ Alpine.data('shiftManager', () => ({
     showToast(message, type = 'success') {
         this.toast = { show: true, message, type };
         setTimeout(() => { this.toast.show = false; }, 3000);
+    },
+}));
+
+Alpine.data('workflowInbox', (config = {}) => ({
+    dataUrl: config.dataUrl || '/workflows/data',
+    storeUrl: config.storeUrl || '/workflows',
+    templateStoreUrl: config.templateStoreUrl || '/workflows/templates',
+    templateUpdateBase: config.templateUpdateBase || '/workflows/templates',
+    templateArchiveBase: config.templateArchiveBase || '/workflows/templates',
+    showUrlBase: config.showUrlBase || '/workflows',
+    approveUrlBase: config.approveUrlBase || '/workflows',
+    cancelUrlBase: config.cancelUrlBase || '/workflows',
+    rejectUrlBase: config.rejectUrlBase || '/workflows',
+    resubmitUrlBase: config.resubmitUrlBase || '/workflows',
+    fulfillUrlBase: config.fulfillUrlBase || '/workflows',
+    loading: false,
+    saving: false,
+    savingDecision: false,
+    savingFulfill: false,
+    savingTemplate: false,
+    cancellingRequestId: null,
+    archivingTemplateId: null,
+    canCreate: true,
+    isAdmin: false,
+    attachmentFile: null,
+    attachmentName: '',
+    requests: [],
+    templates: [],
+    timeline: [],
+    detailsEntries: [],
+    fulfillmentAsset: null,
+    selectedRequest: null,
+    availableAssets: [],
+    decisionMode: 'approve',
+    decisionComment: '',
+    decisionError: '',
+    fulfillError: '',
+    templateErrors: [],
+    formErrors: [],
+    formMode: 'create',
+    editingWorkflowId: null,
+    summary: {
+        pending: 0,
+        approved: 0,
+        fulfilled: 0,
+        rejected: 0,
+        awaiting_my_approval: 0,
+    },
+    filters: {
+        q: '',
+        scope: 'all',
+        status: 'all',
+        type: 'all',
+    },
+    form: {
+        type: 'reimbursement',
+        workflow_template_id: '',
+        title: '',
+        description: '',
+        amount: '',
+        details: {
+            category: '',
+            expense_date: '',
+            merchant: '',
+            receipt_reference: '',
+            notes: '',
+            asset_category: '',
+            urgency: '',
+            needed_by: '',
+            preferred_model: '',
+            business_reason: '',
+            field_name: '',
+            current_value: '',
+            requested_value: '',
+            effective_from: '',
+            reason: '',
+            change_type: '',
+            requested_salary: '',
+            justification: '',
+            last_working_day: '',
+            exit_type: '',
+            handover_owner: '',
+        },
+    },
+    templateForm: {
+        id: null,
+        type: 'reimbursement',
+        name: '',
+        description: '',
+        default_title: '',
+        default_description: '',
+        approval_steps: [
+            { role: 'manager', label: 'Manager Review' },
+            { role: 'hr_manager', label: 'HR Approval' },
+        ],
+        is_active: true,
+    },
+    fulfillForm: {
+        asset_id: '',
+        comment: '',
+    },
+    modals: {
+        create: false,
+        decision: false,
+        timeline: false,
+        fulfill: false,
+        templates: false,
+    },
+    toast: { show: false, message: '', type: 'success' },
+    summaryCards: [
+        { key: 'pending', label: 'Pending', hint: 'Open', tone: 'bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300' },
+        { key: 'awaiting_my_approval', label: 'Awaiting Me', hint: 'Action', tone: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-500/10 dark:text-cyan-300' },
+        { key: 'approved', label: 'Approved', hint: 'Done', tone: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300' },
+        { key: 'fulfilled', label: 'Fulfilled', hint: 'Closed', tone: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-500/10 dark:text-cyan-300' },
+        { key: 'rejected', label: 'Rejected', hint: 'Closed', tone: 'bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-300' },
+    ],
+
+    async init() {
+        await this.fetchRequests();
+        this.handleDeepLink();
+    },
+
+    async fetchRequests() {
+        this.loading = true;
+        try {
+            const { data } = await axios.get(this.dataUrl, { params: this.filters });
+            this.requests = data.requests || [];
+            this.summary = data.summary || this.summary;
+            this.canCreate = data.canCreate !== false;
+            this.availableAssets = data.availableAssets || [];
+            this.templates = data.templates || [];
+            this.isAdmin = data.isAdmin === true;
+        } catch (error) {
+            this.showToast(error.response?.data?.message || 'Failed to load workflows.', 'error');
+        } finally {
+            this.loading = false;
+        }
+    },
+
+    openCreateModal() {
+        this.resetCreateForm();
+        this.attachmentFile = null;
+        this.attachmentName = '';
+        this.formErrors = [];
+        this.formMode = 'create';
+        this.editingWorkflowId = null;
+        this.modals.create = true;
+    },
+
+    resetCreateForm() {
+        this.form = {
+            type: 'reimbursement',
+            workflow_template_id: '',
+            title: '',
+            description: '',
+            amount: '',
+            details: this.emptyDetails(),
+        };
+    },
+
+    openDecisionModal(item, mode) {
+        this.selectedRequest = item;
+        this.decisionMode = mode;
+        this.decisionComment = '';
+        this.decisionError = '';
+        this.modals.decision = true;
+    },
+
+    openTemplateModal() {
+        this.resetTemplateForm();
+        this.templateErrors = [];
+        this.modals.templates = true;
+    },
+
+    openFulfillModal(item) {
+        this.selectedRequest = item;
+        this.fulfillForm = {
+            asset_id: '',
+            comment: '',
+        };
+        this.fulfillError = '';
+        this.modals.fulfill = true;
+    },
+
+    async openTimeline(id) {
+        try {
+            const { data } = await axios.get(`${this.showUrlBase}/${id}`);
+            this.selectedRequest = data.request;
+            this.timeline = data.request.timeline || [];
+            this.fulfillmentAsset = data.request.fulfilled_asset || null;
+            const hiddenDetailKeys = ['fulfilled_asset_id', 'fulfilled_asset_name', 'fulfillment_note', 'fulfilled_at'];
+            this.detailsEntries = Object.entries(data.request.details || {})
+                .filter(([key]) => !hiddenDetailKeys.includes(key))
+                .map(([key, value]) => ({
+                key: key.replace(/_/g, ' '),
+                value: Array.isArray(value) ? value.join(', ') : (typeof value === 'object' && value !== null ? JSON.stringify(value) : String(value)),
+                }));
+            this.modals.timeline = true;
+        } catch (error) {
+            this.showToast(error.response?.data?.message || 'Failed to load timeline.', 'error');
+        }
+    },
+
+    closeModal(key) {
+        this.modals[key] = false;
+        if (key === 'decision') {
+            this.decisionComment = '';
+            this.decisionError = '';
+        }
+        if (key === 'timeline') {
+            this.timeline = [];
+            this.detailsEntries = [];
+            this.fulfillmentAsset = null;
+        }
+        if (key === 'fulfill') {
+            this.fulfillForm = {
+                asset_id: '',
+                comment: '',
+            };
+            this.fulfillError = '';
+        }
+        if (key === 'templates') {
+            this.templateErrors = [];
+        }
+        if (key === 'create') {
+            this.formMode = 'create';
+            this.editingWorkflowId = null;
+        }
+    },
+
+    handleAttachment(event) {
+        const [file] = event.target.files || [];
+        this.attachmentFile = file || null;
+        this.attachmentName = file ? file.name : '';
+    },
+
+    handleTypeChange() {
+        this.form.workflow_template_id = '';
+        this.form.amount = this.form.type === 'reimbursement' ? this.form.amount : '';
+        this.form.details = this.emptyDetails();
+    },
+
+    filteredTemplates() {
+        return this.templates.filter(template => template.type === this.form.type && template.is_active);
+    },
+
+    applySelectedTemplate() {
+        const template = this.templates.find(item => String(item.id) === String(this.form.workflow_template_id));
+        if (!template) {
+            return;
+        }
+
+        if (template.type !== this.form.type) {
+            this.form.workflow_template_id = '';
+            return;
+        }
+
+        if (!this.form.title && template.default_title) {
+            this.form.title = template.default_title;
+        }
+
+        if (!this.form.description && template.default_description) {
+            this.form.description = template.default_description;
+        }
+    },
+
+    async submitRequest() {
+        this.saving = true;
+        this.formErrors = [];
+        try {
+            const payload = new FormData();
+            payload.append('type', this.form.type);
+            if (this.form.workflow_template_id) payload.append('workflow_template_id', this.form.workflow_template_id);
+            payload.append('title', this.form.title);
+            if (this.form.description) payload.append('description', this.form.description);
+            if (this.form.amount !== '') payload.append('amount', this.form.amount);
+
+            Object.entries(this.normalizedDetails()).forEach(([key, value]) => {
+                payload.append(`details[${key}]`, value);
+            });
+
+            if (this.attachmentFile) {
+                payload.append('attachment', this.attachmentFile);
+            }
+
+            const endpoint = this.formMode === 'resubmit' && this.editingWorkflowId
+                ? `${this.resubmitUrlBase}/${this.editingWorkflowId}/resubmit`
+                : this.storeUrl;
+
+            const { data } = await axios.post(endpoint, payload, {
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'multipart/form-data',
+                }
+            });
+
+            this.requests.unshift(data.request);
+            this.closeModal('create');
+            this.showToast(data.message || 'Request submitted.', 'success');
+            await this.fetchRequests();
+        } catch (error) {
+            this.formErrors = this.extractErrors(error, 'Failed to submit request.');
+        } finally {
+            this.saving = false;
+        }
+    },
+
+    async submitDecision() {
+        this.savingDecision = true;
+        this.decisionError = '';
+        try {
+            if (this.decisionMode === 'reject' && !this.decisionComment.trim()) {
+                this.decisionError = 'Rejection reason is required.';
+                this.savingDecision = false;
+                return;
+            }
+
+            const base = this.decisionMode === 'approve' ? this.approveUrlBase : this.rejectUrlBase;
+            const endpoint = `${base}/${this.selectedRequest.id}/${this.decisionMode}`;
+            const payload = { comment: this.decisionComment || null };
+            const { data } = await axios.post(endpoint, payload, {
+                headers: { Accept: 'application/json' }
+            });
+
+            const index = this.requests.findIndex(item => item.id === data.request.id);
+            if (index !== -1) {
+                this.requests.splice(index, 1, data.request);
+            }
+
+            this.closeModal('decision');
+            this.showToast(data.message || 'Decision saved.', 'success');
+            await this.fetchRequests();
+        } catch (error) {
+            this.decisionError = this.extractErrors(error, 'Failed to save decision.').join(' ');
+        } finally {
+            this.savingDecision = false;
+        }
+    },
+
+    async submitFulfill() {
+        this.savingFulfill = true;
+        this.fulfillError = '';
+
+        try {
+            if (!this.fulfillForm.asset_id) {
+                this.fulfillError = 'Select an available asset to continue.';
+                this.savingFulfill = false;
+                return;
+            }
+
+            const endpoint = `${this.fulfillUrlBase}/${this.selectedRequest.id}/fulfill-asset`;
+            const payload = {
+                asset_id: this.fulfillForm.asset_id,
+                comment: this.fulfillForm.comment || null,
+            };
+
+            const { data } = await axios.post(endpoint, payload, {
+                headers: { Accept: 'application/json' }
+            });
+
+            const index = this.requests.findIndex(item => item.id === data.request.id);
+            if (index !== -1) {
+                this.requests.splice(index, 1, data.request);
+            }
+
+            this.closeModal('fulfill');
+            this.showToast(data.message || 'Asset request fulfilled.', 'success');
+            await this.fetchRequests();
+        } catch (error) {
+            this.fulfillError = this.extractErrors(error, 'Failed to fulfill asset request.').join(' ');
+        } finally {
+            this.savingFulfill = false;
+        }
+    },
+
+    async cancelRequest(item) {
+        this.cancellingRequestId = item.id;
+        try {
+            const { data } = await axios.post(`${this.cancelUrlBase}/${item.id}/cancel`, {}, {
+                headers: { Accept: 'application/json' }
+            });
+
+            const index = this.requests.findIndex(request => request.id === data.request.id);
+            if (index !== -1) {
+                this.requests.splice(index, 1, data.request);
+            }
+
+            this.showToast(data.message || 'Request cancelled.', 'success');
+            await this.fetchRequests();
+        } catch (error) {
+            this.showToast(this.extractErrors(error, 'Failed to cancel request.').join(' '), 'error');
+        } finally {
+            this.cancellingRequestId = null;
+        }
+    },
+
+    async openResubmitModal(id) {
+        try {
+            const { data } = await axios.get(`${this.showUrlBase}/${id}`);
+            const request = data.request;
+            this.resetCreateForm();
+            this.formMode = 'resubmit';
+            this.editingWorkflowId = request.id;
+            this.form.type = request.type;
+            this.form.workflow_template_id = request.template_id ? String(request.template_id) : '';
+            this.form.title = request.title || '';
+            this.form.description = request.description || '';
+            this.form.amount = request.amount_value ?? '';
+            this.form.details = { ...this.emptyDetails(), ...(request.details || {}) };
+            this.attachmentFile = null;
+            this.attachmentName = request.attachment?.name || '';
+            this.formErrors = [];
+            this.modals.create = true;
+        } catch (error) {
+            this.showToast(this.extractErrors(error, 'Failed to open resubmit form.').join(' '), 'error');
+        }
+    },
+
+    resetTemplateForm() {
+        this.templateForm = {
+            id: null,
+            type: 'reimbursement',
+            name: '',
+            description: '',
+            default_title: '',
+            default_description: '',
+            approval_steps: [
+                { role: 'manager', label: 'Manager Review' },
+                { role: 'hr_manager', label: 'HR Approval' },
+            ],
+            is_active: true,
+        };
+    },
+
+    editTemplate(template) {
+        this.templateForm = {
+            id: template.id,
+            type: template.type,
+            name: template.name || '',
+            description: template.description || '',
+            default_title: template.default_title || '',
+            default_description: template.default_description || '',
+            approval_steps: (template.approval_steps || []).length
+                ? template.approval_steps.map(step => ({ role: step.role || 'manager', label: step.label || '' }))
+                : [{ role: 'manager', label: 'Manager Review' }],
+            is_active: template.is_active === true,
+        };
+        this.templateErrors = [];
+        this.modals.templates = true;
+    },
+
+    addTemplateStep() {
+        this.templateForm.approval_steps.push({ role: 'manager', label: '' });
+    },
+
+    removeTemplateStep(index) {
+        this.templateForm.approval_steps.splice(index, 1);
+        if (!this.templateForm.approval_steps.length) {
+            this.addTemplateStep();
+        }
+    },
+
+    async submitTemplate() {
+        this.savingTemplate = true;
+        this.templateErrors = [];
+
+        try {
+            const payload = {
+                type: this.templateForm.type,
+                name: this.templateForm.name,
+                description: this.templateForm.description || null,
+                default_title: this.templateForm.default_title || null,
+                default_description: this.templateForm.default_description || null,
+                approval_steps: this.templateForm.approval_steps,
+                is_active: this.templateForm.is_active ? 1 : 0,
+            };
+
+            const endpoint = this.templateForm.id
+                ? `${this.templateUpdateBase}/${this.templateForm.id}`
+                : this.templateStoreUrl;
+
+            const method = this.templateForm.id ? 'patch' : 'post';
+            const { data } = await axios[method](endpoint, payload, {
+                headers: { Accept: 'application/json' }
+            });
+
+            const index = this.templates.findIndex(item => item.id === data.template.id);
+            if (index === -1) {
+                this.templates.unshift(data.template);
+            } else {
+                this.templates.splice(index, 1, data.template);
+            }
+
+            this.showToast(data.message || 'Template saved.', 'success');
+            this.resetTemplateForm();
+            await this.fetchRequests();
+        } catch (error) {
+            this.templateErrors = this.extractErrors(error, 'Failed to save template.');
+        } finally {
+            this.savingTemplate = false;
+        }
+    },
+
+    async archiveTemplate(template) {
+        this.archivingTemplateId = template.id;
+        try {
+            const { data } = await axios.post(`${this.templateArchiveBase}/${template.id}/archive`, {}, {
+                headers: { Accept: 'application/json' }
+            });
+
+            const index = this.templates.findIndex(item => item.id === data.template.id);
+            if (index !== -1) {
+                this.templates.splice(index, 1, data.template);
+            }
+
+            this.showToast(data.message || 'Template archived.', 'success');
+            await this.fetchRequests();
+        } catch (error) {
+            this.templateErrors = this.extractErrors(error, 'Failed to archive template.');
+        } finally {
+            this.archivingTemplateId = null;
+        }
+    },
+
+    handleDeepLink() {
+        const params = new URLSearchParams(window.location.search);
+        const workflowId = params.get('workflow');
+        const modal = params.get('modal');
+        const action = params.get('action');
+
+        if (!workflowId) {
+            return;
+        }
+
+        if (modal === 'timeline') {
+            this.openTimeline(workflowId);
+        } else if (action === 'resubmit') {
+            this.openResubmitModal(workflowId);
+        }
+
+        params.delete('workflow');
+        params.delete('modal');
+        params.delete('action');
+        const nextQuery = params.toString();
+        const nextUrl = `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ''}`;
+        window.history.replaceState({}, '', nextUrl);
+    },
+
+    assetOptionLabel(asset) {
+        const parts = [asset.name];
+        if (asset.category) {
+            parts.push(asset.category.replace(/-/g, ' '));
+        }
+        if (asset.serial_number) {
+            parts.push(asset.serial_number);
+        }
+
+        return parts.join(' - ');
+    },
+
+    emptyDetails() {
+        return {
+            category: '',
+            expense_date: '',
+            merchant: '',
+            receipt_reference: '',
+            notes: '',
+            asset_category: '',
+            urgency: '',
+            needed_by: '',
+            preferred_model: '',
+            business_reason: '',
+            field_name: '',
+            current_value: '',
+            requested_value: '',
+            effective_from: '',
+            reason: '',
+            change_type: '',
+            requested_salary: '',
+            justification: '',
+            last_working_day: '',
+            exit_type: '',
+            handover_owner: '',
+        };
+    },
+
+    statusTone(status) {
+        const tones = {
+            pending: 'bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300',
+            approved: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300',
+            fulfilled: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-500/10 dark:text-cyan-300',
+            cancelled: 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-300',
+            rejected: 'bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-300',
+        };
+
+        return tones[status] || 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300';
+    },
+
+    decisionTone(decision) {
+        const tones = {
+            pending: 'bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300',
+            approved: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300',
+            rejected: 'bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-300',
+            cancelled: 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-300',
+        };
+
+        return tones[decision] || 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300';
+    },
+
+    extractErrors(error, fallback) {
+        if (error.response?.status === 422 && error.response.data?.errors) {
+            return Object.values(error.response.data.errors).flat();
+        }
+
+        return [error.response?.data?.message || fallback];
+    },
+
+    normalizedDetails() {
+        const details = this.form.details || {};
+
+        return Object.fromEntries(
+            Object.entries(details).filter(([, value]) => value !== null && value !== '')
+        );
+    },
+
+    showToast(message, type = 'success') {
+        this.toast = { show: true, message, type };
+        clearTimeout(this.toastTimeout);
+        this.toastTimeout = setTimeout(() => {
+            this.toast.show = false;
+        }, 3000);
     },
 }));
 

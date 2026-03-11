@@ -127,5 +127,35 @@
             </div>
         </div>
     </div>
+    {{-- Add Shift Template Modal --}}
+    <div x-show="showShiftModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm" style="display: none;">
+        <div @click.away="showShiftModal = false" class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-md p-8 shadow-2xl">
+            <h3 class="text-xl font-bold mb-6 text-slate-900 dark:text-white">Create Shift Template</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Shift Name</label>
+                    <input type="text" x-model="shiftForm.name" placeholder="e.g. Morning Shift" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-white">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Start Time</label>
+                        <input type="time" x-model="shiftForm.start_time" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">End Time</label>
+                        <input type="time" x-model="shiftForm.end_time" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-white">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Color Label</label>
+                    <input type="color" x-model="shiftForm.color" class="w-full h-12 rounded-xl border border-slate-200 bg-slate-50 px-4 py-1 text-sm dark:border-slate-700 dark:bg-slate-900">
+                </div>
+            </div>
+            <div class="mt-8 flex gap-3">
+                <button @click="saveShift()" :disabled="!shiftForm.name || !shiftForm.start_time || !shiftForm.end_time || toggling" class="flex-1 rounded-xl bg-cyan-500 py-3 text-sm font-bold text-white hover:bg-cyan-600 disabled:opacity-50">Create</button>
+                <button @click="showShiftModal = false" class="flex-1 rounded-xl border border-slate-200 py-3 text-sm font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700/50">Cancel</button>
+            </div>
+        </div>
+    </div>
 </div>
 @endsection

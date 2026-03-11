@@ -1,0 +1,4 @@
+interface:
+  display_name: "PeopleFlow HRMS"
+  short_description: "Laravel HRMS app context and workflow map"
+  default_prompt: "Use $peopleflow-hrms to make a safe change in this Laravel multi-tenant HRMS app."

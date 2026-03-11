@@ -12,7 +12,7 @@
             <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Track company equipment, serial numbers, and employee assignments.</p>
         </div>
         <template x-if="isAdmin">
-            <button @click="showAddModal = true" class="inline-flex items-center gap-1.5 rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-600 transition-colors shadow-sm">
+            <button @click="openAddModal()" class="inline-flex items-center gap-1.5 rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-600 transition-colors shadow-sm">
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
                 Register Asset
             </button>
@@ -69,41 +69,64 @@
         </template>
     </div>
 
-    {{-- Add Modal (Admin Only) --}}
+    {{-- Add/Edit Modal (Admin Only) --}}
     <div x-show="showAddModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm" style="display: none;">
         <div @click.away="showAddModal = false" class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-md p-8 shadow-2xl">
-            <h3 class="text-xl font-bold mb-6">Register New Asset</h3>
+            <h3 class="text-xl font-bold mb-6 text-slate-900 dark:text-white" x-text="isEditing ? 'Update Asset' : 'Register New Asset'"></h3>
             <div class="space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Asset Name</label>
-                    <input type="text" x-model="addForm.name" placeholder="e.g. MacBook Pro M3" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 dark:border-slate-700 dark:bg-slate-900">
-                </div>
-                <div class="grid grid-cols-2 gap-4">
+                <template x-if="!isEditing">
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Category</label>
-                        <select x-model="addForm.category" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm dark:border-slate-700 dark:bg-slate-900">
-                            <template x-for="[key, label] in Object.entries(categories)" :key="key">
-                                <option :value="key" x-text="label"></option>
-                            </template>
-                        </select>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Asset Name</label>
+                        <input type="text" x-model="addForm.name" placeholder="e.g. MacBook Pro M3" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white">
                     </div>
+                </template>
+                <template x-if="isEditing">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Asset Name</label>
+                        <input type="text" x-model="addForm.name" disabled class="w-full rounded-xl border border-slate-200 bg-slate-100 px-4 py-3 text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
+                    </div>
+                </template>
+                <div class="grid grid-cols-2 gap-4">
+                    <template x-if="!isEditing">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Category</label>
+                            <select x-model="addForm.category" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-white">
+                                <template x-for="[key, label] in Object.entries(categories)" :key="key">
+                                    <option :value="key" x-text="label"></option>
+                                </template>
+                            </select>
+                        </div>
+                    </template>
                     <div>
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Status</label>
-                        <select x-model="addForm.status" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm dark:border-slate-700 dark:bg-slate-900">
+                        <select x-model="addForm.status" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-white">
                             <option value="available">Available</option>
                             <option value="assigned">Assigned</option>
                             <option value="damaged">Damaged</option>
+                            <option value="lost">Lost</option>
+                            <option value="retired">Retired</option>
                         </select>
                     </div>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Serial Number</label>
-                    <input type="text" x-model="addForm.serial_number" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 dark:border-slate-700 dark:bg-slate-900">
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Assign To Employee</label>
+                    <select x-model="addForm.employee_id" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-white">
+                        <option value="">-- Unassigned --</option>
+                        <template x-for="emp in employees" :key="emp.id">
+                            <option :value="emp.id" x-text="emp.full_name"></option>
+                        </template>
+                    </select>
                 </div>
+                <template x-if="!isEditing">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Serial Number</label>
+                        <input type="text" x-model="addForm.serial_number" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white">
+                    </div>
+                </template>
             </div>
             <div class="mt-8 flex gap-3">
-                <button @click="saveAsset()" class="flex-1 rounded-xl bg-cyan-500 py-3 text-sm font-bold text-white hover:bg-cyan-600">Save Asset</button>
-                <button @click="showAddModal = false" class="flex-1 rounded-xl border border-slate-200 py-3 text-sm font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700">Cancel</button>
+                <button @click="saveAsset()" class="flex-1 rounded-xl bg-cyan-500 py-3 text-sm font-bold text-white hover:bg-cyan-600" x-text="isEditing ? 'Update Status' : 'Save Asset'"></button>
+                <button @click="showAddModal = false" class="flex-1 rounded-xl border border-slate-200 py-3 text-sm font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700">Cancel</button>
             </div>
         </div>
     </div>

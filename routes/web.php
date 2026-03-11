@@ -93,6 +93,7 @@ Route::middleware(['auth', 'must.change.password', 'tenant', 'tenant.active', 't
         // Public (All Employees)
         Route::get('/', [LeaveRequestController::class, 'index'])->name('leaves.index');
         Route::get('/my', [LeaveRequestController::class, 'my'])->name('leaves.my');
+        Route::get('/data', [LeaveRequestController::class, 'data'])->name('leaves.data');
         Route::get('/create', [LeaveRequestController::class, 'create'])->name('leaves.create');
         Route::post('/', [LeaveRequestController::class, 'store'])->name('leaves.store');
         Route::get('/events', [LeaveRequestController::class, 'events'])->name('leaves.events');

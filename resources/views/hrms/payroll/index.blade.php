@@ -128,7 +128,55 @@
         </div>
     </div>
 
-    {{-- MODALS (Generate Payslips, Add Structure, View Details) --}}
-    {{-- ... Simplified for now ... --}}
+    {{-- Generate Payslips Modal --}}
+    <div x-show="showGenerateModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm" style="display: none;">
+        <div @click.away="showGenerateModal = false" class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-sm p-8 shadow-2xl">
+            <h3 class="text-xl font-bold mb-6 text-slate-900 dark:text-white">Generate Payslips</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Month (YYYY-MM)</label>
+                    <input type="month" x-model="generateMonth" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-white">
+                </div>
+            </div>
+            <div class="mt-8 flex gap-3">
+                <button @click="generatePayslips()" :disabled="!generateMonth || generating" class="flex-1 rounded-xl bg-cyan-500 py-3 text-sm font-bold text-white hover:bg-cyan-600 disabled:opacity-50">
+                    <span x-show="!generating">Generate</span>
+                    <span x-show="generating">Generating...</span>
+                </button>
+                <button @click="showGenerateModal = false" class="flex-1 rounded-xl border border-slate-200 py-3 text-sm font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700/50">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    {{-- Add Structure Modal --}}
+    <div x-show="showStructureModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm overflow-y-auto" style="display: none;">
+        <div @click.away="showStructureModal = false" class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-lg p-8 shadow-2xl my-8">
+            <h3 class="text-xl font-bold mb-6 text-slate-900 dark:text-white">Add Salary Structure</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Employee</label>
+                    <select x-model="structureForm.employee_id" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-white">
+                        <option value="">Select Employee</option>
+                        <template x-for="emp in availableEmployees" :key="emp.id">
+                            <option :value="emp.id" x-text="emp.full_name"></option>
+                        </template>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Base Salary</label>
+                    <input type="number" step="0.01" x-model="structureForm.base_salary" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-white">
+                </div>
+                
+                {{-- Example default allowance --}}
+                <div class="p-4 rounded-xl bg-cyan-50 dark:bg-cyan-900/20 border border-cyan-100 dark:border-cyan-800">
+                    <p class="text-sm text-cyan-700 dark:text-cyan-400">Basic allowances and deductions will be set as an empty array for this snippet.</p>
+                </div>
+            </div>
+            <div class="mt-8 flex gap-3">
+                <button @click="saveStructure()" :disabled="!structureForm.employee_id || !structureForm.base_salary" class="flex-1 rounded-xl bg-cyan-500 py-3 text-sm font-bold text-white hover:bg-cyan-600 disabled:opacity-50">Save</button>
+                <button @click="showStructureModal = false" class="flex-1 rounded-xl border border-slate-200 py-3 text-sm font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700/50">Cancel</button>
+            </div>
+        </div>
+    </div>
 </div>
 @endsection

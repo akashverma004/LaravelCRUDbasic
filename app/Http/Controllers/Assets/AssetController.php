@@ -34,10 +34,16 @@ class AssetController extends Controller
             ->orderByDesc('created_at')
             ->get();
 
+        $employees = [];
+        if ($user->hasAnyRole(['admin', 'hr_manager'])) {
+            $employees = Employee::where('tenant_id', $tenantId)->get(['id', 'full_name']);
+        }
+
         return response()->json([
             'assets' => $assets,
             'categories' => Asset::categories(),
-            'isAdmin' => $user->hasAnyRole(['admin', 'hr_manager'])
+            'isAdmin' => $user->hasAnyRole(['admin', 'hr_manager']),
+            'employees' => $employees,
         ]);
     }
 
