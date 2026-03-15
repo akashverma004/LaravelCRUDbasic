@@ -91,25 +91,57 @@ class PayrollController extends Controller
             
             if ($exists) continue;
 
+            // Calculate unpaid leave deductions
+            $periodStart = $date->copy()->startOfMonth();
+            $periodEnd = $date->copy()->endOfMonth();
+            
+            $unpaidLeaves = \App\Models\LeaveRequest::where('employee_id', $struct->employee_id)
+                ->where('status', 'approved')
+                ->where('leave_type', 'unpaid')
+                ->where(function ($q) use ($periodStart, $periodEnd) {
+                    $q->whereBetween('start_date', [$periodStart, $periodEnd])
+                      ->orWhereBetween('end_date', [$periodStart, $periodEnd]);
+                })->get();
+
+            $unpaidDays = 0;
+            foreach ($unpaidLeaves as $leave) {
+                $start = Carbon::parse($leave->start_date)->max($periodStart);
+                $end = Carbon::parse($leave->end_date)->min($periodEnd);
+                $unpaidDays += $start->diffInDays($end) + 1;
+            }
+
+            $dailyRate = $struct->base_salary / 30; // Assuming 30-day month for standard calc
+            $unpaidDeduction = round($unpaidDays * $dailyRate, 2);
+
             $totalAllowances = collect($struct->allowances)->sum('amount');
-            $totalDeductions = collect($struct->deductions)->sum('amount');
+            $totalDeductions = collect($struct->deductions)->sum('amount') + $unpaidDeduction;
+            
             $netPay = $struct->base_salary + $totalAllowances - $totalDeductions;
+
+            $details = [
+                'allowances' => $struct->allowances,
+                'deductions' => $struct->deductions
+            ];
+
+            if ($unpaidDeduction > 0) {
+                $details['unpaid_leave_deduction'] = [
+                    'days' => $unpaidDays,
+                    'amount' => $unpaidDeduction
+                ];
+            }
 
             Payslip::create([
                 'tenant_id' => $tenantId,
                 'employee_id' => $struct->employee_id,
                 'month' => $monthLabel,
-                'period_start' => $date->copy()->startOfMonth(),
-                'period_end' => $date->copy()->endOfMonth(),
+                'period_start' => $periodStart,
+                'period_end' => $periodEnd,
                 'base_salary' => $struct->base_salary,
                 'total_allowances' => $totalAllowances,
                 'total_deductions' => $totalDeductions,
                 'net_pay' => $netPay,
                 'status' => 'draft',
-                'details' => [
-                    'allowances' => $struct->allowances,
-                    'deductions' => $struct->deductions
-                ]
+                'details' => $details
             ]);
             $count++;
         }

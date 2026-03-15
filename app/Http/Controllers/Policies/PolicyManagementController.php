@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Policies;
 use App\Http\Controllers\Controller;
 
 use App\Support\PolicyDefinitions;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -66,7 +67,7 @@ class PolicyManagementController extends Controller
         ]);
     }
 
-    public function update(Request $request, string $type): RedirectResponse
+    public function update(Request $request, string $type): RedirectResponse|JsonResponse
     {
         $definition  = PolicyDefinitions::resolve($type);
         $modelClass  = $definition['model'];
@@ -95,6 +96,13 @@ class PolicyManagementController extends Controller
             $modelClass::query()->create($payload);
         } else {
             $policy->update($payload);
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $definition['title'] . ' updated successfully.',
+            ]);
         }
 
         return redirect()

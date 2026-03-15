@@ -16,6 +16,13 @@ use App\Http\Controllers\UserRoleController;
 use App\Http\Controllers\TenantManagementController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ForcePasswordChangeController;
+use App\Http\Controllers\PublicController;
+
+// Public Marketing Routes
+Route::get('/features', [PublicController::class, 'features'])->name('public.features');
+Route::get('/solutions', [PublicController::class, 'solutions'])->name('public.solutions');
+Route::get('/pricing', [PublicController::class, 'pricing'])->name('public.pricing');
+Route::get('/docs', [PublicController::class, 'docs'])->name('public.docs');
 
 // Password force change routes
 Route::middleware(['auth'])->group(function () {
@@ -53,6 +60,7 @@ Route::middleware(['auth', 'must.change.password', 'tenant', 'tenant.active', 't
     Route::prefix('departments')->group(function () {
         // Public (All Employees)
         Route::get('/', [DepartmentController::class, 'index'])->name('departments.index');
+        Route::get('/data', [DepartmentController::class, 'data'])->name('departments.data');
         Route::get('/{id}', [DepartmentController::class, 'show'])->name('departments.show')->where('id', '[0-9]+');
 
         // Protected (Admin/HR only)
@@ -69,6 +77,7 @@ Route::middleware(['auth', 'must.change.password', 'tenant', 'tenant.active', 't
     Route::prefix('employees')->group(function () {
         // Public (All Employees)
         Route::get('/', [EmployeeController::class, 'index'])->name('employees.index');
+        Route::get('/data', [EmployeeController::class, 'data'])->name('employees.data');
         Route::get('/search', [EmployeeController::class, 'search'])->name('employees.search');
         Route::get('/{id}', [EmployeeController::class, 'show'])->name('employees.show')->where('id', '[0-9]+');
 
@@ -88,6 +97,7 @@ Route::middleware(['auth', 'must.change.password', 'tenant', 'tenant.active', 't
         // Protected (Admin/HR only)
         Route::middleware('role:admin,hr_manager')->group(function () {
             Route::get('/pending', [LeaveRequestController::class, 'pending'])->name('leaves.pending');
+            Route::get('/pending/data', [LeaveRequestController::class, 'pendingData'])->name('leaves.pending.data');
         });
 
         // Public (All Employees)
@@ -157,6 +167,7 @@ Route::middleware(['auth', 'must.change.password', 'tenant', 'tenant.active', 't
     // Tenant users and invitations
     Route::prefix('tenant-users')->middleware('role:admin,hr_manager')->group(function () {
         Route::get('/', [TenantUserController::class, 'index'])->name('tenant-users.index');
+        Route::get('/data', [TenantUserController::class, 'data'])->name('tenant-users.data');
         Route::post('/create', [TenantUserController::class, 'store'])->name('tenant-users.store');
         Route::post('/invite', [TenantUserController::class, 'invite'])->name('tenant-users.invite');
     });
@@ -164,6 +175,7 @@ Route::middleware(['auth', 'must.change.password', 'tenant', 'tenant.active', 't
 
 Route::middleware(['auth', 'can:manage-tenants'])->prefix('platform/tenants')->group(function () {
     Route::get('/', [TenantManagementController::class, 'index'])->name('tenants.index');
+    Route::get('/data', [TenantManagementController::class, 'data'])->name('tenants.data');
     Route::get('/create', [TenantManagementController::class, 'create'])->name('tenants.create');
     Route::post('/', [TenantManagementController::class, 'store'])->name('tenants.store');
     Route::get('/{tenant}/edit', [TenantManagementController::class, 'edit'])->name('tenants.edit');

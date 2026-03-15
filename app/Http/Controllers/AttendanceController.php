@@ -40,7 +40,13 @@ class AttendanceController extends Controller
 
         $record->refresh()->updateCalculatedSeconds();
 
-        return back()->with('success', 'Punched in successfully at ' . now()->format('H:i'));
+        $message = 'Punched in successfully at ' . now()->format('H:i');
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => $message]);
+        }
+
+        return back()->with('success', $message);
     }
 
     public function pause(Request $request)
@@ -55,6 +61,9 @@ class AttendanceController extends Controller
             ->firstOrFail();
 
         if ($record->status !== 'clocked_in') {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'You are not currenty clocked in.'], 422);
+            }
             return back()->with('error', 'You are not currenty clocked in.');
         }
 
@@ -77,7 +86,13 @@ class AttendanceController extends Controller
         
         $record->refresh()->updateCalculatedSeconds();
 
-        return back()->with('success', 'Paused work for ' . ucfirst($type) . ' at ' . now()->format('H:i'));
+        $message = 'Paused work for ' . ucfirst($type) . ' at ' . now()->format('H:i');
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => $message]);
+        }
+
+        return back()->with('success', $message);
     }
 
     public function resume(Request $request)
@@ -91,6 +106,9 @@ class AttendanceController extends Controller
             ->firstOrFail();
 
         if (strpos($record->status, 'on_') !== 0) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'You are not on a break.'], 422);
+            }
             return back()->with('error', 'You are not on a break.');
         }
 
@@ -113,7 +131,13 @@ class AttendanceController extends Controller
 
         $record->refresh()->updateCalculatedSeconds();
 
-        return back()->with('success', 'Resumed work at ' . now()->format('H:i'));
+        $message = 'Resumed work at ' . now()->format('H:i');
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => $message]);
+        }
+
+        return back()->with('success', $message);
     }
 
     public function punchOut(Request $request)
@@ -144,7 +168,17 @@ class AttendanceController extends Controller
             
             $record->refresh()->updateCalculatedSeconds();
             
-            return back()->with('success', 'Shift marked as completed at ' . now()->format('H:i'));
+            $message = 'Shift marked as completed at ' . now()->format('H:i');
+
+            if ($request->expectsJson()) {
+                return response()->json(['success' => true, 'message' => $message]);
+            }
+
+            return back()->with('success', $message);
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Could not complete shift.'], 422);
         }
 
         return back()->with('error', 'Could not complete shift.');

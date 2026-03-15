@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Policies;
 use App\Http\Controllers\Controller;
 
 use App\Services\Policies\LeavePolicyService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -33,7 +34,7 @@ class LeavePolicyController extends Controller
         return view('hrms.policies.leave', compact('policy'));
     }
 
-    public function update(Request $request): RedirectResponse
+    public function update(Request $request): RedirectResponse|JsonResponse
     {
         $validated = $request->validate([
             'annual_limit' => ['required', 'integer', 'min:0', 'max:365'],
@@ -51,6 +52,13 @@ class LeavePolicyController extends Controller
             ], auth()->id());
         } else {
             $this->leavePolicyService->update($policy->id, $validated, auth()->id());
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Global leave policy updated.',
+            ]);
         }
 
         return redirect()->route('policies.leave.edit')->with('status', 'Global leave policy updated.');

@@ -8,8 +8,14 @@
     <p class="text-slate-600 dark:text-slate-400">Set global leave limits for all employees</p>
 </div>
 
-<div class="max-w-2xl rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
-    <form method="POST" action="{{ route('policies.leave.update') }}" class="grid gap-4 md:grid-cols-2">
+<div x-data="asyncForm()" class="max-w-2xl rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
+    <div x-show="toast.show" x-transition class="mb-4 rounded-xl px-4 py-3 text-sm font-semibold" :class="toast.type === 'success' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300' : 'bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-300'" style="display: none;">
+        <span x-text="toast.message"></span>
+    </div>
+    <div x-show="errorMessage" class="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-600 dark:border-rose-800 dark:bg-rose-950/40 dark:text-rose-300" style="display: none;">
+        <span x-text="errorMessage"></span>
+    </div>
+    <form x-ref="form" @submit.prevent="submit()" method="POST" action="{{ route('policies.leave.update') }}" class="grid gap-4 md:grid-cols-2">
         @csrf
         @method('PATCH')
 
@@ -46,7 +52,9 @@
         </div>
 
         <div class="md:col-span-2 pt-2">
-            <button type="submit" class="rounded-lg bg-cyan-500 px-6 py-2 font-semibold text-slate-900 hover:bg-cyan-400">Save Global Policy</button>
+            <button type="submit" :disabled="saving" class="rounded-lg bg-cyan-500 px-6 py-2 font-semibold text-slate-900 hover:bg-cyan-400 disabled:opacity-60">
+                <span x-text="saving ? 'Saving...' : 'Save Global Policy'"></span>
+            </button>
         </div>
     </form>
 </div>

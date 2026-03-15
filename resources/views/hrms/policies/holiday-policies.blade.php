@@ -3,136 +3,128 @@
 @section('title', 'Holiday Policies - PeopleFlow HRMS')
 
 @section('content')
-<div class="mb-8 flex flex-wrap items-center justify-between gap-3">
-    <div>
-        <h1 class="text-3xl font-bold">Holiday Policies</h1>
-        <p class="text-slate-600 dark:text-slate-400">Create and maintain country/state holiday policy definitions</p>
-    </div>
-    <div class="flex gap-2">
-        <a href="{{ route('policies.holiday-calendar.index') }}" class="rounded-lg border border-cyan-300 px-4 py-2 text-sm font-semibold text-cyan-700 hover:bg-cyan-50 dark:border-cyan-700 dark:text-cyan-300 dark:hover:bg-cyan-900/20">Manage Calendar</a>
-        <a href="{{ route('policies.index') }}" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">Back to Policies</a>
-    </div>
-</div>
+<div class="space-y-6">
 
-@php
-    $weekdays = $weekdays ?? ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-@endphp
-
-<div class="grid gap-6 xl:grid-cols-3">
-    <div class="xl:col-span-1">
-        <div class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
-            <h2 class="text-lg font-semibold">Create Policy</h2>
-            <form method="POST" action="{{ route('policies.holiday-policies.store') }}" class="mt-4 space-y-3">
-                @csrf
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Policy Name</label>
-                    <input type="text" name="name" required class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950" placeholder="India - Karnataka Holidays">
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Country</label>
-                        <input type="text" name="country_code" list="country-options" required maxlength="3" class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm uppercase dark:border-slate-700 dark:bg-slate-950" placeholder="IN">
-                        <datalist id="country-options">
-                            @foreach ($countries as $code => $name)
-                                <option value="{{ $code }}" label="{{ $name }}">{{ $name }}</option>
-                            @endforeach
-                        </datalist>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">State</label>
-                        <input type="text" name="state_code" list="state-options" required maxlength="3" class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm uppercase dark:border-slate-700 dark:bg-slate-950" placeholder="KA">
-                        <datalist id="state-options">
-                            @foreach ($states as $code => $name)
-                                <option value="{{ $code }}" label="{{ $name }}">{{ $name }}</option>
-                            @endforeach
-                        </datalist>
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Code (Optional)</label>
-                    <input type="text" name="code" class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950" placeholder="HOLIDAY_IN_KA">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Weekend Days</label>
-                    <div class="mt-2 flex flex-wrap gap-3">
-                        @foreach ($weekdays as $day)
-                            <label class="inline-flex items-center gap-2 text-sm">
-                                <input type="checkbox" name="weekend_days[]" value="{{ $day }}" class="h-4 w-4 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500" @checked(in_array($day, ['saturday', 'sunday'], true))>
-                                <span class="capitalize">{{ $day }}</span>
-                            </label>
-                        @endforeach
-                    </div>
-                </div>
-                <label class="inline-flex items-center gap-2 text-sm">
-                    <input type="hidden" name="is_active" value="0">
-                    <input type="checkbox" name="is_active" value="1" class="h-4 w-4 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500" checked>
-                    <span>Active</span>
-                </label>
-                <button type="submit" class="rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-cyan-400">Create Policy</button>
-            </form>
+    {{-- Header Section --}}
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-6 border-b border-slate-200 dark:border-white/5">
+        <div>
+            <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Holiday Policies</h1>
+            <p class="mt-2 text-sm text-slate-500">Set up regional holidays and weekend schedules.</p>
+        </div>
+        <div class="flex gap-3">
+            <a href="{{ route('policies.holiday-calendar.index') }}" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
+                <span>Calendar View</span>
+            </a>
+            <a href="{{ route('policies.index') }}" class="rounded-xl border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-semibold text-slate-300 hover:bg-slate-700 transition-all">Back to Policies</a>
         </div>
     </div>
 
-    <div class="xl:col-span-2 space-y-4">
-        @forelse ($policies as $policy)
-            <div class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
-                <div class="mb-3 flex items-center justify-between">
-                    <h2 class="text-lg font-semibold">{{ $policy->name }}</h2>
-                    <a href="{{ route('policies.holiday-calendar.index', ['policy_id' => $policy->id]) }}" class="text-sm font-medium text-cyan-600 hover:text-cyan-500 dark:text-cyan-300">Open Calendar</a>
-                </div>
-                <form method="POST" action="{{ route('policies.holiday-policies.update', $policy) }}" class="grid gap-3 md:grid-cols-2">
-                    @csrf
-                    @method('PATCH')
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Policy Name</label>
-                        <input type="text" name="name" value="{{ $policy->name }}" required class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950">
+    @php
+        $weekdays = $weekdays ?? ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    @endphp
+
+    <div class="grid gap-6 xl:grid-cols-3">
+        {{-- Creation Form --}}
+        <div class="xl:col-span-1">
+            <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
+                <h2 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-6">Create New Policy</h2>
+                <div x-data="asyncForm({ reloadOnSuccess: true })">
+                    <div x-show="toast.show" x-transition class="mb-4 rounded-lg px-4 py-2 text-xs font-bold" :class="toast.type === 'success' ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'" style="display: none;">
+                        <span x-text="toast.message"></span>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Code</label>
-                        <input type="text" name="code" value="{{ $policy->code }}" class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Country</label>
-                        <input type="text" name="country_code" list="country-options" maxlength="3" value="{{ $policy->country_code }}" required class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm uppercase dark:border-slate-700 dark:bg-slate-950">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">State</label>
-                        <input type="text" name="state_code" list="state-options" maxlength="3" value="{{ $policy->state_code }}" required class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm uppercase dark:border-slate-700 dark:bg-slate-950">
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Weekend Days</label>
-                        <div class="mt-2 flex flex-wrap gap-3">
-                            @foreach ($weekdays as $day)
-                                <label class="inline-flex items-center gap-2 text-sm">
-                                    <input type="checkbox" name="weekend_days[]" value="{{ $day }}" class="h-4 w-4 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500" @checked(in_array($day, $policy->weekend_days ?? [], true))>
-                                    <span class="capitalize">{{ $day }}</span>
-                                </label>
-                            @endforeach
+                    
+                    <form x-ref="form" @submit.prevent="submit()" method="POST" action="{{ route('policies.holiday-policies.store') }}" class="space-y-4">
+                        @csrf
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Policy Name</label>
+                            <input type="text" name="name" placeholder="e.g. Standard UK" required class="w-full rounded-lg border border-slate-200 bg-transparent px-3 py-2 text-sm focus:border-cyan-500 dark:border-slate-700 dark:text-white">
                         </div>
-                    </div>
-                    <div class="md:col-span-2 flex items-center gap-3">
-                        <label class="inline-flex items-center gap-2 text-sm">
-                            <input type="hidden" name="is_active" value="0">
-                            <input type="checkbox" name="is_active" value="1" class="h-4 w-4 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500" @checked((bool) $policy->is_active)>
-                            <span>Active</span>
-                        </label>
-                        <span class="text-xs text-slate-500 dark:text-slate-400">{{ $policy->holiday_dates_count }} holiday dates</span>
-                    </div>
-                    <div class="md:col-span-2">
-                        <button type="submit" class="rounded-lg bg-slate-200 px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600">Save Policy</button>
-                    </div>
-                </form>
-                <form method="POST" action="{{ route('policies.holiday-policies.destroy', $policy) }}" class="mt-3" onsubmit="return confirm('Delete this holiday policy and all dates?');">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-500">Delete Policy</button>
-                </form>
+                        
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Country Code</label>
+                                <input type="text" name="country_code" placeholder="GB" required maxlength="3" class="w-full rounded-lg border border-slate-200 bg-transparent px-3 py-2 text-sm uppercase dark:border-slate-700 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">State/Region</label>
+                                <input type="text" name="state_code" placeholder="ENG" required maxlength="3" class="w-full rounded-lg border border-slate-200 bg-transparent px-3 py-2 text-sm uppercase dark:border-slate-700 dark:text-white">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Internal Code</label>
+                            <input type="text" name="code" placeholder="e.g. HOL-01" class="w-full rounded-lg border border-slate-200 bg-transparent px-3 py-2 text-sm dark:border-slate-700 dark:text-white">
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Weekend Days</label>
+                            <div class="mt-2 flex flex-wrap gap-2">
+                                @foreach ($weekdays as $day)
+                                    <label class="flex items-center gap-1.5 cursor-pointer group">
+                                        <input type="checkbox" name="weekend_days[]" value="{{ $day }}" class="h-3.5 w-3.5 rounded border-slate-300 text-cyan-500 focus:ring-cyan-500 dark:border-slate-700 dark:bg-slate-800" @checked(in_array($day, ['saturday', 'sunday'], true))>
+                                        <span class="text-[10px] font-bold text-slate-500 group-hover:text-slate-900 dark:group-hover:text-white capitalize" x-text="'{{ $day }}'.substring(0, 3)"></span>
+                                    </label>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <button type="submit" :disabled="saving" class="w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">
+                            <span x-text="saving ? 'Creating...' : 'Create Policy'"></span>
+                        </button>
+                    </form>
+                </div>
             </div>
-        @empty
-            <div class="rounded-2xl border border-slate-200 bg-white p-6 text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
-                No holiday policies yet. Create one from the left panel.
-            </div>
-        @endforelse
+        </div>
+
+        {{-- Policy List --}}
+        <div class="xl:col-span-2 space-y-4">
+            @forelse ($policies as $policy)
+                <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
+                    <div class="flex items-start justify-between mb-6">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-900 dark:text-white" x-text="'{{ $policy->name }}'"></h2>
+                            <p class="text-[10px] font-bold text-cyan-600 dark:text-cyan-400 uppercase tracking-wider" x-text="'Code: {{ $policy->code ?: 'N/A' }}'"></p>
+                        </div>
+                        <a href="{{ route('policies.holiday-calendar.index', ['policy_id' => $policy->id]) }}" class="inline-flex items-center gap-2 rounded-lg bg-slate-100 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-600 hover:bg-slate-900 hover:text-white dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-white dark:hover:text-slate-900 transition-colors">
+                            Manage Calendar
+                            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
+                        </a>
+                    </div>
+
+                    <div x-data="asyncForm({ reloadOnSuccess: true })">
+                        <form x-ref="form" @submit.prevent="submit()" method="POST" action="{{ route('policies.holiday-policies.update', $policy) }}" class="space-y-4">
+                            @csrf
+                            @method('PATCH')
+                            <div class="flex items-center gap-4 p-3 rounded-lg bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800">
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" name="is_active" value="1" class="h-3.5 w-3.5 rounded border-slate-300 text-emerald-500 focus:ring-emerald-500 dark:border-slate-700 dark:bg-slate-800" @checked((bool) $policy->is_active)>
+                                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Active Policy</span>
+                                </label>
+                                <div class="h-4 w-px bg-slate-200 dark:bg-slate-800"></div>
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider" x-text="'{{ $policy->holiday_dates_count }} Holidays Listed'"></span>
+                            </div>
+
+                            <div class="flex justify-between items-center bg-slate-50 p-2 rounded-lg dark:bg-slate-950/20">
+                                <button type="submit" :disabled="saving" class="px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded bg-slate-900 text-white hover:bg-cyan-500 hover:text-slate-950 dark:bg-white dark:text-slate-900 transition-colors">
+                                    <span x-text="saving ? 'Saving...' : 'Update Policy'"></span>
+                                </button>
+                                
+                                <form x-ref="deleteForm" @submit.prevent="if (confirm('Permanently delete this policy?')) { const original = $refs.form; $refs.form = $refs.deleteForm; submit().finally(() => { $refs.form = original; }); }" method="POST" action="{{ route('policies.holiday-policies.destroy', $policy) }}">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" :disabled="saving" class="px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider text-rose-500 hover:text-rose-700">Delete</button>
+                                </form>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            @empty
+                <div class="py-12 text-center rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400">No holiday policies found.</p>
+                </div>
+            @endforelse
+        </div>
     </div>
 </div>
 @endsection

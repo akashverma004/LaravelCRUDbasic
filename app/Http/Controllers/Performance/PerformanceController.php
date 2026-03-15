@@ -57,11 +57,17 @@ class PerformanceController extends Controller
             ->orderByDesc('meeting_date')
             ->get();
 
+        $employees = [];
+        if ($user->hasAnyRole(['admin', 'hr_manager'])) {
+            $employees = Employee::where('tenant_id', $tenantId)->get(['id', 'full_name']);
+        }
+
         return response()->json([
             'goals' => $goals,
             'reviews' => $reviews,
             'notes' => $notes,
             'is_manager' => $user->hasAnyRole(['admin', 'hr_manager']),
+            'employees' => $employees,
         ]);
     }
 

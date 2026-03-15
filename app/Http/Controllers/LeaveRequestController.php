@@ -13,6 +13,7 @@ use App\Notifications\LeaveRejected;
 use App\Notifications\LeaveSubmitted;
 use App\Services\LeaveService;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\View\View;
@@ -165,6 +166,24 @@ class LeaveRequestController extends Controller
         return view('hrms.leaves.pending', compact('leaves', 'tab'));
     }
 
+    public function pendingData(): JsonResponse
+    {
+        $tab = request('tab', 'pending');
+        $leaves = $tab === 'all'
+            ? $this->leaveService->getAllLeaveRequests()
+            : $this->leaveService->getPendingLeaveRequests();
+
+        return response()->json([
+            'leaves' => $leaves->getCollection()->map(fn (LeaveRequest $leave) => $this->transformLeave($leave))->values(),
+            'meta' => [
+                'current_page' => $leaves->currentPage(),
+                'last_page' => $leaves->lastPage(),
+                'per_page' => $leaves->perPage(),
+                'total' => $leaves->total(),
+            ],
+        ]);
+    }
+
     public function create(): View
     {
         $user = auth()->user();
@@ -185,27 +204,110 @@ class LeaveRequestController extends Controller
     public function data(): \Illuminate\Http\JsonResponse
     {
         $user = auth()->user();
-        if ($user->hasAnyRole(['admin', 'hr_manager'])) {
-            $employees = Employee::orderBy('full_name')->get(['id', 'full_name']);
-        } else {
-            $employees = Employee::where('email', $user->email)
-                ->where('tenant_id', $user->tenant_id)
-                ->get(['id', 'full_name']);
-        }
-
+        $tenantId = $user->tenant_id;
+        
         $employee = Employee::where('email', $user->email)
-            ->where('tenant_id', $user->tenant_id)
+            ->where('tenant_id', $tenantId)
             ->first();
 
-        $leaves = [];
-        if ($employee) {
-            $leaves = LeaveRequest::where('employee_id', $employee->id)
-                ->latest()
-                ->get();
+        if (!$employee) {
+            return response()->json(['error' => 'Employee record not found'], 404);
+        }
+
+        // 1. Leave history for the current employee
+        $leaves = LeaveRequest::where('employee_id', $employee->id)
+            ->latest()
+            ->get()
+            ->map(fn($l) => $this->transformLeave($l));
+
+        // 2. Balances
+        $policy = $employee->leavePolicy ?: new \App\Models\EmployeeLeavePolicy([
+            'annual_limit' => 20, 
+            'sick_limit' => 10, 
+            'casual_limit' => 10, 
+            'unpaid_limit' => 30
+        ]);
+
+        $used = LeaveRequest::where('employee_id', $employee->id)
+            ->where('status', 'approved')
+            ->selectRaw('leave_type, SUM(DATEDIFF(end_date, start_date) + 1) as total')
+            ->groupBy('leave_type')
+            ->pluck('total', 'leave_type');
+
+        $balances = [
+            'annual' => [
+                'limit' => $policy->annual_limit,
+                'used' => (float)($used['annual'] ?? 0),
+                'remaining' => max(0, $policy->annual_limit - ($used['annual'] ?? 0))
+            ],
+            'sick' => [
+                'limit' => $policy->sick_limit,
+                'used' => (float)($used['sick'] ?? 0),
+                'remaining' => max(0, $policy->sick_limit - ($used['sick'] ?? 0))
+            ],
+            'casual' => [
+                'limit' => $policy->casual_limit,
+                'used' => (float)($used['casual'] ?? 0),
+                'remaining' => max(0, $policy->casual_limit - ($used['casual'] ?? 0))
+            ],
+            'unpaid' => [
+                'limit' => $policy->unpaid_limit,
+                'used' => (float)($used['unpaid'] ?? 0),
+                'remaining' => max(0, $policy->unpaid_limit - ($used['unpaid'] ?? 0))
+            ],
+        ];
+
+        // 3. Who's Away (Today & Upcoming 7 days)
+        $today = now()->toDateString();
+        $nextWeek = now()->addDays(7)->toDateString();
+
+        $awayToday = LeaveRequest::where('tenant_id', $tenantId)
+            ->where('status', 'approved')
+            ->whereDate('start_date', '<=', $today)
+            ->whereDate('end_date', '>=', $today)
+            ->with('employee:id,full_name,profile_photo,job_title')
+            ->get()
+            ->map(fn($l) => [
+                'id' => $l->employee->id,
+                'name' => $l->employee->full_name,
+                'photo' => $l->employee->profile_photo,
+                'title' => $l->employee->job_title,
+                'type' => $l->leave_type,
+            ]);
+
+        $upcomingAway = LeaveRequest::where('tenant_id', $tenantId)
+            ->where('status', 'approved')
+            ->whereDate('start_date', '>', $today)
+            ->whereDate('start_date', '<=', $nextWeek)
+            ->with('employee:id,full_name,profile_photo,job_title')
+            ->orderBy('start_date')
+            ->get()
+            ->map(fn($l) => [
+                'id' => $l->employee->id,
+                'name' => $l->employee->full_name,
+                'photo' => $l->employee->profile_photo,
+                'title' => $l->employee->job_title,
+                'type' => $l->leave_type,
+                'from' => $l->start_date->format('d M'),
+            ]);
+
+        // 4. Admin only employees list if needed
+        $employees = [];
+        if ($user->hasAnyRole(['admin', 'hr_manager'])) {
+            $employees = Employee::where('tenant_id', $tenantId)->orderBy('full_name')->get(['id', 'full_name']);
         }
 
         return response()->json([
             'leaves' => $leaves,
+            'balances' => $balances,
+            'whoIsAway' => [
+                'today' => $awayToday,
+                'upcoming' => $upcomingAway
+            ],
+            'stats' => [
+                'pending' => $leaves->where('status', 'pending')->count(),
+                'approved' => $leaves->where('status', 'approved')->count(),
+            ],
             'employees' => $employees,
             'isAdmin' => $user->hasAnyRole(['admin', 'hr_manager'])
         ]);
@@ -242,7 +344,12 @@ class LeaveRequestController extends Controller
         }
 
         if ($request->wantsJson()) {
-            return response()->json(['success' => true, 'leave' => $leave->load('employee'), 'message' => 'Leave request submitted successfully.']);
+            return response()->json([
+                'success' => true,
+                'leave' => $leave->load('employee'),
+                'message' => 'Leave request submitted successfully.',
+                'redirect' => $user->hasAnyRole(['admin', 'hr_manager']) ? route('leaves.index') : route('leaves.my'),
+            ]);
         }
 
         return redirect()->route('leaves.index')->with('status', 'Leave request submitted successfully.');
@@ -254,7 +361,7 @@ class LeaveRequestController extends Controller
         return view('hrms.leaves.show', compact('leave'));
     }
 
-    public function approve(int $id): RedirectResponse
+    public function approve(Request $request, int $id): RedirectResponse|JsonResponse
     {
         $leave = LeaveRequest::with('employee')->findOrFail($id);
         $this->leaveService->approveLeaveRequest($leave);
@@ -265,10 +372,18 @@ class LeaveRequestController extends Controller
             ->first();
         $employeeUser?->notify(new LeaveApproved($leave));
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Leave request approved.',
+                'leave' => $this->transformLeave($leave->fresh()->load('employee')),
+            ]);
+        }
+
         return redirect()->back()->with('status', 'Leave request approved.');
     }
 
-    public function reject(int $id): RedirectResponse
+    public function reject(Request $request, int $id): RedirectResponse|JsonResponse
     {
         $leave = LeaveRequest::with('employee')->findOrFail($id);
         $this->leaveService->rejectLeaveRequest($leave);
@@ -279,6 +394,14 @@ class LeaveRequestController extends Controller
             ->first();
         $employeeUser?->notify(new LeaveRejected($leave));
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Leave request rejected.',
+                'leave' => $this->transformLeave($leave->fresh()->load('employee')),
+            ]);
+        }
+
         return redirect()->back()->with('status', 'Leave request rejected.');
     }
 
@@ -287,7 +410,15 @@ class LeaveRequestController extends Controller
         $user = auth()->user();
         $employee = Employee::where('email', $user->email)
             ->where('tenant_id', $user->tenant_id)
-            ->firstOrFail();
+            ->first();
+
+        if (!$employee) {
+            return view('hrms.leaves.my', [
+                'leaves' => collect(),
+                'employee' => null,
+                'error' => 'No employee record found for your account. Please contact HR.'
+            ]);
+        }
 
         $leaves = LeaveRequest::where('employee_id', $employee->id)
             ->latest()
@@ -351,14 +482,19 @@ class LeaveRequestController extends Controller
         $this->leaveService->updateLeaveRequest($leave, $data);
         
         if ($request->wantsJson()) {
-            return response()->json(['success' => true, 'leave' => $leave->fresh()->load('employee'), 'message' => 'Leave request updated successfully.']);
+            return response()->json([
+                'success' => true,
+                'leave' => $leave->fresh()->load('employee'),
+                'message' => 'Leave request updated successfully.',
+                'redirect' => $user->hasAnyRole(['admin', 'hr_manager']) ? route('leaves.index') : route('leaves.my'),
+            ]);
         }
 
         return redirect()->route($user->hasAnyRole(['admin', 'hr_manager']) ? 'leaves.index' : 'leaves.my')
             ->with('status', 'Leave request updated successfully.');
     }
 
-    public function destroy(int $id): \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
+    public function destroy(Request $request, int $id): \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
     {
         $user = auth()->user();
         $leave = LeaveRequest::findOrFail($id);
@@ -374,15 +510,19 @@ class LeaveRequestController extends Controller
             }
 
             if ($leave->status !== 'pending') {
-                if (request()->wantsJson()) return response()->json(['error' => 'Only pending requests can be deleted.'], 403);
+                if ($request->wantsJson()) return response()->json(['error' => 'Only pending requests can be deleted.'], 403);
                 return redirect()->back()->with('error', 'Only pending requests can be deleted.');
             }
         }
 
         $this->leaveService->deleteLeaveRequest($leave);
         
-        if (request()->wantsJson()) {
-            return response()->json(['success' => true, 'message' => 'Leave request deleted successfully.']);
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Leave request deleted successfully.',
+                'redirect' => $user->hasAnyRole(['admin', 'hr_manager']) ? route('leaves.index') : route('leaves.my'),
+            ]);
         }
         
         return redirect()->back()->with('status', 'Leave request deleted successfully.');
@@ -403,5 +543,25 @@ class LeaveRequestController extends Controller
     public function events(): View
     {
         return view('hrms.events.index');
+    }
+
+    private function transformLeave(LeaveRequest $leave): array
+    {
+        return [
+            'id' => $leave->id,
+            'employee_id' => $leave->employee_id,
+            'employee_name' => $leave->employee?->full_name,
+            'leave_type' => $leave->leave_type,
+            'leave_session' => $leave->leave_session,
+            'status' => $leave->status,
+            'reason' => $leave->reason,
+            'start_date' => $leave->start_date?->format('Y-m-d'),
+            'end_date' => $leave->end_date?->format('Y-m-d'),
+            'start_label' => $leave->start_date?->format('d M Y'),
+            'end_label' => $leave->end_date?->format('d M Y'),
+            'days' => $leave->start_date && $leave->end_date ? $leave->start_date->diffInDays($leave->end_date) + 1 : 0,
+            'created_at' => $leave->created_at?->format('Y-m-d H:i:s'),
+            'show_url' => route('leaves.show', $leave->id),
+        ];
     }
 }

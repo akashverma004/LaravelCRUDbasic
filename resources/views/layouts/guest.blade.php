@@ -5,11 +5,10 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'PeopleFlow HRMS') }}</title>
+        <title>{{ $title ?? config('app.name', 'PeopleFlow HRMS') }}</title>
 
         <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/theme.js'])
@@ -21,8 +20,22 @@
                 document.documentElement.classList.add('dark');
             }
         </script>
+        <style>
+            body { font-family: 'Inter', sans-serif; }
+            [x-cloak] { display: none !important; }
+        </style>
     </head>
-    <body class="font-sans antialiased dark:bg-gradient-to-br dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50 dark:text-white text-slate-900 min-h-screen transition-colors duration-300">
+    <body class="antialiased bg-slate-50 text-slate-900 min-h-screen selection:bg-violet-500 selection:text-white relative overflow-x-hidden">
+        {{-- Flare-inspired Mesh Gradient Background --}}
+        <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+            <div class="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-violet-200/50 blur-[120px] animate-pulse"></div>
+            <div class="absolute top-[20%] -right-[5%] w-[35%] h-[35%] rounded-full bg-blue-200/40 blur-[100px] animate-pulse" style="animation-delay: 2s"></div>
+            <div class="absolute -bottom-[10%] left-[15%] w-[45%] h-[45%] rounded-full bg-emerald-100/40 blur-[130px] animate-pulse" style="animation-delay: 4s"></div>
+            <div class="absolute top-[40%] left-[30%] w-[30%] h-[30%] rounded-full bg-purple-100/30 blur-[110px] animate-pulse" style="animation-delay: 1s"></div>
+            {{-- Subtle Noise Overlay --}}
+            <div class="absolute inset-0 opacity-[0.03] mix-blend-overlay pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
+        </div>
+
         {{ $slot }}
     </body>
 </html>

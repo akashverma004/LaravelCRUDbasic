@@ -74,6 +74,10 @@ class DashboardController extends Controller
         return view('hrms.dashboard', [
             ...$stats,
             'departmentBreakdown' => $departmentBreakdown,
+            'departmentChartData' => [
+                'labels' => $departmentBreakdown->pluck('name'),
+                'values' => $departmentBreakdown->pluck('employees_count'),
+            ],
             'employees' => $employees,
             'leaveRequests' => $leaveRequests,
             'leaveStats' => $leaveStats,

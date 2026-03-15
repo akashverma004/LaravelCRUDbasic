@@ -107,11 +107,15 @@ Alpine.data('selfServiceProfile', () => ({
     showDeleteConfirm: false,
     deletePassword: '',
 
+    loading: true,
+    errors: {},
+
     async init() {
         await this.fetchProfile();
     },
 
     async fetchProfile() {
+        this.loading = true;
         try {
             const { data } = await axios.get('/self-service/profile/data');
             this.employee = data.employee;
@@ -121,10 +125,15 @@ Alpine.data('selfServiceProfile', () => ({
             }
         } catch (e) {
             this.showToast('Failed to load profile.', 'error');
+        } finally {
+            this.loading = false;
         }
     },
 
     startEditing() {
+        console.log('Starting edit mode for employee:', this.employee);
+        if (!this.employee) return;
+        
         this.form = {
             phone: this.employee.phone || '',
             city: this.employee.city || '',
@@ -159,10 +168,12 @@ Alpine.data('selfServiceProfile', () => ({
     cancelEditing() {
         this.editing = false;
         this.form = {};
+        this.errors = {};
     },
 
     async saveProfile() {
         this.saving = true;
+        this.errors = {};
         try {
             const { data } = await axios.patch('/self-service/profile/info', this.form, {
                 headers: { 'Accept': 'application/json' }
@@ -171,6 +182,9 @@ Alpine.data('selfServiceProfile', () => ({
             this.editing = false;
             this.showToast(data.message, 'success');
         } catch (e) {
+            if (e.response?.status === 422) {
+                this.errors = e.response.data.errors || {};
+            }
             const msg = e.response?.data?.message || 'Failed to update profile.';
             this.showToast(msg, 'error');
         } finally {
@@ -210,6 +224,7 @@ Alpine.data('selfServiceProfile', () => ({
 
     // ── Education CRUD ──────────────────────────────────────────────
     async addEducation() {
+        this.errors = {};
         try {
             const { data } = await axios.post('/self-service/profile/educations', this.eduForm);
             if (!this.employee.educations) this.employee.educations = [];
@@ -218,8 +233,16 @@ Alpine.data('selfServiceProfile', () => ({
             this.showEduForm = false;
             this.showToast(data.message, 'success');
         } catch (e) {
+            if (e.response?.status === 422) {
+                this.errors = e.response.data.errors || {};
+            }
             this.showToast(e.response?.data?.message || 'Failed to add education.', 'error');
         }
+    },
+
+    editEducation(edu) {
+        this.eduForm = { ...edu };
+        this.showEduForm = true;
     },
 
     async removeEducation(id) {
@@ -234,6 +257,7 @@ Alpine.data('selfServiceProfile', () => ({
 
     // ── Experience CRUD ─────────────────────────────────────────────
     async addExperience() {
+        this.errors = {};
         try {
             const { data } = await axios.post('/self-service/profile/experiences', this.expForm);
             if (!this.employee.experiences) this.employee.experiences = [];
@@ -242,8 +266,16 @@ Alpine.data('selfServiceProfile', () => ({
             this.showExpForm = false;
             this.showToast(data.message, 'success');
         } catch (e) {
+            if (e.response?.status === 422) {
+                this.errors = e.response.data.errors || {};
+            }
             this.showToast(e.response?.data?.message || 'Failed to add experience.', 'error');
         }
+    },
+
+    editExperience(exp) {
+        this.expForm = { ...exp };
+        this.showExpForm = true;
     },
 
     async removeExperience(id) {
@@ -283,10 +315,14 @@ Alpine.data('selfServiceProfile', () => ({
     // ── Account Management ────────────────────────────────────
     async updateAccount() {
         this.savingAccount = true;
+        this.errors = {};
         try {
             const { data } = await axios.patch('/self-service/profile/account', this.accountForm);
             this.showToast(data.message, 'success');
         } catch (e) {
+            if (e.response?.status === 422) {
+                this.errors = e.response.data.errors || {};
+            }
             const msg = e.response?.data?.message || 'Failed to update account.';
             this.showToast(msg, 'error');
         } finally {
@@ -296,12 +332,16 @@ Alpine.data('selfServiceProfile', () => ({
 
     async updatePassword() {
         this.savingPassword = true;
+        this.errors = {};
         try {
             const { data } = await axios.put('/self-service/profile/password', this.passwordForm);
             this.passwordForm = { current_password: '', password: '', password_confirmation: '' };
             this.showToast(data.message, 'success');
         } catch (e) {
-            const msg = e.response?.data?.message || Object.values(e.response?.data?.errors || {}).flat()[0] || 'Failed to update password.';
+            if (e.response?.status === 422) {
+                this.errors = e.response.data.errors || {};
+            }
+            const msg = e.response?.data?.message || 'Failed to update password.';
             this.showToast(msg, 'error');
         } finally {
             this.savingPassword = false;
@@ -430,12 +470,18 @@ Alpine.data('performanceManager', () => ({
     goals: [],
     reviews: [],
     notes: [],
+    employees: [],
     isManager: false,
     loading: true,
+    saving: false,
     toast: { show: false, message: '', type: 'success' },
     showGoalForm: false,
     showReviewForm: false,
     showNoteForm: false,
+    
+    goalForm: { title: '', description: '', due_date: '', priority: 'medium', employee_id: '' },
+    reviewForm: { employee_id: '', review_cycle: '', rating: 3, feedback: '', strengths: '', areas_for_improvement: '', status: 'submitted' },
+    noteForm: { employee_id: '', meeting_date: new Date().toISOString().split('T')[0], talking_points: '', action_items: '', private_notes: '' },
 
     async init() {
         await this.fetchData();
@@ -448,11 +494,57 @@ Alpine.data('performanceManager', () => ({
             this.goals = data.goals;
             this.reviews = data.reviews;
             this.notes = data.notes;
+            this.employees = data.employees;
             this.isManager = data.is_manager;
         } catch (e) {
             this.showToast('Failed to load performance data.', 'error');
         } finally {
             this.loading = false;
+        }
+    },
+
+    async saveGoal() {
+        this.saving = true;
+        try {
+            await axios.post('/performance/goals', this.goalForm);
+            this.showGoalForm = false;
+            this.goalForm = { title: '', description: '', due_date: '', priority: 'medium', employee_id: '' };
+            this.showToast('Goal added successfully!');
+            await this.fetchData();
+        } catch (e) {
+            this.showToast('Failed to save goal.', 'error');
+        } finally {
+            this.saving = false;
+        }
+    },
+
+    async saveReview() {
+        this.saving = true;
+        try {
+            await axios.post('/performance/reviews', this.reviewForm);
+            this.showReviewForm = false;
+            this.reviewForm = { employee_id: '', review_cycle: '', rating: 3, feedback: '', strengths: '', areas_for_improvement: '', status: 'submitted' };
+            this.showToast('Review submitted successfully!');
+            await this.fetchData();
+        } catch (e) {
+            this.showToast('Failed to submit review.', 'error');
+        } finally {
+            this.saving = false;
+        }
+    },
+
+    async saveNote() {
+        this.saving = true;
+        try {
+            await axios.post('/performance/notes', this.noteForm);
+            this.showNoteForm = false;
+            this.noteForm = { employee_id: '', meeting_date: new Date().toISOString().split('T')[0], talking_points: '', action_items: '', private_notes: '' };
+            this.showToast('Note logged successfully!');
+            await this.fetchData();
+        } catch (e) {
+            this.showToast('Failed to log note.', 'error');
+        } finally {
+            this.saving = false;
         }
     },
 
@@ -641,6 +733,10 @@ Alpine.data('leaveManager', () => ({
     },
     toast: { show: false, message: '', type: 'success' },
 
+    balances: {},
+    whoIsAway: { today: [], upcoming: [] },
+    stats: { pending: 0, approved: 0 },
+
     async init() {
         await this.fetchData();
     },
@@ -652,6 +748,9 @@ Alpine.data('leaveManager', () => ({
             this.leaves = data.leaves;
             this.employees = data.employees;
             this.isAdmin = data.isAdmin;
+            this.balances = data.balances || {};
+            this.whoIsAway = data.whoIsAway || { today: [], upcoming: [] };
+            this.stats = data.stats || { pending: 0, approved: 0 };
         } catch (e) {
             console.error('Failed to load leaves', e);
         } finally {
@@ -886,9 +985,12 @@ Alpine.data('payrollManager', () => ({
         }
     },
 
+    selectedPayslip: null,
+    showDetailsModal: false,
+
     viewPayslip(ps) {
-        // Logic to show detailed breakdown in a modal
-        alert(`Details for ${ps.month}:\nBase: $${ps.base_salary}\nAllowances: $${ps.total_allowances}\nDeductions: $${ps.total_deductions}\nNet: $${ps.net_pay}`);
+        this.selectedPayslip = ps;
+        this.showDetailsModal = true;
     },
 
     showToast(message, type = 'success') {
@@ -1014,6 +1116,871 @@ Alpine.data('shiftManager', () => ({
     showToast(message, type = 'success') {
         this.toast = { show: true, message, type };
         setTimeout(() => { this.toast.show = false; }, 3000);
+    },
+}));
+
+Alpine.data('employeeDirectory', (config = {}) => ({
+    dataUrl: config.dataUrl || '/employees/data',
+    storeUrl: config.storeUrl || '/employees',
+    deleteUrlBase: config.deleteUrlBase || '/employees',
+    storageBase: config.storageBase || '/storage',
+    loading: false,
+    saving: false,
+    deletingId: null,
+    showCreateModal: false,
+    employees: [],
+    meta: { current_page: 1, last_page: 1, total: 0 },
+    filters: {
+        q: config.filters?.q || '',
+        department_id: config.filters?.department_id || '',
+        role_id: config.filters?.role_id || '',
+        page: 1,
+    },
+    departments: config.departments || [],
+    roles: config.roles || [],
+    managers: config.managers || [],
+    countries: config.countries || [],
+    states: config.states || [],
+    formErrors: [],
+    toast: { show: false, message: '', type: 'success' },
+    form: {},
+
+    init() {
+        this.resetForm();
+        this.fetchData();
+    },
+
+    resetForm() {
+        this.form = {
+            full_name: '',
+            email: '',
+            password: '',
+            phone: '',
+            job_title: '',
+            department_id: '',
+            manager_id: '',
+            role_id: '',
+            employment_type: 'full-time',
+            salary: '',
+            joined_on: new Date().toISOString().split('T')[0],
+            status: 'active',
+            country: 'IN',
+            state: '',
+            city: '',
+            address: '',
+        };
+    },
+
+    async fetchData(page = null) {
+        this.loading = true;
+        if (page) {
+            this.filters.page = page;
+        }
+
+        try {
+            const { data } = await axios.get(this.dataUrl, { params: this.filters });
+            this.employees = data.employees || [];
+            this.meta = data.meta || this.meta;
+        } catch (error) {
+            this.showToast('Failed to load employees.', 'error');
+        } finally {
+            this.loading = false;
+        }
+    },
+
+    openCreateModal() {
+        this.resetForm();
+        this.formErrors = [];
+        this.showCreateModal = true;
+    },
+
+    closeCreateModal() {
+        this.showCreateModal = false;
+        this.formErrors = [];
+    },
+
+    async submitCreate() {
+        this.saving = true;
+        this.formErrors = [];
+
+        try {
+            await axios.post(this.storeUrl, this.form, {
+                headers: { Accept: 'application/json' }
+            });
+            this.closeCreateModal();
+            this.showToast('Employee created successfully.');
+            this.fetchData(1);
+        } catch (error) {
+            this.formErrors = this.extractErrors(error, 'Failed to create employee.');
+        } finally {
+            this.saving = false;
+        }
+    },
+
+    async deleteEmployee(employee) {
+        if (!confirm(`Archive ${employee.full_name}?`)) return;
+
+        this.deletingId = employee.id;
+        try {
+            await axios.delete(`${this.deleteUrlBase}/${employee.id}`, {
+                headers: { Accept: 'application/json' }
+            });
+            this.showToast('Employee archived successfully.');
+            await this.fetchData();
+        } catch (error) {
+            this.showToast(this.extractErrors(error, 'Failed to archive employee.').join(' '), 'error');
+        } finally {
+            this.deletingId = null;
+        }
+    },
+
+    avatarUrl(employee) {
+        return employee.profile_photo ? `${this.storageBase}/${employee.profile_photo}` : null;
+    },
+
+    statusTone(status) {
+        return {
+            active: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400',
+            'on-leave': 'bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400',
+            resigned: 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-300',
+        }[status] || 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300';
+    },
+
+    showToast(message, type = 'success') {
+        this.toast = { show: true, message, type };
+        setTimeout(() => { this.toast.show = false; }, 3000);
+    },
+
+    extractErrors(error, fallback) {
+        if (error.response?.status === 422 && error.response.data?.errors) {
+            return Object.values(error.response.data.errors).flat();
+        }
+
+        return [error.response?.data?.message || fallback];
+    },
+}));
+
+Alpine.data('departmentDirectory', (config = {}) => ({
+    dataUrl: config.dataUrl || '/departments/data',
+    storeUrl: config.storeUrl || '/departments',
+    deleteUrlBase: config.deleteUrlBase || '/departments',
+    canManage: config.canManage || false,
+    employees: config.employees || [],
+    loading: false,
+    saving: false,
+    deletingId: null,
+    showCreateModal: false,
+    departments: [],
+    formErrors: [],
+    toast: { show: false, message: '', type: 'success' },
+    form: {
+        name: '',
+        code: '',
+        lead_employee_id: '',
+        lead_name: '',
+    },
+
+    init() {
+        this.fetchData();
+    },
+
+    async fetchData() {
+        this.loading = true;
+        try {
+            const { data } = await axios.get(this.dataUrl);
+            this.departments = data.departments || [];
+        } catch (error) {
+            this.showToast('Failed to load departments.', 'error');
+        } finally {
+            this.loading = false;
+        }
+    },
+
+    openCreateModal() {
+        this.form = { name: '', code: '', lead_employee_id: '', lead_name: '' };
+        this.formErrors = [];
+        this.showCreateModal = true;
+    },
+
+    closeCreateModal() {
+        this.showCreateModal = false;
+        this.formErrors = [];
+    },
+
+    async submitCreate() {
+        this.saving = true;
+        this.formErrors = [];
+
+        try {
+            await axios.post(this.storeUrl, this.form, {
+                headers: { Accept: 'application/json' }
+            });
+            this.closeCreateModal();
+            this.showToast('Department created successfully.');
+            await this.fetchData();
+        } catch (error) {
+            this.formErrors = this.extractErrors(error, 'Failed to create department.');
+        } finally {
+            this.saving = false;
+        }
+    },
+
+    async deleteDepartment(department) {
+        if (!confirm(`Delete ${department.name}?`)) return;
+
+        this.deletingId = department.id;
+        try {
+            await axios.delete(`${this.deleteUrlBase}/${department.id}`, {
+                headers: { Accept: 'application/json' }
+            });
+            this.showToast('Department deleted successfully.');
+            await this.fetchData();
+        } catch (error) {
+            this.showToast(this.extractErrors(error, 'Failed to delete department.').join(' '), 'error');
+        } finally {
+            this.deletingId = null;
+        }
+    },
+
+    showToast(message, type = 'success') {
+        this.toast = { show: true, message, type };
+        setTimeout(() => { this.toast.show = false; }, 3000);
+    },
+
+    extractErrors(error, fallback) {
+        if (error.response?.status === 422 && error.response.data?.errors) {
+            return Object.values(error.response.data.errors).flat();
+        }
+
+        return [error.response?.data?.message || fallback];
+    },
+}));
+
+Alpine.data('tenantUserManager', (config = {}) => ({
+    dataUrl: config.dataUrl || '/tenant-users/data',
+    storeUrl: config.storeUrl || '/tenant-users/create',
+    inviteUrl: config.inviteUrl || '/tenant-users/invite',
+    loading: false,
+    savingUser: false,
+    savingInvite: false,
+    users: [],
+    invitations: [],
+    roles: [],
+    meta: { current_page: 1, last_page: 1, total: 0 },
+    showCreateModal: false,
+    showInviteModal: false,
+    userErrors: [],
+    inviteErrors: [],
+    toast: { show: false, message: '', type: 'success' },
+    userForm: { name: '', email: '', password: '', role_name: '' },
+    inviteForm: { name: '', email: '', role_name: '' },
+
+    init() {
+        this.fetchData();
+    },
+
+    async fetchData(page = null) {
+        this.loading = true;
+        try {
+            const { data } = await axios.get(this.dataUrl, { params: page ? { page } : {} });
+            this.users = data.users || [];
+            this.invitations = data.invitations || [];
+            this.roles = data.roles || [];
+            this.meta = data.meta || this.meta;
+            if (!this.userForm.role_name && this.roles.length) this.userForm.role_name = this.roles[0].name;
+            if (!this.inviteForm.role_name && this.roles.length) this.inviteForm.role_name = this.roles[0].name;
+        } catch (error) {
+            this.showToast('Failed to load tenant users.', 'error');
+        } finally {
+            this.loading = false;
+        }
+    },
+
+    openCreateModal() {
+        this.userForm = { name: '', email: '', password: '', role_name: this.roles[0]?.name || '' };
+        this.userErrors = [];
+        this.showCreateModal = true;
+    },
+
+    openInviteModal() {
+        this.inviteForm = { name: '', email: '', role_name: this.roles[0]?.name || '' };
+        this.inviteErrors = [];
+        this.showInviteModal = true;
+    },
+
+    closeModal(type) {
+        if (type === 'create') this.showCreateModal = false;
+        if (type === 'invite') this.showInviteModal = false;
+    },
+
+    async submitUser() {
+        this.savingUser = true;
+        this.userErrors = [];
+        try {
+            await axios.post(this.storeUrl, this.userForm, { headers: { Accept: 'application/json' } });
+            this.closeModal('create');
+            this.showToast('User created successfully.');
+            await this.fetchData(1);
+        } catch (error) {
+            this.userErrors = this.extractErrors(error, 'Failed to create user.');
+        } finally {
+            this.savingUser = false;
+        }
+    },
+
+    async submitInvite() {
+        this.savingInvite = true;
+        this.inviteErrors = [];
+        try {
+            await axios.post(this.inviteUrl, this.inviteForm, { headers: { Accept: 'application/json' } });
+            this.closeModal('invite');
+            this.showToast('Invitation created successfully.');
+            await this.fetchData();
+        } catch (error) {
+            this.inviteErrors = this.extractErrors(error, 'Failed to create invitation.');
+        } finally {
+            this.savingInvite = false;
+        }
+    },
+
+    showToast(message, type = 'success') {
+        this.toast = { show: true, message, type };
+        setTimeout(() => { this.toast.show = false; }, 3000);
+    },
+
+    extractErrors(error, fallback) {
+        if (error.response?.status === 422 && error.response.data?.errors) {
+            return Object.values(error.response.data.errors).flat();
+        }
+
+        return [error.response?.data?.message || fallback];
+    },
+}));
+
+Alpine.data('tenantDirectory', (config = {}) => ({
+    dataUrl: config.dataUrl || '/platform/tenants/data',
+    storeUrl: config.storeUrl || '/platform/tenants',
+    updateUrlBase: config.updateUrlBase || '/platform/tenants',
+    deleteUrlBase: config.deleteUrlBase || '/platform/tenants',
+    loading: false,
+    saving: false,
+    deletingId: null,
+    showModal: false,
+    mode: 'create',
+    editTenantId: null,
+    tenants: [],
+    meta: { current_page: 1, last_page: 1, total: 0 },
+    filters: {
+        q: config.filters?.q || '',
+        status: config.filters?.status || '',
+        page: 1,
+    },
+    formErrors: [],
+    toast: { show: false, message: '', type: 'success' },
+    form: {},
+
+    init() {
+        this.resetForm();
+        this.fetchData();
+    },
+
+    resetForm() {
+        this.form = {
+            name: '',
+            code: '',
+            slug: '',
+            email: '',
+            phone: '',
+            address: '',
+            country: 'IN',
+            timezone: 'Asia/Kolkata',
+            currency: 'INR',
+            is_active: true,
+        };
+    },
+
+    async fetchData(page = null) {
+        this.loading = true;
+        if (page) this.filters.page = page;
+        try {
+            const { data } = await axios.get(this.dataUrl, { params: this.filters });
+            this.tenants = data.tenants || [];
+            this.meta = data.meta || this.meta;
+        } catch (error) {
+            this.showToast('Failed to load tenants.', 'error');
+        } finally {
+            this.loading = false;
+        }
+    },
+
+    openCreateModal() {
+        this.mode = 'create';
+        this.editTenantId = null;
+        this.resetForm();
+        this.formErrors = [];
+        this.showModal = true;
+    },
+
+    openEditModal(tenant) {
+        this.mode = 'edit';
+        this.editTenantId = tenant.id;
+        this.form = {
+            name: tenant.name || '',
+            code: tenant.code || '',
+            slug: tenant.slug || '',
+            email: tenant.email || '',
+            phone: tenant.phone || '',
+            address: tenant.address || '',
+            country: tenant.country || 'IN',
+            timezone: tenant.timezone || 'Asia/Kolkata',
+            currency: tenant.currency || 'INR',
+            is_active: tenant.is_active === true,
+        };
+        this.formErrors = [];
+        this.showModal = true;
+    },
+
+    closeModal() {
+        this.showModal = false;
+        this.formErrors = [];
+    },
+
+    async submitTenant() {
+        this.saving = true;
+        this.formErrors = [];
+        try {
+            const endpoint = this.mode === 'edit' && this.editTenantId
+                ? `${this.updateUrlBase}/${this.editTenantId}`
+                : this.storeUrl;
+            const method = this.mode === 'edit' ? 'patch' : 'post';
+            await axios[method](endpoint, this.form, { headers: { Accept: 'application/json' } });
+            this.closeModal();
+            this.showToast(this.mode === 'edit' ? 'Tenant updated successfully.' : 'Tenant created successfully.');
+            await this.fetchData(this.mode === 'create' ? 1 : this.meta.current_page);
+        } catch (error) {
+            this.formErrors = this.extractErrors(error, 'Failed to save tenant.');
+        } finally {
+            this.saving = false;
+        }
+    },
+
+    async deleteTenant(tenant) {
+        if (!confirm(`Delete ${tenant.name}?`)) return;
+        this.deletingId = tenant.id;
+        try {
+            await axios.delete(`${this.deleteUrlBase}/${tenant.id}`, { headers: { Accept: 'application/json' } });
+            this.showToast('Tenant deleted successfully.');
+            await this.fetchData();
+        } catch (error) {
+            this.showToast(this.extractErrors(error, 'Failed to delete tenant.').join(' '), 'error');
+        } finally {
+            this.deletingId = null;
+        }
+    },
+
+    showToast(message, type = 'success') {
+        this.toast = { show: true, message, type };
+        setTimeout(() => { this.toast.show = false; }, 3000);
+    },
+
+    extractErrors(error, fallback) {
+        if (error.response?.status === 422 && error.response.data?.errors) {
+            return Object.values(error.response.data.errors).flat();
+        }
+
+        return [error.response?.data?.message || fallback];
+    },
+}));
+
+Alpine.data('leaveReviewManager', (config = {}) => ({
+    dataUrl: config.dataUrl || '/leaves/pending/data',
+    approveUrlBase: config.approveUrlBase || '/leaves',
+    rejectUrlBase: config.rejectUrlBase || '/leaves',
+    loading: false,
+    processingId: null,
+    tab: config.tab || 'pending',
+    leaves: [],
+    meta: { current_page: 1, last_page: 1, total: 0 },
+    toast: { show: false, message: '', type: 'success' },
+
+    init() {
+        this.fetchData();
+    },
+
+    async fetchData(page = null) {
+        this.loading = true;
+        try {
+            const params = { tab: this.tab };
+            if (page) params.page = page;
+            const { data } = await axios.get(this.dataUrl, { params });
+            this.leaves = data.leaves || [];
+            this.meta = data.meta || this.meta;
+        } catch (error) {
+            this.showToast('Failed to load leave requests.', 'error');
+        } finally {
+            this.loading = false;
+        }
+    },
+
+    async setTab(tab) {
+        this.tab = tab;
+        await this.fetchData(1);
+    },
+
+    async decide(leave, action) {
+        this.processingId = leave.id;
+        try {
+            const endpoint = `${action === 'approve' ? this.approveUrlBase : this.rejectUrlBase}/${leave.id}/${action}`;
+            const { data } = await axios.patch(endpoint, {}, { headers: { Accept: 'application/json' } });
+            const index = this.leaves.findIndex(item => item.id === leave.id);
+            if (index !== -1) this.leaves.splice(index, 1, data.leave);
+            this.showToast(data.message || `Leave request ${action}d.`);
+            await this.fetchData(this.meta.current_page);
+        } catch (error) {
+            this.showToast(error.response?.data?.message || `Failed to ${action} leave request.`, 'error');
+        } finally {
+            this.processingId = null;
+        }
+    },
+
+    statusTone(status) {
+        return {
+            pending: 'bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300',
+            approved: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300',
+            rejected: 'bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-300',
+        }[status] || 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300';
+    },
+
+    showToast(message, type = 'success') {
+        this.toast = { show: true, message, type };
+        setTimeout(() => { this.toast.show = false; }, 3000);
+    },
+}));
+
+Alpine.data('attendanceCard', (config = {}) => ({
+    punchInUrl: config.punchInUrl,
+    pauseUrl: config.pauseUrl,
+    resumeUrl: config.resumeUrl,
+    punchOutUrl: config.punchOutUrl,
+    status: config.status || null,
+    loading: false,
+    flash: { show: false, message: '', type: 'success' },
+
+    async act(url, payload = {}, successMessage = 'Updated.') {
+        this.loading = true;
+        try {
+            const { data } = await axios.post(url, payload, { headers: { Accept: 'application/json' } });
+            this.flash = { show: true, message: data.message || successMessage, type: 'success' };
+            window.location.reload();
+        } catch (error) {
+            this.flash = { show: true, message: error.response?.data?.message || 'Action failed.', type: 'error' };
+        } finally {
+            this.loading = false;
+            setTimeout(() => { this.flash.show = false; }, 3000);
+        }
+    },
+}));
+
+Alpine.data('adminDashboardActions', (config = {}) => ({
+    departmentStoreUrl: config.departmentStoreUrl,
+    assignManagerUrl: config.assignManagerUrl,
+    departmentForm: {
+        name: '',
+        code: '',
+        lead_employee_id: '',
+    },
+    managerForm: {
+        employee_id: '',
+        manager_id: '',
+        effective_date: config.defaultEffectiveDate || '',
+    },
+    departmentSaving: false,
+    managerSaving: false,
+    departmentErrors: {},
+    managerErrors: {},
+    toast: { show: false, message: '', type: 'success' },
+
+    async submitDepartment() {
+        this.departmentSaving = true;
+        this.departmentErrors = {};
+
+        try {
+            const { data } = await axios.post(this.departmentStoreUrl, this.departmentForm, {
+                headers: { Accept: 'application/json' },
+            });
+
+            this.departmentForm = { name: '', code: '', lead_employee_id: '' };
+            this.showToast(data.message || 'Department created successfully.');
+        } catch (error) {
+            if (error.response?.status === 422) {
+                this.departmentErrors = error.response.data.errors || {};
+                return;
+            }
+
+            this.showToast(error.response?.data?.message || 'Unable to create department.', 'error');
+        } finally {
+            this.departmentSaving = false;
+        }
+    },
+
+    async submitManagerAssignment() {
+        this.managerSaving = true;
+        this.managerErrors = {};
+
+        try {
+            const { data } = await axios.post(this.assignManagerUrl, this.managerForm, {
+                headers: { Accept: 'application/json' },
+            });
+
+            this.showToast(data.message || 'Manager assigned successfully.');
+        } catch (error) {
+            if (error.response?.status === 422) {
+                this.managerErrors = error.response.data.errors || {};
+                return;
+            }
+
+            this.showToast(error.response?.data?.message || 'Unable to assign manager.', 'error');
+        } finally {
+            this.managerSaving = false;
+        }
+    },
+
+    fieldError(errors, field) {
+        return errors?.[field]?.[0] || '';
+    },
+
+    showToast(message, type = 'success') {
+        this.toast = { show: true, message, type };
+        setTimeout(() => { this.toast.show = false; }, 3000);
+    },
+}));
+
+Alpine.data('asyncForm', (config = {}) => ({
+    saving: false,
+    errors: {},
+    errorMessage: '',
+    toast: { show: false, message: '', type: 'success' },
+
+    async submit() {
+        this.saving = true;
+        this.errors = {};
+        this.errorMessage = '';
+
+        try {
+            const form = this.$refs.form;
+            const payload = new FormData(form);
+            const { data } = await axios.post(config.url || form.action, payload, {
+                headers: { Accept: 'application/json' },
+            });
+
+            this.showToast(data.message || config.successMessage || 'Saved successfully.');
+
+            if (config.resetOnSuccess) {
+                form.reset();
+            }
+
+            if (data.redirect && config.followRedirect !== false) {
+                window.location.href = data.redirect;
+                return;
+            }
+
+            if (config.reloadOnSuccess) {
+                window.location.reload();
+            }
+        } catch (error) {
+            if (error.response?.status === 422) {
+                this.errors = error.response.data.errors || {};
+                this.errorMessage = Object.values(this.errors).flat()[0] || 'Please fix the highlighted errors.';
+                return;
+            }
+
+            this.errorMessage = error.response?.data?.message || 'Unable to save changes.';
+            this.showToast(this.errorMessage, 'error');
+        } finally {
+            this.saving = false;
+        }
+    },
+
+    firstError(field) {
+        return this.errors?.[field]?.[0] || '';
+    },
+
+    showToast(message, type = 'success') {
+        this.toast = { show: true, message, type };
+        setTimeout(() => { this.toast.show = false; }, 3000);
+    },
+}));
+
+Alpine.data('roleManager', (config = {}) => ({
+    roles: config.roles || [],
+    permissionGroups: config.permissionGroups || [],
+    storeUrl: config.storeUrl,
+    showModal: false,
+    saving: false,
+    errorMessage: '',
+    toast: { show: false, message: '', type: 'success' },
+    form: {
+        id: null,
+        name: '',
+        display_name: '',
+        description: '',
+        permissions: [],
+    },
+
+    openCreate() {
+        this.form = { id: null, name: '', display_name: '', description: '', permissions: [] };
+        this.errorMessage = '';
+        this.showModal = true;
+    },
+
+    openEdit(role) {
+        this.form = {
+            id: role.id,
+            name: role.name,
+            display_name: role.display_name,
+            description: role.description || '',
+            permissions: role.permissions.map((permission) => permission.id),
+        };
+        this.errorMessage = '';
+        this.showModal = true;
+    },
+
+    closeModal() {
+        this.showModal = false;
+    },
+
+    async saveRole() {
+        this.saving = true;
+        this.errorMessage = '';
+
+        try {
+            const payload = {
+                ...this.form,
+                permissions: this.form.permissions,
+            };
+
+            let response;
+            if (this.form.id) {
+                response = await axios.post(`/roles/${this.form.id}`, { ...payload, _method: 'PATCH' }, { headers: { Accept: 'application/json' } });
+            } else {
+                response = await axios.post(this.storeUrl, payload, { headers: { Accept: 'application/json' } });
+            }
+
+            const role = response.data.role;
+            if (this.form.id) {
+                this.roles = this.roles.map((item) => item.id === role.id ? role : item);
+            } else {
+                this.roles.unshift(role);
+            }
+
+            this.showToast(response.data.message || 'Role saved successfully.');
+            this.closeModal();
+        } catch (error) {
+            this.errorMessage = error.response?.data?.message || Object.values(error.response?.data?.errors || {}).flat()[0] || 'Unable to save role.';
+        } finally {
+            this.saving = false;
+        }
+    },
+
+    async removeRole(role) {
+        if (!confirm(`Delete ${role.display_name}?`)) return;
+
+        try {
+            await axios.post(role.delete_url, { _method: 'DELETE' }, { headers: { Accept: 'application/json' } });
+            this.roles = this.roles.filter((item) => item.id !== role.id);
+            this.showToast('Role deleted successfully.');
+        } catch (error) {
+            this.showToast(error.response?.data?.message || 'Unable to delete role.', 'error');
+        }
+    },
+
+    showToast(message, type = 'success') {
+        this.toast = { show: true, message, type };
+        setTimeout(() => { this.toast.show = false; }, 3000);
+    },
+}));
+
+Alpine.data('userRoleManager', (config = {}) => ({
+    users: config.users || [],
+    roles: config.roles || [],
+    selectedUser: null,
+    selectedRoles: [],
+    showModal: false,
+    saving: false,
+    errorMessage: '',
+    toast: { show: false, message: '', type: 'success' },
+
+    openModal(user) {
+        this.selectedUser = user;
+        this.selectedRoles = user.roles.map((role) => role.id);
+        this.errorMessage = '';
+        this.showModal = true;
+    },
+
+    closeModal() {
+        this.showModal = false;
+        this.selectedUser = null;
+        this.selectedRoles = [];
+    },
+
+    async saveRoles() {
+        if (!this.selectedUser) return;
+
+        this.saving = true;
+        this.errorMessage = '';
+
+        try {
+            const { data } = await axios.post(this.selectedUser.update_url, {
+                _method: 'PATCH',
+                roles: this.selectedRoles,
+            }, {
+                headers: { Accept: 'application/json' },
+            });
+
+            const updatedUser = data.user;
+            this.users = this.users.map((user) => user.id === updatedUser.id ? updatedUser : user);
+            this.showToast(data.message || 'User roles updated successfully.');
+            this.closeModal();
+        } catch (error) {
+            this.errorMessage = error.response?.data?.message || Object.values(error.response?.data?.errors || {}).flat()[0] || 'Unable to update user roles.';
+        } finally {
+            this.saving = false;
+        }
+    },
+
+    showToast(message, type = 'success') {
+        this.toast = { show: true, message, type };
+        setTimeout(() => { this.toast.show = false; }, 3000);
+    },
+}));
+
+Alpine.data('leaveDetailManager', (config = {}) => ({
+    approveUrl: config.approveUrl,
+    rejectUrl: config.rejectUrl,
+    deleteUrl: config.deleteUrl,
+    backUrl: config.backUrl,
+    loading: false,
+    toast: { show: false, message: '', type: 'success' },
+
+    async act(url, method = 'PATCH', successMessage = 'Updated.') {
+        this.loading = true;
+
+        try {
+            const payload = method === 'DELETE' ? { _method: 'DELETE' } : { _method: method };
+            const { data } = await axios.post(url, payload, {
+                headers: { Accept: 'application/json' },
+            });
+
+            this.toast = { show: true, message: data.message || successMessage, type: 'success' };
+            window.location.href = data.redirect || this.backUrl || window.location.href;
+        } catch (error) {
+            this.toast = { show: true, message: error.response?.data?.message || error.response?.data?.error || 'Action failed.', type: 'error' };
+            this.loading = false;
+            setTimeout(() => { this.toast.show = false; }, 3000);
+            return;
+        }
+
+        this.loading = false;
     },
 }));
 
@@ -1646,6 +2613,67 @@ Alpine.data('workflowInbox', (config = {}) => ({
             this.toast.show = false;
         }, 3000);
     },
+}));
+
+Alpine.data('commandPalette', () => ({
+    isOpen: false,
+    query: '',
+    selectedIndex: 0,
+    items: [
+        { title: 'My Profile', category: 'Self-Service', url: '/self-service/profile', type: 'page' },
+        { title: 'My Leaves', category: 'Self-Service', url: '/leaves/my', type: 'page' },
+        { title: 'Workflows & Inbox', category: 'Operations', url: '/workflows', type: 'page' },
+        { title: 'Documents', category: 'Self-Service', url: '/documents', type: 'page' },
+        { title: 'Performance', category: 'Growth', url: '/performance', type: 'page' },
+        { title: 'Employee Directory', category: 'Company', url: '/employees', type: 'page' },
+        { title: 'Departments', category: 'Company', url: '/departments', type: 'page' },
+        { title: 'Policies', category: 'Company', url: '/policies', type: 'page' },
+        { title: 'Asset Management', category: 'Operations', url: '/assets', type: 'page' },
+        { title: 'New Leave Request', category: 'Quick Action', url: '/leaves/my?action=new', type: 'action' },
+        { title: 'New Workflow Request', category: 'Quick Action', url: '/workflows?action=new', type: 'action' },
+        { title: 'Night Mode', category: 'Theme', url: '#theme-toggle', type: 'action' },
+    ],
+
+    open() {
+        this.isOpen = true;
+        this.query = '';
+        this.selectedIndex = 0;
+        this.$nextTick(() => this.$refs.searchInput.focus());
+    },
+
+    close() {
+        this.isOpen = false;
+    },
+
+    get filteredItems() {
+        if (!this.query) return this.items.slice(0, 8);
+        const q = this.query.toLowerCase();
+        return this.items.filter(i => 
+            i.title.toLowerCase().includes(q) || 
+            i.category.toLowerCase().includes(q)
+        ).slice(0, 10);
+    },
+
+    next() {
+        this.selectedIndex = (this.selectedIndex + 1) % this.filteredItems.length;
+    },
+
+    prev() {
+        this.selectedIndex = (this.selectedIndex - 1 + this.filteredItems.length) % this.filteredItems.length;
+    },
+
+    select() {
+        const item = this.filteredItems[this.selectedIndex];
+        if (!item) return;
+
+        if (item.url === '#theme-toggle') {
+            document.getElementById('theme-toggle-topbar')?.click();
+            this.close();
+            return;
+        }
+
+        window.location.href = item.url;
+    }
 }));
 
 Alpine.start();

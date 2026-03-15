@@ -1,48 +1,65 @@
-{{--
-    Public top navbar — shown on login, signup, and other guest pages.
-    Contains: PeopleFlow branding on left, dark mode toggle on right.
---}}
-<nav class="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur dark:border-slate-800 dark:bg-slate-950/80">
-    <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
+{{-- Public top navbar --}}
+<div class="fixed top-0 left-0 right-0 z-50 flex justify-center py-0 transition-all duration-500 ease-in-out"
+     x-data="{ scrolled: false }"
+     @scroll.window="scrolled = (window.pageYOffset > 50)"
+     :class="scrolled ? 'pt-4' : 'pt-0'">
+    
+    <nav :class="scrolled 
+            ? 'w-[95%] max-w-7xl rounded-full border border-white/40 bg-white/70 shadow-[0_20px_50px_rgba(0,0,0,0.05)] backdrop-blur-2xl px-10 h-16' 
+            : 'w-full border-b border-slate-100 bg-white/70 backdrop-blur-xl px-12 h-24'"
+         class="mx-auto flex flex-none items-center justify-between transition-all duration-500 ease-in-out">
 
         {{-- Brand --}}
-        <a href="{{ route('login') }}" class="flex items-center gap-2.5 select-none">
-            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-400 to-blue-500 shadow-sm">
-                <span class="text-base font-bold text-white">P</span>
+        <a href="/" class="flex items-center gap-2.5 transition-transform duration-500"
+           :class="scrolled ? 'scale-90' : 'scale-100'">
+            <div class="flex h-10 w-10 items-center justify-center rounded-[12px] bg-gradient-to-br from-violet-500 to-indigo-600 shadow-lg shadow-violet-500/20">
+                <span class="text-xl font-black text-white">PF</span>
             </div>
-            <span class="text-lg font-bold text-slate-900 dark:text-white tracking-tight">PeopleFlow</span>
-            <span class="hidden sm:inline-block rounded-full bg-cyan-100 dark:bg-cyan-900/40 px-2 py-0.5 text-xs font-semibold text-cyan-700 dark:text-cyan-300">HRMS</span>
+            <span class="text-xl font-black tracking-tight text-slate-900 uppercase tracking-widest hidden sm:block">PeopleFlow</span>
         </a>
 
-        {{-- Right side --}}
-        <div class="flex items-center gap-3">
-            {{-- Login / Signup links (contextual) --}}
-            @if(request()->routeIs('company-signup.*'))
-                <a href="{{ route('login') }}"
-                   class="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">
-                    Sign In
-                </a>
-            @elseif(request()->routeIs('login'))
-                <a href="{{ route('company-signup.create') }}"
-                   class="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">
-                    Register Company
+        {{-- Center Navigation --}}
+        <nav class="hidden md:flex items-center gap-10">
+            <a href="{{ route('public.features') }}" 
+               class="text-[10px] font-black uppercase tracking-[0.2em] transition-all hover:text-violet-600"
+               :class="scrolled ? 'text-slate-500' : ({{ request()->routeIs('public.features') ? 'true' : 'false' }} ? 'text-violet-600' : 'text-slate-400')">
+               Features
+            </a>
+            <a href="{{ route('public.solutions') }}" 
+               class="text-[10px] font-black uppercase tracking-[0.2em] transition-all hover:text-violet-600"
+               :class="scrolled ? 'text-slate-500' : ({{ request()->routeIs('public.solutions') ? 'true' : 'false' }} ? 'text-violet-600' : 'text-slate-400')">
+               Solutions
+            </a>
+            <a href="{{ route('public.pricing') }}" 
+               class="text-[10px] font-black uppercase tracking-[0.2em] transition-all hover:text-violet-600"
+               :class="scrolled ? 'text-slate-500' : ({{ request()->routeIs('public.pricing') ? 'true' : 'false' }} ? 'text-violet-600' : 'text-slate-400')">
+               Pricing
+            </a>
+            <a href="{{ route('public.docs') }}" 
+               class="text-[10px] font-black uppercase tracking-[0.2em] transition-all hover:text-violet-600"
+               :class="scrolled ? 'text-slate-500' : ({{ request()->routeIs('public.docs') ? 'true' : 'false' }} ? 'text-violet-600' : 'text-slate-400')">
+               Documentation
+            </a>
+        </nav>
+
+        {{-- Actions --}}
+        <div class="flex items-center gap-6">
+            @if(!request()->routeIs('login'))
+                <a href="{{ route('login') }}" class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-900 hover:text-violet-600 transition-transform duration-500"
+                   :class="scrolled ? 'scale-90' : 'scale-100'">
+                    Log In
                 </a>
             @endif
 
-            {{-- Dark / Light toggle --}}
-            <button id="theme-toggle" type="button"
-                    class="flex items-center gap-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-200">
-                {{-- Moon icon --}}
-                <svg class="h-4 w-4 block dark:hidden" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
-                </svg>
-                {{-- Sun icon --}}
-                <svg class="h-4 w-4 hidden dark:block" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/>
-                </svg>
-                <span class="hidden sm:inline dark:hidden">Dark</span>
-                <span class="hidden sm:hidden dark:sm:inline">Light</span>
-            </button>
+            @if(!request()->routeIs('company-signup.create'))
+                <a href="{{ route('company-signup.create') }}" 
+                    class="rounded-full bg-slate-900 px-6 py-3 text-[9px] font-black uppercase tracking-[0.2em] text-white shadow-xl shadow-slate-900/10 transition-all hover:bg-violet-600 hover:shadow-violet-600/20 active:scale-[0.98]"
+                    :class="scrolled ? 'scale-90' : 'scale-100'">
+                    Register Company
+                </a>
+            @endif
         </div>
-    </div>
-</nav>
+    </nav>
+</div>
+{{-- Spacer to prevent layout shift --}}
+<div class="h-24"></div>

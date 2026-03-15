@@ -1,186 +1,361 @@
 @extends('hrms.layouts.app')
 
-@section('title', 'My Leave History - PeopleFlow HRMS')
+@section('title', 'Time Off - PeopleFlow HRMS')
 
 @section('content')
-<div x-data="leaveManager()" x-init="init()">
-    <div class="mb-8 flex items-center justify-between">
-        <div>
-            <h1 class="text-3xl font-black text-slate-800 dark:text-white tracking-tight">My Leave History</h1>
-            <p class="text-slate-500 dark:text-slate-400 font-medium">Track and manage your leave requests</p>
-        </div>
-        <div class="flex gap-3">
-            <a href="{{ route('leaves.index') }}" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 transition-all">Who's Away Calendar</a>
-            <button @click="openModal()" class="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-bold text-white shadow-lg shadow-indigo-500/20 hover:bg-indigo-700 transition-all">+ New Request</button>
+<div x-data="leaveManager()" x-init="init()" class="max-w-[1200px] mx-auto space-y-8 pb-10">
+    {{-- Hero Section --}}
+    <div class="relative overflow-hidden mb-8 rounded-3xl bg-slate-950 p-6 shadow-xl shadow-slate-950/20 border border-white/5">
+        {{-- Soft, Ethereal Glows --}}
+        <div class="absolute -right-32 -top-32 h-64 w-64 rounded-full bg-indigo-500/10 blur-[80px] pointer-events-none"></div>
+        <div class="absolute -left-32 -bottom-32 h-64 w-64 rounded-full bg-cyan-500/10 blur-[80px] pointer-events-none"></div>
+
+        <div class="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div class="space-y-3">
+                @if(isset($error))
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 text-[10px] font-bold">
+                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <span>{{ $error }}</span>
+                    </div>
+                @endif
+                
+                <div class="flex items-center gap-2">
+                    <div class="h-1.5 w-1.5 rounded-full bg-cyan-500/60 blur-[1px]"></div>
+                    <span class="text-[9px] font-black uppercase tracking-[0.2em] text-cyan-400/60">Balance Overview</span>
+                </div>
+
+                <div class="space-y-1">
+                    <h1 class="text-2xl lg:text-3xl font-black text-white tracking-tight">
+                        {{ isset($employee) ? 'Hi, ' . explode(' ', $employee->full_name)[0] : 'Hello' }} 👋
+                    </h1>
+                    <p class="text-xs text-slate-400 font-medium leading-relaxed max-w-lg">
+                        You have <span class="text-white" x-text="Object.values(balances).reduce((a, b) => a + b.remaining, 0)"></span> days left to recharge.
+                    </p>
+                </div>
+                
+                <div class="flex items-center gap-4 pt-1">
+                    <a href="{{ route('leaves.index') }}" class="group flex items-center gap-2 text-[10px] font-bold text-slate-500 hover:text-cyan-400 transition-colors">
+                        <div class="h-6 w-6 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-cyan-500/10 transition-colors">
+                            <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
+                        </div>
+                        <span>Who's Away Calendar</span>
+                    </a>
+                </div>
+            </div>
+
+            <div>
+                <button @click="openModal()" class="group relative inline-flex h-11 items-center gap-2.5 rounded-full bg-white text-slate-900 px-6 text-xs font-black uppercase tracking-widest shadow-xl shadow-white/5 transition-all hover:scale-105 active:scale-95">
+                    <div class="h-5 w-5 rounded-full bg-slate-900 flex items-center justify-center">
+                        <svg class="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                    </div>
+                    <span>Book Leave</span>
+                </button>
+            </div>
         </div>
     </div>
 
-    <div class="rounded-[2rem] border border-slate-200 bg-white/50 backdrop-blur-xl overflow-hidden shadow-sm dark:border-slate-800 dark:bg-slate-900/50 relative min-h-[300px]">
-        <div x-show="loading" class="absolute inset-x-0 top-0 h-1 overflow-hidden bg-slate-100 dark:bg-slate-800 rounded-t-[2rem]">
-            <div class="absolute h-full w-1/3 bg-indigo-500 dark:bg-indigo-400 animate-pulse"></div>
-        </div>
+    {{-- Main Content Grid --}}
+    <div class="grid grid-cols-1 gap-10 lg:grid-cols-12">
+        {{-- Left Column: Balances & History --}}
+        <div class="lg:col-span-8 space-y-10">
+            {{-- Balances Grid --}}
+            <section>
+                <div class="flex items-center justify-between mb-5">
+                    <h3 class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 flex items-center gap-3">
+                        Your Allowances
+                        <span class="h-px w-16 bg-slate-100 dark:bg-white/5"></span>
+                    </h3>
+                    <template x-if="loading">
+                        <div class="flex items-center gap-2">
+                            <div class="h-2.5 w-2.5 animate-spin rounded-full border-2 border-cyan-500 border-t-transparent"></div>
+                            <span class="text-[9px] font-bold text-slate-400 animate-pulse">Updating...</span>
+                        </div>
+                    </template>
+                </div>
 
-        <table class="w-full text-left border-collapse">
-            <thead>
-                <tr class="bg-slate-50/50 dark:bg-slate-800/50">
-                    <th class="px-6 py-4 text-xs font-bold uppercase tracking-widest text-slate-400">Leave Type</th>
-                    <th class="px-6 py-4 text-xs font-bold uppercase tracking-widest text-slate-400">Duration</th>
-                    <th class="px-6 py-4 text-xs font-bold uppercase tracking-widest text-slate-400">Requested On</th>
-                    <th class="px-6 py-4 text-xs font-bold uppercase tracking-widest text-slate-400">Status</th>
-                    <th class="px-6 py-4 text-xs font-bold uppercase tracking-widest text-slate-400">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-                <template x-for="leave in leaves" :key="leave.id">
-                    <tr class="group transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
-                        <td class="px-6 py-5">
-                            <div class="flex items-center gap-3">
-                                <div class="flex h-10 w-10 items-center justify-center rounded-xl"
-                                    :class="{
-                                        'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400': leave.leave_type === 'annual',
-                                        'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400': leave.leave_type === 'sick',
-                                        'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400': leave.leave_type === 'casual',
-                                        'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400': !['annual', 'sick', 'casual'].includes(leave.leave_type)
-                                    }">
-                                    <template x-if="leave.leave_type === 'annual'">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                    </template>
-                                    <template x-if="leave.leave_type === 'sick'">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.022.547l-2.387 2.387a2 2 0 102.828 2.828l1.414-1.414 1.414 1.414a2 2 0 002.828 0l1.414-1.414 1.414 1.414a2 2 0 002.828 0l1.414-1.414 1.414 1.414a2 2 0 102.828-2.828l-2.387-2.387z"/></svg>
-                                    </template>
-                                    <template x-if="!['annual', 'sick'].includes(leave.leave_type)">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                    </template>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {{-- Skeleton Loader --}}
+                    <template x-if="loading && Object.keys(balances).length === 0">
+                        <template x-for="i in 4">
+                            <div class="animate-pulse rounded-2xl border border-slate-100 bg-white p-5 dark:border-white/5 dark:bg-slate-900/50">
+                                <div class="flex justify-between mb-4">
+                                    <div class="h-8 w-8 rounded-xl bg-slate-100 dark:bg-white/5"></div>
+                                    <div class="h-3 w-10 rounded bg-slate-100 dark:bg-white/5"></div>
                                 </div>
-                                <div>
-                                    <p class="font-bold text-slate-700 dark:text-slate-200 capitalize" x-text="leave.leave_type + ' Leave'"></p>
-                                    <p class="text-xs text-slate-400 font-medium capitalize" x-text="leave.leave_session.replace('_', ' ')"></p>
-                                </div>
+                                <div class="h-6 w-20 rounded bg-slate-200 dark:bg-white/10 mb-3"></div>
+                                <div class="h-1.5 w-full rounded-full bg-slate-50 dark:bg-white/5"></div>
                             </div>
-                        </td>
-                        <td class="px-6 py-5">
-                            <p class="font-bold text-slate-700 dark:text-slate-200" x-text="formatDateShort(leave.start_date) + ' - ' + formatDateShort(leave.end_date)"></p>
-                            <p class="text-xs text-slate-400 font-medium" x-text="leave.days + ' days requested'"></p>
-                        </td>
-                        <td class="px-6 py-5">
-                            <p class="text-sm font-bold text-slate-600 dark:text-slate-400" x-text="formatDateFull(leave.created_at)"></p>
-                        </td>
-                        <td class="px-6 py-5">
-                            <template x-if="leave.status === 'approved'">
-                                <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-[10px] font-black uppercase text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
-                                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span> Approved
-                                </span>
-                            </template>
-                            <template x-if="leave.status === 'rejected'">
-                                <span class="inline-flex items-center gap-1.5 rounded-full bg-rose-100 px-3 py-1 text-[10px] font-black uppercase text-rose-700 dark:bg-rose-900/30 dark:text-rose-400">
-                                    <span class="h-1.5 w-1.5 rounded-full bg-rose-500"></span> Rejected
-                                </span>
-                            </template>
-                            <template x-if="leave.status === 'pending'">
-                                <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-[10px] font-black uppercase text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-                                    <span class="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse"></span> Pending
-                                </span>
-                            </template>
-                        </td>
-                        <td class="px-6 py-5">
-                            <div class="flex items-center gap-3">
-                                <a :href="'/leaves/' + leave.id" class="text-slate-400 hover:text-indigo-600 transition-colors" title="View Details">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                </a>
-                                <template x-if="leave.status === 'pending'">
-                                    <div class="flex items-center gap-3">
-                                        <button @click="editLeave(leave)" class="text-slate-400 hover:text-amber-500 transition-colors" title="Edit Request">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                        </button>
-                                        <button @click="deleteLeave(leave.id)" class="text-slate-400 hover:text-rose-500 transition-colors" title="Delete Request">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                        </button>
+                        </template>
+                    </template>
+
+                    {{-- Actual Content --}}
+                    <template x-if="!loading || Object.keys(balances).length > 0">
+                        <template x-for="(bal, type) in balances" :key="type">
+                            <div class="group relative rounded-[2rem] border border-slate-100 bg-white p-6 shadow-sm transition-all hover:shadow-2xl hover:shadow-slate-200/50 dark:border-white/5 dark:bg-slate-900/50 dark:hover:shadow-none">
+                                <div class="flex items-center justify-between mb-5">
+                                    <div class="h-10 w-10 flex items-center justify-center rounded-2xl transition-all duration-500 group-hover:scale-110"
+                                        :class="{
+                                            'bg-rose-50 text-rose-500 dark:bg-rose-500/10': type === 'annual',
+                                            'bg-emerald-50 text-emerald-500 dark:bg-emerald-500/10': type === 'sick',
+                                            'bg-violet-50 text-violet-500 dark:bg-violet-500/10': type === 'casual',
+                                            'bg-slate-50 text-slate-500 dark:bg-slate-500/10': type === 'unpaid'
+                                        }">
+                                        <template x-if="type === 'annual'"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg></template>
+                                        <template x-if="type === 'sick'"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A3.333 3.333 0 0016.5 3c-1.833 0-3.333 1.5-3.333 3.333 0 1.833 1.5 3.333 3.333 3.333a3.333 3.333 0 003.333-3.333c0-1.833-1.5-3.333-3.333-3.333z" /></svg></template>
+                                        <template x-if="type === 'casual'"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></template>
+                                        <template x-if="type === 'unpaid'"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></template>
                                     </div>
-                                </template>
-                            </div>
-                        </td>
-                    </tr>
-                </template>
-                <template x-if="leaves.length === 0 && !loading">
-                    <tr>
-                        <td colspan="5" class="px-6 py-12 text-center">
-                            <div class="flex flex-col items-center justify-center">
-                                <div class="rounded-full bg-slate-50 p-6 dark:bg-slate-800">
-                                    <svg class="w-12 h-12 text-slate-300 dark:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    <span class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400" x-text="type"></span>
                                 </div>
-                                <p class="mt-4 text-slate-500 font-bold">No leave requests found.</p>
-                                <button @click="openModal()" class="mt-2 text-indigo-600 font-bold hover:underline">Submit your first request</button>
+                                <div class="flex items-baseline gap-2">
+                                    <span class="text-4xl font-black text-slate-900 dark:text-white tracking-tight" x-text="bal.remaining"></span>
+                                    <span class="text-xs font-bold text-slate-400">/ <span x-text="bal.limit"></span> days</span>
+                                </div>
+                                <div class="mt-6 flex items-center justify-between text-[9px] font-bold uppercase tracking-widest text-slate-400">
+                                    <span>Used <span class="text-slate-900 dark:text-white" x-text="bal.used"></span> days</span>
+                                    <span x-text="Math.round((bal.used / bal.limit) * 100) + '%'"></span>
+                                </div>
+                                <div class="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-slate-50 dark:bg-white/5">
+                                    <div class="h-full rounded-full transition-all duration-1000" 
+                                        :class="{
+                                            'bg-rose-400': type === 'annual',
+                                            'bg-emerald-400': type === 'sick',
+                                            'bg-violet-400': type === 'casual',
+                                            'bg-slate-400': type === 'unpaid'
+                                        }"
+                                        :style="'width: ' + Math.min(100, (bal.used / bal.limit) * 100) + '%'"></div>
+                                </div>
                             </div>
-                        </td>
-                    </tr>
-                </template>
-            </tbody>
-        </table>
+                        </template>
+                    </template>
+                </div>
+            </section>
+
+            {{-- History Section --}}
+            <section>
+                <div class="flex items-center justify-between mb-5">
+                    <h3 class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 flex items-center gap-3">
+                        Recent Activity
+                        <span class="h-px w-12 bg-slate-100 dark:bg-white/5"></span>
+                    </h3>
+                </div>
+                <div class="rounded-3xl bg-white shadow-xl shadow-slate-200/20 dark:bg-slate-900 dark:shadow-none border border-slate-50 dark:border-white/5 overflow-hidden">
+                    <div class="overflow-x-auto text-nowrap">
+                        <table class="w-full text-left">
+                            <tbody class="divide-y divide-slate-50 dark:divide-white/5">
+                                <template x-if="loading && leaves.length === 0">
+                                    <template x-for="i in 3">
+                                        <tr class="animate-pulse">
+                                            <td class="px-6 py-4"><div class="h-3.5 w-24 bg-slate-50 dark:bg-white/5 rounded"></div></td>
+                                            <td class="px-6 py-4"><div class="h-3.5 w-16 bg-slate-50 dark:bg-white/5 rounded"></div></td>
+                                            <td class="px-6 py-4 text-right"><div class="h-3.5 w-20 bg-slate-50 dark:bg-white/5 rounded ml-auto"></div></td>
+                                        </tr>
+                                    </template>
+                                </template>
+                                <template x-if="!loading || leaves.length > 0">
+                                    <template x-for="leave in leaves" :key="leave.id">
+                                        <tr class="group hover:bg-slate-50/50 dark:hover:bg-white/[0.02] transition-colors">
+                                            <td class="px-6 py-5">
+                                                <div class="flex items-center gap-4">
+                                                    <div class="h-10 w-10 flex items-center justify-center rounded-[14px] text-[10px] font-bold shadow-sm"
+                                                        :class="{
+                                                            'bg-rose-50 text-rose-500 dark:bg-rose-500/10': leave.leave_type === 'annual',
+                                                            'bg-emerald-50 text-emerald-500 dark:bg-emerald-500/10': leave.leave_type === 'sick',
+                                                            'bg-violet-50 text-violet-500 dark:bg-violet-500/10': leave.leave_type === 'casual',
+                                                            'bg-slate-50 text-slate-500 dark:bg-slate-500/10': leave.leave_type === 'unpaid'
+                                                        }">
+                                                        <span x-text="leave.leave_type.charAt(0).toUpperCase()"></span>
+                                                    </div>
+                                                    <div>
+                                                        <p class="text-[13px] font-bold text-slate-900 dark:text-white capitalize" x-text="leave.leave_type"></p>
+                                                        <p class="text-[10px] text-slate-400 font-medium" x-text="formatDateShort(leave.start_date) + ' → ' + formatDateShort(leave.end_date)"></p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-5">
+                                                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 dark:bg-white/5 px-2 py-1 rounded-lg" x-text="leave.days + ' Days'"></span>
+                                            </td>
+                                            <td class="px-6 py-5 text-right">
+                                                <div class="flex items-center justify-end gap-4">
+                                                    <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-wider"
+                                                        :class="{
+                                                            'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10': leave.status === 'approved',
+                                                            'bg-rose-50 text-rose-600 dark:bg-rose-500/10': leave.status === 'rejected',
+                                                            'bg-amber-50 text-amber-600 dark:bg-amber-500/10': leave.status === 'pending'
+                                                        }">
+                                                        <span class="h-1 w-1 rounded-full bg-current"></span>
+                                                        <span x-text="leave.status"></span>
+                                                    </span>
+                                                    
+                                                    <template x-if="leave.status === 'pending'">
+                                                        <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            <button @click="editLeave(leave)" class="p-2 text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors">
+                                                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                                                            </button>
+                                                            <button @click="deleteLeave(leave.id)" class="p-2 text-slate-300 hover:text-rose-500 transition-colors">
+                                                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                                            </button>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </template>
+                                <template x-if="!loading && leaves.length === 0">
+                                    <tr>
+                                        <td colspan="3" class="px-6 py-12 text-center">
+                                            <p class="text-sm font-bold text-slate-400">No leave history found.</p>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        {{-- Right Column: Side Info --}}
+        <div class="lg:col-span-4 space-y-10">
+            {{-- Away Today --}}
+            <section>
+                <div class="flex items-center justify-between mb-5">
+                    <h3 class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Away Today</h3>
+                    <span class="rounded-full bg-slate-50 px-2.5 py-1 text-[9px] font-black text-slate-400 dark:bg-white/5" x-text="whoIsAway.today.length"></span>
+                </div>
+                <div class="grid gap-3">
+                    <template x-if="whoIsAway.today.length === 0">
+                        <div class="rounded-3xl border border-dashed border-slate-100 p-8 text-center dark:border-white/5">
+                            <p class="text-[10px] font-bold text-slate-300 italic">Everyone's here today</p>
+                        </div>
+                    </template>
+                    <template x-for="person in whoIsAway.today" :key="person.id">
+                        <div class="group flex items-center gap-4 rounded-[1.5rem] bg-white p-3.5 shadow-sm border border-slate-50 transition-all hover:shadow-xl hover:shadow-slate-200/50 dark:bg-slate-900 dark:border-white/5 dark:hover:shadow-none">
+                            <div class="relative">
+                                <template x-if="person.photo">
+                                    <img :src="person.photo" class="h-9 w-9 rounded-2xl object-cover shadow-sm grayscale group-hover:grayscale-0 transition-all">
+                                </template>
+                                <template x-if="!person.photo">
+                                    <div class="h-9 w-9 flex items-center justify-center rounded-2xl bg-slate-50 text-xs font-bold text-slate-400 dark:bg-white/5" x-text="person.name.charAt(0)"></div>
+                                </template>
+                                <div class="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white bg-rose-400 dark:border-slate-900"></div>
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <p class="truncate text-[13px] font-bold text-slate-900 dark:text-white" x-text="person.name"></p>
+                                <p class="truncate text-[9px] font-black text-slate-400 uppercase tracking-widest" x-text="person.type"></p>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </section>
+
+            {{-- Upcoming Away --}}
+            <section>
+                <h3 class="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-6">Upcoming Away</h3>
+                <div class="space-y-4">
+                    <template x-if="whoIsAway.upcoming.length === 0">
+                        <p class="text-xs font-medium text-slate-400 italic">No upcoming away time.</p>
+                    </template>
+                    <template x-for="person in whoIsAway.upcoming" :key="person.id">
+                        <div class="flex items-center gap-3">
+                            <div class="h-1.5 w-1.5 rounded-full bg-slate-200 dark:bg-slate-700"></div>
+                            <p class="text-xs font-bold text-slate-700 dark:text-slate-300">
+                                <span class="text-slate-900 dark:text-white" x-text="person.name"></span>
+                                <span class="mx-1 text-slate-400 font-medium">from</span>
+                                <span class="text-cyan-600 dark:text-cyan-400" x-text="person.from"></span>
+                            </p>
+                        </div>
+                    </template>
+                </div>
+            </section>
+
+            {{-- My Stats Summary --}}
+            <section class="relative overflow-hidden rounded-[2rem] bg-slate-950 p-6 shadow-xl shadow-slate-950/20 border border-white/5">
+                <div class="absolute -right-12 -top-12 h-24 w-24 rounded-full bg-indigo-500/20 blur-2xl pointer-events-none"></div>
+                <div class="relative space-y-5">
+                    <h3 class="text-[9px] font-black uppercase tracking-[0.2em] text-indigo-400/60">Insight</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-3xl font-black text-white tracking-tight" x-text="stats.approved + stats.pending"></p>
+                            <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest mt-1">Total</p>
+                        </div>
+                        <div>
+                            <p class="text-3xl font-black text-amber-400 tracking-tight" x-text="stats.pending"></p>
+                            <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest mt-1">Pending</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
     </div>
 
-    {{-- Add/Edit Leave Modal --}}
-    <div x-show="showModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm" style="display: none;" x-transition>
-        <div @click.away="showModal = false" class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-lg p-8 shadow-2xl">
-            <div class="mb-6">
-                <h3 class="text-xl font-bold text-slate-900 dark:text-white" x-text="isEditing ? 'Update Leave Request' : 'New Leave Request'"></h3>
-                <p class="text-sm text-slate-500">Provide details for your absence</p>
+    {{-- Request Modal --}}
+    <div x-show="showModal" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm" x-transition.opacity>
+        <div @click.away="showModal = false" class="w-full max-w-sm rounded-[24px] bg-white shadow-2xl dark:bg-slate-900 border border-slate-200 dark:border-white/5 overflow-hidden" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="scale-95 opacity-0">
+            <div class="flex items-center justify-between border-b border-slate-50 px-6 py-4 dark:border-white/5">
+                <h3 class="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-[0.2em]" x-text="isEditing ? 'Edit Request' : 'Book Time Off'"></h3>
+                <button @click="showModal = false" class="text-slate-400 hover:text-slate-900 transition-colors">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
             </div>
             
-            <form @submit.prevent="saveLeave" class="space-y-4">
-                <template x-if="isAdmin">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Employee</label>
-                        <select x-model="form.employee_id" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-white" required>
-                            <option value="">Select Employee</option>
-                            <template x-for="emp in employees" :key="emp.id">
-                                <option :value="emp.id" x-text="emp.full_name"></option>
-                            </template>
-                        </select>
-                    </div>
-                </template>
+            <div class="p-6">
+                <form @submit.prevent="saveLeave" id="leaveForm" class="space-y-5">
+                    <template x-if="isAdmin">
+                        <div class="space-y-2">
+                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Team Member</label>
+                            <select x-model="form.employee_id" class="w-full rounded-2xl border border-slate-100 bg-slate-50/50 px-4 py-3 text-sm font-bold text-slate-900 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10 dark:border-white/5 dark:bg-white/5 dark:text-white" required>
+                                <option value="">Select Employee</option>
+                                <template x-for="emp in employees" :key="emp.id">
+                                    <option :value="emp.id" x-text="emp.full_name"></option>
+                                </template>
+                            </select>
+                        </div>
+                    </template>
 
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Leave Type</label>
-                        <select x-model="form.leave_type" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-white" required>
-                            <option value="">Select Type</option>
-                            <option value="annual">Annual</option>
-                            <option value="sick">Sick</option>
-                            <option value="casual">Casual</option>
-                            <option value="unpaid">Unpaid</option>
-                        </select>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-2">
+                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Leave Type</label>
+                            <select x-model="form.leave_type" class="w-full rounded-2xl border border-slate-100 bg-slate-50/50 px-3 py-3 text-xs font-bold text-slate-900 focus:border-cyan-500 dark:border-white/5 dark:bg-white/5 dark:text-white" required>
+                                <option value="annual">Annual</option>
+                                <option value="sick">Sick</option>
+                                <option value="casual">Casual</option>
+                                <option value="unpaid">Unpaid</option>
+                            </select>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Duration</label>
+                            <select x-model="form.leave_session" class="w-full rounded-2xl border border-slate-100 bg-slate-50/50 px-3 py-3 text-xs font-bold text-slate-900 focus:border-cyan-500 dark:border-white/5 dark:bg-white/5 dark:text-white" required>
+                                <option value="full_day">Full Day</option>
+                                <option value="morning">Morning</option>
+                                <option value="evening">Evening</option>
+                            </select>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Session</label>
-                        <select x-model="form.leave_session" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-white" required>
-                            <option value="full_day">Full day</option>
-                            <option value="morning">Morning</option>
-                            <option value="evening">Evening</option>
-                        </select>
-                    </div>
-                </div>
 
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Start Date</label>
-                        <input type="date" x-model="form.start_date" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm appearance-auto dark:border-slate-700 dark:bg-slate-900 dark:text-white" required>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-2">
+                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Start Date</label>
+                            <input type="date" x-model="form.start_date" class="w-full rounded-2xl border border-slate-100 bg-slate-50/50 px-3 py-3 text-xs font-bold text-slate-900 dark:border-white/5 dark:bg-white/5 dark:text-white" required>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest">End Date</label>
+                            <input type="date" x-model="form.end_date" class="w-full rounded-2xl border border-slate-100 bg-slate-50/50 px-3 py-3 text-xs font-bold text-slate-900 dark:border-white/5 dark:bg-white/5 dark:text-white" required>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">End Date</label>
-                        <input type="date" x-model="form.end_date" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm appearance-auto dark:border-slate-700 dark:bg-slate-900 dark:text-white" required>
+
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Message (Optional)</label>
+                        <textarea x-model="form.reason" rows="2" class="w-full rounded-2xl border border-slate-100 bg-slate-50/50 px-4 py-3 text-sm font-medium text-slate-900 focus:border-cyan-500 dark:border-white/5 dark:bg-white/5 dark:text-white" placeholder="Adding some context..."></textarea>
                     </div>
-                </div>
+                </form>
+            </div>
 
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Reason</label>
-                    <textarea x-model="form.reason" rows="3" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-white" required></textarea>
-                </div>
-
-                <div class="mt-8 flex gap-3 pt-4 border-t border-slate-100 dark:border-slate-700/50">
-                    <button type="submit" class="flex-1 rounded-xl bg-indigo-600 py-3 text-sm font-bold text-white hover:bg-indigo-700 shadow-md">Submit</button>
-                    <button type="button" @click="showModal = false" class="flex-1 rounded-xl border border-slate-200 py-3 text-sm font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700">Cancel</button>
-                </div>
-            </form>
+            <div class="flex justify-end gap-3 bg-slate-50/50 px-6 py-4 dark:bg-white/5">
+                <button @click="showModal = false" class="text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">Cancel</button>
+                <button form="leaveForm" @click="saveLeave()" class="rounded-full bg-slate-900 px-6 py-2.5 text-[10px] font-black uppercase tracking-widest text-white shadow-xl shadow-slate-900/20 hover:bg-cyan-600 hover:shadow-cyan-600/20 transition-all active:scale-95 dark:bg-cyan-500 dark:text-slate-900">Request</button>
+            </div>
         </div>
     </div>
 </div>

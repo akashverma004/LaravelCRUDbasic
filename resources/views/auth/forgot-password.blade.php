@@ -1,66 +1,74 @@
-<x-guest-layout>
-    <div class="min-h-screen transition-colors duration-300 dark:bg-gradient-to-br dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50 flex items-center justify-center px-4">
-        <div class="w-full max-w-md">
-            <!-- Theme Toggle Button -->
-            <div class="flex justify-end mb-4">
-                <button id="theme-toggle" type="button" class="p-2 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors duration-200">
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
-                </button>
-            </div>
+<x-guest-layout title="Key Recovery - PeopleFlow HRMS">
+    @include('hrms.components.public-navbar')
 
-            <!-- Password Reset Form -->
-            <form method="POST" action="{{ route('password.email') }}" class="transition-colors duration-300 dark:bg-slate-800 bg-white dark:border-slate-700 border-slate-200 border rounded-2xl shadow-2xl overflow-hidden">
-                <!-- Header Section with Logo -->
-                <div class="transition-colors duration-300 dark:bg-gradient-to-r dark:from-slate-750 dark:to-slate-800 bg-gradient-to-r from-slate-100 to-slate-200 dark:border-slate-700 px-8 py-8 text-center border-b border-slate-200">
-                    <a href="{{ route('dashboard') }}" class="inline-block mb-4">
-                        <div class="w-14 h-14 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-xl flex items-center justify-center">
-                            <span class="text-white font-bold text-2xl">P</span>
-                        </div>
-                    </a>
-                    <h1 class="text-2xl font-bold dark:text-white text-slate-900">PeopleFlow HRMS</h1>
-                    <p class="dark:text-slate-400 text-slate-500 text-sm mt-2">Reset your password</p>
+    <div class="relative min-h-[calc(100vh-80px)] overflow-hidden bg-slate-950 flex items-center justify-center px-6 py-12">
+        {{-- High-Impact Decorations --}}
+        <div class="absolute -left-40 -top-40 h-[40rem] w-[40rem] rounded-full bg-cyan-500/10 blur-[120px]"></div>
+        <div class="absolute -right-40 -bottom-40 h-[40rem] w-[40rem] rounded-full bg-indigo-500/10 blur-[120px]"></div>
+        
+        <div class="relative w-full max-w-xl">
+            {{-- Recovery Terminal --}}
+            <div class="overflow-hidden rounded-[3rem] border border-white/10 bg-slate-900/40 shadow-[0_32px_120px_-20px_rgba(0,0,0,0.8)] backdrop-blur-3xl transition-all">
+                
+                {{-- Terminal Header --}}
+                <div class="relative border-b border-white/5 bg-slate-950/40 p-12 text-center">
+                    <div class="mx-auto mb-8 flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-gradient-to-br from-cyan-400 to-indigo-600 shadow-2xl shadow-cyan-400/20">
+                        <span class="text-3xl font-black text-white">P</span>
+                    </div>
+                    <h1 class="text-3xl font-black tracking-tight text-white uppercase">Key <span class="text-cyan-400">Recovery</span></h1>
+                    <p class="mt-3 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Initializing Access Restoration Protocol</p>
                 </div>
 
-                <!-- Form Body Section -->
-                <div class="px-8 py-8 space-y-6">
-                    @csrf
-
-                    <!-- Info Message -->
-                    <div class="p-4 rounded-lg dark:bg-blue-900/20 dark:border-blue-700/50 bg-blue-100 border border-blue-300">
-                        <p class="text-sm dark:text-blue-300 text-blue-700">
-                            {{ __('No problem. Just let us know your email and we will send you a password reset link.') }}
+                <div class="p-12 space-y-8">
+                    {{-- Info Payload --}}
+                    <div class="flex items-start gap-4 rounded-3xl border border-cyan-500/10 bg-cyan-500/5 p-6">
+                        <svg class="h-5 w-5 shrink-0 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg>
+                        <p class="text-[10px] font-bold text-cyan-400 uppercase tracking-widest leading-relaxed">
+                            Provide your primary alias to receive a temporary recovery token in your secure inbox.
                         </p>
                     </div>
 
-                    <!-- Session Status -->
+                    {{-- Session Status --}}
                     @if (session('status'))
-                        <div class="p-4 rounded-lg dark:bg-emerald-900/20 dark:border-emerald-700/50 bg-emerald-100 border border-emerald-300">
-                            <p class="text-sm dark:text-emerald-400 text-emerald-700">{{ session('status') }}</p>
+                        <div class="flex items-center gap-4 rounded-3xl border border-emerald-500/10 bg-emerald-500/5 px-8 py-5 shadow-xl shadow-emerald-500/5">
+                            <div class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                            <p class="text-[9px] font-black uppercase tracking-widest text-emerald-500">{{ session('status') }}</p>
                         </div>
                     @endif
 
-                    <!-- Email Address -->
-                    <div>
-                        <label for="email" class="block text-sm font-medium dark:text-slate-300 text-slate-700 mb-2">{{ __('Email Address') }}</label>
-                        <input id="email" type="email" name="email" value="{{ old('email') }}" class="w-full rounded-lg transition-colors duration-300 dark:border-slate-600 dark:bg-slate-900 dark:text-white dark:placeholder-slate-400 dark:focus:ring-cyan-500 border-slate-300 bg-white text-slate-900 placeholder-slate-400 focus:ring-cyan-500 border px-4 py-3 focus:outline-none focus:ring-2" placeholder="your@email.com" required autofocus />
-                        @error('email')
-                            <p class="mt-2 text-sm dark:text-red-400 text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
+                    <form method="POST" action="{{ route('password.email') }}" class="space-y-8">
+                        @csrf
 
-                    <!-- Submit Button -->
-                    <button type="submit" class="w-full px-4 py-3 rounded-lg font-medium transition-all duration-200 dark:bg-gradient-to-r dark:from-cyan-500 dark:to-blue-600 dark:text-white dark:hover:shadow-lg dark:hover:shadow-cyan-500/50 bg-gradient-to-r from-cyan-500 to-blue-600 text-white hover:shadow-lg hover:shadow-cyan-500/30">
-                        {{ __('Send Reset Link') }}
-                    </button>
+                        {{-- Email Input --}}
+                        <div>
+                            <label for="email" class="block text-[9px] font-black uppercase tracking-widest text-slate-500 ml-4 mb-3">Operator Alias</label>
+                            <input id="email" type="email" name="email" value="{{ old('email') }}"
+                                class="w-full rounded-2xl border border-white/5 bg-slate-950/50 px-8 py-5 text-sm font-bold text-white placeholder:text-slate-700 transition-all focus:border-cyan-400 focus:bg-slate-950 focus:ring-4 focus:ring-cyan-400/10"
+                                placeholder="IDENT_TOKEN@HQ" required autofocus>
+                            @error('email')<p class="mt-3 text-[8px] font-black uppercase tracking-widest text-rose-500 ml-4">{{ $message }}</p>@enderror
+                        </div>
 
-                    <!-- Back to Login -->
-                    <div class="pt-4 dark:border-slate-700 border-t border-slate-200 text-center text-sm">
-                        <a href="{{ route('login') }}" class="dark:text-cyan-400 dark:hover:text-cyan-300 text-cyan-600 hover:text-cyan-700 transition">
-                            {{ __('Back to Sign In') }}
-                        </a>
-                    </div>
+                        {{-- Execution --}}
+                        <div class="pt-4">
+                            <button type="submit"
+                                class="group relative w-full overflow-hidden rounded-2xl bg-cyan-400 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-slate-950 shadow-2xl shadow-cyan-400/20 transition-all hover:bg-cyan-300 hover:-translate-y-1 active:translate-y-0">
+                                Transmit Recovery Link
+                            </button>
+                        </div>
+
+                        <div class="pt-8 text-center">
+                            <a href="{{ route('login') }}" class="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-cyan-400 transition-colors">
+                                Return to Access Point
+                            </a>
+                        </div>
+                    </form>
                 </div>
-            </form>
+            </div>
+
+            {{-- Terminal Footer Decoration --}}
+            <div class="mt-12 text-center">
+                <p class="text-[9px] font-black uppercase tracking-[0.4em] text-slate-700">Access_Restoration_Interface_V4.0</p>
+            </div>
         </div>
     </div>
 </x-guest-layout>

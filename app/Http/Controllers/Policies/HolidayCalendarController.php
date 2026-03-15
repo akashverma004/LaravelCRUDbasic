@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 
 use App\Models\HolidayPolicy;
 use App\Models\HolidayPolicyDate;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -34,7 +35,7 @@ class HolidayCalendarController extends Controller
         ]);
     }
 
-    public function storeDate(Request $request, int $holidayPolicy): RedirectResponse
+    public function storeDate(Request $request, int $holidayPolicy): RedirectResponse|JsonResponse
     {
         $holidayPolicy = HolidayPolicy::query()->findOrFail($holidayPolicy);
         $validated = $request->validate([
@@ -43,7 +44,7 @@ class HolidayCalendarController extends Controller
             'is_optional' => ['sometimes', 'boolean'],
         ]);
 
-        HolidayPolicyDate::query()->create([
+        $date = HolidayPolicyDate::query()->create([
             'holiday_policy_id' => $holidayPolicy->id,
             'name' => $validated['name'],
             'holiday_date' => $validated['holiday_date'],
@@ -51,12 +52,20 @@ class HolidayCalendarController extends Controller
             'rules' => [],
         ]);
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Holiday added.',
+                'holiday_date' => $this->transformHolidayDate($date),
+            ]);
+        }
+
         return redirect()
             ->route('policies.holiday-calendar.index', ['policy_id' => $holidayPolicy->id])
             ->with('status', 'Holiday added.');
     }
 
-    public function updateDate(Request $request, int $holidayPolicy, int $holidayDate): RedirectResponse
+    public function updateDate(Request $request, int $holidayPolicy, int $holidayDate): RedirectResponse|JsonResponse
     {
         $holidayPolicy = HolidayPolicy::query()->findOrFail($holidayPolicy);
         $holidayDate = HolidayPolicyDate::query()->findOrFail($holidayDate);
@@ -74,20 +83,45 @@ class HolidayCalendarController extends Controller
             'is_optional' => (bool) ($validated['is_optional'] ?? false),
         ]);
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Holiday updated.',
+                'holiday_date' => $this->transformHolidayDate($holidayDate->fresh()),
+            ]);
+        }
+
         return redirect()
             ->route('policies.holiday-calendar.index', ['policy_id' => $holidayPolicy->id])
             ->with('status', 'Holiday updated.');
     }
 
-    public function destroyDate(int $holidayPolicy, int $holidayDate): RedirectResponse
+    public function destroyDate(Request $request, int $holidayPolicy, int $holidayDate): RedirectResponse|JsonResponse
     {
         $holidayPolicy = HolidayPolicy::query()->findOrFail($holidayPolicy);
         $holidayDate = HolidayPolicyDate::query()->findOrFail($holidayDate);
         abort_unless($holidayDate->holiday_policy_id === $holidayPolicy->id, 404);
         $holidayDate->delete();
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Holiday removed.',
+            ]);
+        }
+
         return redirect()
             ->route('policies.holiday-calendar.index', ['policy_id' => $holidayPolicy->id])
             ->with('status', 'Holiday removed.');
+    }
+
+    private function transformHolidayDate(HolidayPolicyDate $holidayDate): array
+    {
+        return [
+            'id' => $holidayDate->id,
+            'name' => $holidayDate->name,
+            'holiday_date' => $holidayDate->holiday_date?->toDateString(),
+            'is_optional' => (bool) $holidayDate->is_optional,
+        ];
     }
 }

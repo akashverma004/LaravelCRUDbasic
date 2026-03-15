@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Department;
 use App\Models\LeavePolicy;
 use App\Support\TenantContext;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -28,7 +29,7 @@ class TenantOnboardingController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request): RedirectResponse|JsonResponse
     {
         $tenant = $request->user()->tenant;
 
@@ -69,6 +70,14 @@ class TenantOnboardingController extends Controller
         }
 
         // Proceed to Step 2 — Department setup
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Company details saved! Now set up your departments.',
+                'redirect' => route('onboarding.departments.show'),
+            ]);
+        }
+
         return redirect()->route('onboarding.departments.show')
             ->with('status', 'Company details saved! Now set up your departments.');
     }
@@ -87,7 +96,7 @@ class TenantOnboardingController extends Controller
         ]);
     }
 
-    public function storeDepartments(Request $request): RedirectResponse
+    public function storeDepartments(Request $request): RedirectResponse|JsonResponse
     {
         $validated = $request->validate([
             'departments'             => ['required', 'array', 'min:1'],
@@ -113,6 +122,14 @@ class TenantOnboardingController extends Controller
                 ['code' => $code, 'tenant_id' => $tenantId],
                 ['name' => trim($deptData['name']), 'lead_name' => null]
             );
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Setup complete! Your workspace is ready.',
+                'redirect' => route('dashboard'),
+            ]);
         }
 
         return redirect()->route('dashboard')
