@@ -5,21 +5,21 @@
 @section('content')
 <div class="space-y-8">
     {{-- Header Section --}}
-    <div class="relative overflow-hidden rounded-2xl bg-white px-8 py-8 shadow-sm border border-slate-200 dark:bg-slate-900/50 dark:border-slate-800">
+    <div class="relative overflow-hidden rounded-2xl bg-white px-8 py-8 shadow-sm border border-slate-200 dark:bg-slate-900/50 dark:border-white/5">
         <div class="absolute -right-20 -top-20 h-48 w-48 rounded-full bg-cyan-500/10 blur-[60px]"></div>
         
         <div class="relative flex flex-col items-center text-center">
-            <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+            <h1 class="text-2xl font-black tracking-tight text-slate-900 dark:text-white uppercase">
                 Company <span class="text-cyan-500">Hierarchy</span>
             </h1>
-            <p class="mt-2 text-sm text-slate-500">Displays the reporting structure of your organization.</p>
-            <div class="mt-6 flex flex-wrap justify-center gap-6 text-xs font-semibold text-slate-600 dark:text-slate-400">
+            <p class="mt-1 text-[11px] font-medium text-slate-500">Displays the reporting structure of your organization.</p>
+            <div class="mt-6 flex flex-wrap justify-center gap-6 text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
                 <div class="flex items-center gap-2">
-                    <span class="h-2 w-2 rounded-full bg-cyan-500"></span>
+                    <span class="h-1.5 w-1.5 rounded-full bg-cyan-500"></span>
                     <span>{{ $stats['totalEmployees'] }} Total Employees</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <span class="h-2 w-2 rounded-full bg-indigo-500"></span>
+                    <span class="h-1.5 w-1.5 rounded-full bg-indigo-500"></span>
                     <span>{{ $stats['managers'] }} Managers</span>
                 </div>
             </div>

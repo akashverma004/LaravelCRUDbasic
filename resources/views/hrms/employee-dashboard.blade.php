@@ -11,10 +11,10 @@
         
         <div class="relative flex flex-col items-start justify-between gap-6 lg:flex-row lg:items-center">
             <div>
-                <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white lg:text-4xl">
+                <h1 class="text-2xl font-black tracking-tight text-slate-900 dark:text-white lg:text-3xl">
                     Welcome back, <span class="text-cyan-600 dark:text-cyan-400">{{ explode(' ', $employee->full_name)[0] }}!</span> 👋
                 </h1>
-                <p class="mt-2 text-sm font-medium text-slate-500">
+                <p class="mt-1 text-[11px] font-medium text-slate-500">
                     {{ $employee->job_title }} · {{ $employee->department->name ?? 'No Department' }}
                 </p>
             </div>
@@ -60,9 +60,9 @@
                     </div>
                 </div>
                 
-                <a href="{{ route('employees.show', $employee->id) }}" class="mt-6 flex items-center justify-center gap-2 rounded-xl bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700">
+                <a href="{{ route('employees.show', $employee->id) }}" class="mt-5 flex items-center justify-center gap-2 rounded-lg bg-slate-900 border border-white/10 px-4 py-2 text-[11px] font-black uppercase tracking-widest text-white shadow-lg shadow-indigo-500/10 transition-all hover:bg-cyan-600 active:scale-[0.98] dark:bg-white/5 dark:hover:bg-cyan-500/20 dark:hover:text-cyan-400">
                     View Profile
-                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                    <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" /></svg>
                 </a>
             </div>
 
@@ -103,8 +103,8 @@
                     </div>
 
                     <div class="flex flex-col items-center gap-1 lg:items-end">
-                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Logged Time</span>
-                        <div id="attendance-total-timer" class="text-4xl font-bold tabular-nums tracking-tight text-slate-900 dark:text-white"
+                        <span class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Logged Time</span>
+                        <div id="attendance-total-timer" class="text-3xl font-black tabular-nums tracking-tight text-slate-900 dark:text-white"
                              data-base-seconds="{{ $todayAttendance?->getCompletedWorkSeconds() ?? 0 }}"
                              data-status="{{ $todayAttendance?->status ?? 'none' }}"
                              data-last-start-ms="{{ $todayAttendance && $todayAttendance->status === 'clocked_in' ? \Carbon\Carbon::parse(collect($todayAttendance->intervals)->where('type', 'work')->where('end', null)->last()['start'] ?? now())->getPreciseTimestamp(3) : 0 }}"
@@ -122,14 +122,18 @@
                             <span x-text="loading ? 'Processing...' : 'Clock In'"></span>
                         </button>
                     @elseif($todayAttendance->status !== 'completed')
-                        <div class="flex flex-wrap gap-3">
+                        <div class="flex flex-wrap gap-2.5">
                             @if($todayAttendance->status === 'clocked_in')
-                                <button @click="act(pauseUrl, { type: 'lunch' }, 'Lunch break started.')" :disabled="loading" class="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800">Lunch</button>
-                                <button @click="act(pauseUrl, { type: 'break' }, 'Break started.')" :disabled="loading" class="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800">Short Break</button>
+                                <button @click="act(pauseUrl, { type: 'lunch' }, 'Lunch break started.')" :disabled="loading" class="rounded-lg border border-slate-200 bg-white px-4 py-2 text-[11px] font-black uppercase tracking-widest text-slate-600 transition-all hover:border-cyan-500 hover:text-cyan-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">Lunch</button>
+                                <button @click="act(pauseUrl, { type: 'break' }, 'Break started.')" :disabled="loading" class="rounded-lg border border-slate-200 bg-white px-4 py-2 text-[11px] font-black uppercase tracking-widest text-slate-600 transition-all hover:border-cyan-500 hover:text-cyan-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">Break</button>
                             @else
-                                <button @click="act(resumeUrl, {}, 'Resumed successfully.')" :disabled="loading" class="rounded-xl bg-emerald-500 px-6 py-2.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-emerald-600">Resume Work</button>
+                                <button @click="act(resumeUrl, {}, 'Resumed successfully.')" :disabled="loading" class="rounded-lg bg-emerald-500 px-5 py-2 text-[11px] font-black uppercase tracking-widest text-white shadow-sm transition-all hover:bg-emerald-600">Resume</button>
                             @endif
-                            <button @click="confirm('Are you sure you want to clock out for the day?') && act(punchOutUrl, {}, 'Clocked out successfully.')" :disabled="loading" class="rounded-xl bg-slate-900 px-6 py-2.5 text-sm font-bold text-white transition-colors hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">Clock Out</button>
+                            <button @click="confirm('Are you sure you want to clock out for the day?') && act(punchOutUrl, {}, 'Clocked out successfully.')" :disabled="loading" 
+                                class="inline-flex items-center gap-2 rounded-lg bg-slate-900 border border-white/10 px-5 py-2 text-[11px] font-black uppercase tracking-widest text-white shadow-lg shadow-rose-500/10 transition-all hover:bg-rose-700 active:scale-95 disabled:opacity-50 dark:bg-white/5 dark:hover:bg-rose-500/20 dark:hover:text-rose-400">
+                                <svg x-show="loading" class="h-3 w-3 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                                <span x-text="loading ? 'Processing' : 'Clock Out'"></span>
+                            </button>
                         </div>
                     @else
                         <div class="flex items-center gap-3 rounded-xl bg-emerald-50 px-5 py-3 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 w-fit">

@@ -3,38 +3,38 @@
 @section('title', 'Add Employee - PeopleFlow HRMS')
 
 @section('content')
-<div class="mb-6">
-    <h1 class="text-3xl font-bold text-slate-900 dark:text-white">Add New Employee</h1>
-    <p class="text-slate-500 dark:text-slate-400 mt-1">Create a new employee record for your workspace.</p>
+<div class="mb-8">
+    <h1 class="text-3xl font-black tracking-tighter text-slate-900 dark:text-white uppercase"><span class="text-cyan-500">Add</span> Employee</h1>
+    <p class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mt-1">Initiating a new personnel registry for your organization.</p>
 </div>
 
 @php
-    $input  = 'mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-white px-3 py-2 text-sm transition focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500';
-    $label  = 'block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1';
+    $input  = 'w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-bold text-slate-900 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10 dark:border-white/5 dark:bg-white/5 dark:text-white transition-all';
+    $label  = 'block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1.5 ml-1';
 @endphp
 
-<div class="rounded-3xl bg-white shadow-sm dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+<div class="rounded-2xl bg-white shadow-sm dark:bg-slate-900/50 border border-slate-200 dark:border-white/5 overflow-hidden">
     <form method="POST" action="{{ route('employees.store') }}" id="employee-form" novalidate>
         @csrf
 
-        <div class="space-y-12 p-8 sm:p-10 divide-y divide-slate-200 dark:divide-slate-800">
+        <div class="space-y-12 p-8 sm:p-10 divide-y divide-slate-100 dark:divide-white/5">
             
             {{-- ── Work Details ────────────────────────────────────────── --}}
-            <div class="grid grid-cols-1 gap-x-8 gap-y-10 md:grid-cols-3">
+            <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
                 <div class="md:col-span-1">
-                    <h2 class="text-lg font-bold text-slate-900 dark:text-white">Work Details</h2>
-                    <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Core employment information, including role, salary, and contact details.</p>
+                    <h2 class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tight">Employment Credentials</h2>
+                    <p class="mt-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-relaxed">Core identity and logistical data for the new personnel.</p>
                 </div>
 
                 <div class="md:col-span-2 grid grid-cols-1 gap-6 sm:grid-cols-2">
                     <div class="sm:col-span-2">
-                        <label class="{{ $label }}">Full Name <span class="text-red-500">*</span></label>
+                        <label class="{{ $label }}">Full Name <span class="text-rose-500">*</span></label>
                         <input type="text" name="full_name" id="full_name"
-                            class="{{ $input }} @error('full_name') border-red-400 @enderror"
+                            class="{{ $input }} @error('full_name') border-rose-500 @enderror"
                             value="{{ old('full_name') }}"
                             data-rules="required|min:2|max:255"
                             placeholder="e.g. Jane Smith">
-                        <p class="mt-1 text-xs text-red-500 min-h-[16px]">@error('full_name'){{ $message }}@enderror</p>
+                        <p class="mt-1.5 text-[9px] font-bold text-rose-500 uppercase tracking-widest ml-1 min-h-[16px]">@error('full_name'){{ $message }}@enderror</p>
                     </div>
 
                     <div>
@@ -134,16 +134,16 @@
                     </div>
 
                     <div>
-                        <label class="{{ $label }}">Annual Salary <span class="text-red-500">*</span></label>
-                        <div class="relative mt-1">
-                            <span class="absolute inset-y-0 left-3 flex items-center text-slate-400 text-sm pointer-events-none">₹</span>
+                        <label class="{{ $label }}">Annual Salary <span class="text-rose-500">*</span></label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-4 flex items-center text-slate-400 text-xs font-black pointer-events-none">₹</span>
                             <input type="number" step="0.01" min="0" max="9999999999999" name="salary" id="salary"
-                                class="w-full rounded-lg border border-slate-300 bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-white pl-7 pr-3 py-2 text-sm transition focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 @error('salary') border-red-400 @enderror"
+                                class="w-full rounded-xl border border-slate-200 bg-slate-50 pl-8 pr-4 py-2.5 text-xs font-bold text-slate-900 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10 dark:border-white/5 dark:bg-white/5 dark:text-white transition-all @error('salary') border-rose-500 @enderror"
                                 value="{{ old('salary') }}"
                                 data-rules="required|min_val:0|max_val:9999999999999"
                                 placeholder="500000">
                         </div>
-                        <p class="mt-1 text-xs text-red-500 min-h-[16px]">@error('salary'){{ $message }}@enderror</p>
+                        <p class="mt-1.5 text-[9px] font-bold text-rose-500 uppercase tracking-widest ml-1 min-h-[16px]">@error('salary'){{ $message }}@enderror</p>
                     </div>
 
                     <div>
@@ -269,15 +269,15 @@
 
         </div>
 
-        {{-- ── Footer ───────────────────────────────────────────────── --}}
-        <div class="flex items-center justify-end gap-3 rounded-b-3xl bg-slate-50 p-6 px-8 dark:bg-slate-800/50">
+        {{-- Footer --}}
+        <div class="flex items-center justify-end gap-3 bg-slate-50/50 p-8 dark:bg-white/5">
             <a href="{{ route('employees.index') }}"
-               class="rounded-xl px-4 py-2 text-sm font-bold text-slate-600 hover:bg-slate-200 dark:text-slate-300 dark:hover:bg-slate-700 transition-colors">
+               class="rounded-xl px-6 py-2.5 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 dark:hover:text-white transition-all">
                 Cancel
             </a>
             <button type="submit"
-                class="rounded-xl bg-cyan-600 px-6 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-cyan-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600 transition-all">
-                Add Employee
+                class="rounded-xl bg-slate-900 border border-white/10 px-8 py-3 text-[10px] font-black uppercase tracking-widest text-white shadow-xl hover:bg-cyan-600 transition-all active:scale-95 dark:bg-white/5 dark:hover:bg-cyan-500/20 dark:hover:text-cyan-400">
+                Deploy Registry
             </button>
         </div>
 

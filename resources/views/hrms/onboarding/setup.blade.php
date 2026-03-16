@@ -5,37 +5,42 @@
 @section('content')
 <div class="mx-auto max-w-3xl">
 
-    {{-- ── Stepper ─────────────────────────────────────────────── --}}
-    <div class="mb-8">
-        <h1 class="text-3xl font-bold text-slate-900 dark:text-white">Welcome to PeopleFlow 👋</h1>
-        <p class="mt-1 text-slate-500 dark:text-slate-400">Let's get your workspace set up in 2 quick steps.</p>
+    {{-- Header Section --}}
+    <div class="mb-10 text-center">
+        <h1 class="text-4xl font-black tracking-tighter text-slate-900 dark:text-white uppercase">Welcome to <span class="text-cyan-500">PeopleFlow</span> 👋</h1>
+        <p class="mt-2 text-[11px] font-bold text-slate-500 uppercase tracking-widest leading-relaxed">Let's get your workspace set up in 2 quick steps.</p>
 
-        <div class="mt-6 flex items-center gap-0">
-            {{-- Step 1 --}}
-            <div class="flex items-center gap-2">
-                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-cyan-500 text-sm font-bold text-slate-900">1</div>
-                <span class="text-sm font-semibold text-cyan-500">Company Info</span>
-            </div>
-            <div class="mx-4 h-px flex-1 bg-slate-300 dark:bg-slate-700"></div>
-            {{-- Step 2 --}}
-            <div class="flex items-center gap-2">
-                <div class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-slate-300 dark:border-slate-600 text-sm font-bold text-slate-400 dark:text-slate-500">2</div>
-                <span class="text-sm font-medium text-slate-400 dark:text-slate-500">Departments</span>
+        <div class="mt-10 mx-auto max-w-sm">
+            <div class="flex items-center justify-between gap-0">
+                {{-- Step 1 --}}
+                <div class="flex items-center gap-3">
+                    <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-900 border border-white/10 text-xs font-black text-white shadow-lg shadow-cyan-500/10 dark:bg-white/5 dark:text-cyan-400">1</div>
+                    <span class="text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-white">Workspace</span>
+                </div>
+                <div class="flex-1 mx-4 h-0.5 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden">
+                    <div class="h-full w-1/2 bg-cyan-500 rounded-full"></div>
+                </div>
+                {{-- Step 2 --}}
+                <div class="flex items-center gap-3">
+                    <div class="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-xs font-black text-slate-400 dark:border-white/5 dark:bg-white/5">2</div>
+                    <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">Structure</span>
+                </div>
             </div>
         </div>
     </div>
 
-    {{-- ── Form ────────────────────────────────────────────────── --}}
-    <div x-data="asyncForm({ followRedirect: true })" class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <div class="border-b border-slate-200 dark:border-slate-800 px-6 py-4">
-            <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Company Details</h2>
-            <p class="text-sm text-slate-500 dark:text-slate-400">Basic information about your company workspace.</p>
+    {{-- Form Section --}}
+    <div x-data="asyncForm({ followRedirect: true })" class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/5 dark:bg-slate-900/50 overflow-hidden">
+        <div class="border-b border-slate-100 dark:border-white/5 px-8 py-6 bg-slate-50/50 dark:bg-white/5">
+            <h2 class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tight">Workspace Designation</h2>
+            <p class="mt-1 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Basic architectural telemetry for your organization.</p>
         </div>
 
-        <div x-show="toast.show" x-transition class="mx-6 mt-6 rounded-xl px-4 py-3 text-sm font-semibold" :class="toast.type === 'success' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300' : 'bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-300'" style="display: none;">
+        <div x-show="toast.show" x-transition class="mx-8 mt-6 rounded-xl border border-white/10 bg-slate-900/90 px-5 py-3 text-[10px] font-bold text-white shadow-2xl backdrop-blur-xl dark:bg-slate-800/90" x-cloak>
+            <div :class="toast.type === 'success' ? 'bg-emerald-500' : 'bg-rose-500'" class="h-1.5 w-1.5 rounded-full animate-pulse mr-2 inline-block"></div>
             <span x-text="toast.message"></span>
         </div>
-        <div x-show="errorMessage" class="mx-6 mt-6 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-600 dark:border-rose-800 dark:bg-rose-950/40 dark:text-rose-300" style="display: none;">
+        <div x-show="errorMessage" class="mx-8 mt-6 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-[10px] font-bold text-rose-600 dark:border-rose-800 dark:bg-rose-950/40 dark:text-rose-300" x-cloak>
             <span x-text="errorMessage"></span>
         </div>
 
@@ -43,96 +48,96 @@
             @csrf
 
             {{-- Company basics --}}
-            <div class="grid gap-4 sm:grid-cols-2">
+            <div class="grid gap-6 sm:grid-cols-2">
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Company Name <span class="text-red-500">*</span></label>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1.5 ml-1">Company Name <span class="text-rose-500">*</span></label>
                     <input name="name" value="{{ old('name', $tenant->name) }}"
-                        class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm transition focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white @error('name') border-red-500 @enderror"
+                        class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-bold text-slate-900 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10 dark:border-white/5 dark:bg-white/5 dark:text-white @error('name') border-red-500 @enderror"
                         required placeholder="Acme Corp">
-                    @error('name')<p class="mt-1 text-xs text-red-400">{{ $message }}</p>@enderror
+                    @error('name')<p class="mt-1.5 text-[9px] font-bold text-rose-400 uppercase tracking-widest ml-1">{{ $message }}</p>@enderror
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Company Email <span class="text-red-500">*</span></label>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1.5 ml-1">Company Email <span class="text-rose-500">*</span></label>
                     <input type="email" name="email" value="{{ old('email', $tenant->email) }}"
-                        class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm transition focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white @error('email') border-red-500 @enderror"
+                        class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-bold text-slate-900 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10 dark:border-white/5 dark:bg-white/5 dark:text-white @error('email') border-red-500 @enderror"
                         required placeholder="hr@acmecorp.com">
-                    @error('email')<p class="mt-1 text-xs text-red-400">{{ $message }}</p>@enderror
+                    @error('email')<p class="mt-1.5 text-[9px] font-bold text-rose-400 uppercase tracking-widest ml-1">{{ $message }}</p>@enderror
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Phone</label>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1.5 ml-1">Phone</label>
                     <input name="phone" value="{{ old('phone', $tenant->phone) }}"
-                        class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm transition focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                        class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-bold text-slate-900 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10 dark:border-white/5 dark:bg-white/5 dark:text-white"
                         placeholder="+91 98765 43210">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Country</label>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1.5 ml-1">Country</label>
                     <select name="country"
-                        class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm transition focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white">
+                        class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-bold text-slate-900 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10 dark:border-white/5 dark:bg-white/5 dark:text-white appearance-none">
                         @foreach($countries as $code => $label)
                             <option value="{{ $code }}" @selected(old('country', $tenant->country ?? 'IN') === $code)>{{ $label }} ({{ $code }})</option>
                         @endforeach
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Timezone <span class="text-red-500">*</span></label>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1.5 ml-1">Timezone <span class="text-rose-500">*</span></label>
                     <input name="timezone" value="{{ old('timezone', $tenant->timezone ?? 'Asia/Kolkata') }}"
-                        class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm transition focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white @error('timezone') border-red-500 @enderror"
+                        class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-bold text-slate-900 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10 dark:border-white/5 dark:bg-white/5 dark:text-white @error('timezone') border-red-500 @enderror"
                         required placeholder="Asia/Kolkata">
-                    @error('timezone')<p class="mt-1 text-xs text-red-400">{{ $message }}</p>@enderror
+                    @error('timezone')<p class="mt-1.5 text-[9px] font-bold text-rose-400 uppercase tracking-widest ml-1">{{ $message }}</p>@enderror
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Currency <span class="text-red-500">*</span></label>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1.5 ml-1">Currency <span class="text-rose-500">*</span></label>
                     <input name="currency" value="{{ old('currency', $tenant->currency ?? 'INR') }}"
-                        class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm transition focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white @error('currency') border-red-500 @enderror"
+                        class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-bold text-slate-900 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10 dark:border-white/5 dark:bg-white/5 dark:text-white @error('currency') border-red-500 @enderror"
                         required placeholder="INR">
-                    @error('currency')<p class="mt-1 text-xs text-red-400">{{ $message }}</p>@enderror
+                    @error('currency')<p class="mt-1.5 text-[9px] font-bold text-rose-400 uppercase tracking-widest ml-1">{{ $message }}</p>@enderror
                 </div>
                 <div class="sm:col-span-2">
-                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Office Address</label>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1.5 ml-1">Office Address</label>
                     <textarea name="address" rows="2"
-                        class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm transition focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                        class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-bold text-slate-900 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10 dark:border-white/5 dark:bg-white/5 dark:text-white"
                         placeholder="123 Business Park, Mumbai, MH">{{ old('address', $tenant->address) }}</textarea>
                 </div>
             </div>
 
             {{-- Leave defaults --}}
-            <div class="border-t border-slate-200 dark:border-slate-800 pt-5">
-                <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Default Leave Limits (days/year)</h3>
+            <div class="border-t border-slate-100 dark:border-white/5 pt-6">
+                <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4 ml-1">Default Leave Protocols</h3>
                 <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
                     <div>
-                        <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Annual</label>
+                        <label class="block text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1 ml-1">Annual</label>
                         <input type="number" min="0" name="annual_limit"
                             value="{{ old('annual_limit', $leavePolicy->annual_limit ?? 15) }}"
-                            class="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950 dark:text-white" required>
-                        @error('annual_limit')<p class="mt-1 text-xs text-red-400">{{ $message }}</p>@enderror
+                            class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-bold text-slate-900 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10 dark:border-white/5 dark:bg-white/5 dark:text-white" required>
+                        @error('annual_limit')<p class="mt-1.5 text-[9px] font-bold text-rose-400 uppercase tracking-widest ml-1">{{ $message }}</p>@enderror
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Sick</label>
+                        <label class="block text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1 ml-1">Sick</label>
                         <input type="number" min="0" name="sick_limit"
                             value="{{ old('sick_limit', $leavePolicy->sick_limit ?? 10) }}"
-                            class="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950 dark:text-white" required>
+                            class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-bold text-slate-900 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10 dark:border-white/5 dark:bg-white/5 dark:text-white" required>
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Casual</label>
+                        <label class="block text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1 ml-1">Casual</label>
                         <input type="number" min="0" name="casual_limit"
                             value="{{ old('casual_limit', $leavePolicy->casual_limit ?? 8) }}"
-                            class="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950 dark:text-white" required>
+                            class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-bold text-slate-900 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10 dark:border-white/5 dark:bg-white/5 dark:text-white" required>
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Unpaid</label>
+                        <label class="block text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1 ml-1">Unpaid</label>
                         <input type="number" min="0" name="unpaid_limit"
                             value="{{ old('unpaid_limit', $leavePolicy->unpaid_limit ?? 0) }}"
-                            class="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950 dark:text-white" required>
+                            class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-bold text-slate-900 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10 dark:border-white/5 dark:bg-white/5 dark:text-white" required>
                     </div>
                 </div>
             </div>
 
             {{-- Footer --}}
-            <div class="flex items-center justify-between border-t border-slate-200 dark:border-slate-800 pt-5">
-                <p class="text-sm text-slate-400">Step 1 of 2</p>
+            <div class="flex items-center justify-between border-t border-slate-100 dark:border-white/5 pt-6 mt-4">
+                <p class="text-[9px] font-black uppercase tracking-widest text-slate-400 leading-none">Step 01 <span class="mx-2">/</span> 02</p>
                 <button type="submit" :disabled="saving"
-                    class="inline-flex items-center gap-2 rounded-lg bg-cyan-500 px-6 py-2.5 text-sm font-semibold text-slate-900 transition hover:bg-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500">
-                    <span x-text="saving ? 'Saving...' : 'Save & Continue →'"></span>
+                    class="inline-flex items-center gap-2 rounded-xl bg-slate-900 border border-white/10 px-8 py-3 text-[10px] font-black uppercase tracking-widest text-white shadow-xl hover:bg-cyan-600 transition-all active:scale-95 dark:bg-white/5 dark:hover:bg-cyan-500/20 dark:hover:text-cyan-400 disabled:opacity-50">
+                    <span x-text="saving ? 'Processing...' : 'Save & Continue →'"></span>
                 </button>
             </div>
         </form>

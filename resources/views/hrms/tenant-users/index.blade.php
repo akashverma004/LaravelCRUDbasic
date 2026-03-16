@@ -15,16 +15,16 @@
     {{-- Header Section --}}
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-6 border-b border-slate-200 dark:border-white/5">
         <div>
-            <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Users</h1>
-            <p class="mt-2 text-sm text-slate-500">Manage user access, roles, and invitations.</p>
+            <h1 class="text-2xl font-black tracking-tight text-slate-900 dark:text-white">Users</h1>
+            <p class="mt-1 text-[11px] font-medium text-slate-500">Manage user access, roles, and invitations.</p>
         </div>
         <div class="flex items-center gap-3">
-            <button @click="openInviteModal()" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800">
-                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" /></svg>
+            <button @click="openInviteModal()" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-700 shadow-sm transition-all hover:bg-slate-50 dark:border-white/5 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10">
+                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" /></svg>
                 <span>Invite User</span>
             </button>
-            <button @click="openCreateModal()" class="inline-flex items-center gap-2 rounded-xl bg-cyan-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-cyan-600 dark:text-white">
-                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+            <button @click="openCreateModal()" class="inline-flex items-center gap-2 rounded-xl bg-slate-900 border border-white/10 px-5 py-2.5 text-[10px] font-black uppercase tracking-widest text-white shadow-lg shadow-indigo-500/10 transition-all hover:bg-cyan-600 active:scale-95 dark:bg-white/5 dark:hover:bg-cyan-500/20 dark:hover:text-cyan-400">
+                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
                 <span>Add User</span>
             </button>
         </div>
@@ -173,12 +173,19 @@
                 </template>
             </div>
 
-            <div class="flex items-center justify-end gap-3 border-t border-slate-100 px-6 py-4 bg-slate-50 dark:border-slate-800 dark:bg-slate-900/50">
-                <button @click="closeModal('create')" class="rounded-xl px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors">
+            <div class="flex items-center justify-end gap-3 border-t border-slate-100 px-6 py-4 dark:bg-white/5">
+                <button @click="closeModal('create')" class="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
                     Cancel
                 </button>
-                <button @click="submitUser()" :disabled="savingUser" class="inline-flex items-center gap-2 rounded-xl bg-cyan-500 px-5 py-2 text-sm font-bold text-white shadow-sm transition-colors hover:bg-cyan-600 disabled:opacity-50">
-                    <span x-text="savingUser ? 'Saving...' : 'Save User'"></span>
+                <button @click="submitUser()" :disabled="savingUser" class="inline-flex items-center gap-2 rounded-xl bg-slate-900 border border-white/10 px-5 py-2 text-[10px] font-black uppercase tracking-widest text-white shadow-lg transition-all hover:bg-cyan-600 disabled:opacity-50 active:scale-95 dark:bg-white/5 dark:hover:bg-cyan-500/20 dark:hover:text-cyan-400">
+                    <span x-show="!savingUser" class="flex items-center gap-2">
+                        <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                        Save User
+                    </span>
+                    <span x-show="savingUser" class="flex items-center gap-2">
+                        <svg class="h-3 w-3 animate-spin" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                        Processing
+                    </span>
                 </button>
             </div>
         </div>
@@ -222,12 +229,19 @@
                 </template>
             </div>
 
-            <div class="flex items-center justify-end gap-3 border-t border-slate-100 px-6 py-4 bg-slate-50 dark:border-slate-800 dark:bg-slate-900/50">
-                <button @click="closeModal('invite')" class="rounded-xl px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors">
+            <div class="flex items-center justify-end gap-3 border-t border-slate-100 px-6 py-4 dark:bg-white/5 text-[10px] font-black uppercase tracking-widest text-white shadow-lg transition-all hover:bg-cyan-600 disabled:opacity-50 active:scale-95 dark:bg-white/5 dark:hover:bg-cyan-500/20 dark:hover:text-cyan-400">
+                <button @click="closeModal('invite')" class="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
                     Cancel
                 </button>
-                <button @click="submitInvite()" :disabled="savingInvite" class="inline-flex items-center gap-2 rounded-xl bg-cyan-500 px-5 py-2 text-sm font-bold text-white shadow-sm transition-colors hover:bg-cyan-600 disabled:opacity-50">
-                    <span x-text="savingInvite ? 'Creating...' : 'Create Invite'"></span>
+                <button @click="submitInvite()" :disabled="savingInvite" class="inline-flex items-center gap-2 rounded-xl bg-slate-900 border border-white/10 px-5 py-2 text-[10px] font-black uppercase tracking-widest text-white shadow-lg transition-all hover:bg-cyan-600 disabled:opacity-50 active:scale-95 dark:bg-white/5 dark:hover:bg-cyan-500/20 dark:hover:text-cyan-400">
+                    <span x-show="!savingInvite" class="flex items-center gap-2">
+                        <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                        Create Invite
+                    </span>
+                    <span x-show="savingInvite" class="flex items-center gap-2">
+                        <svg class="h-3.5 w-3.5 animate-spin" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                        Processing
+                    </span>
                 </button>
             </div>
         </div>

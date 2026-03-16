@@ -8,15 +8,15 @@
     {{-- Header Section --}}
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-6 border-b border-slate-200 dark:border-white/5">
         <div>
-            <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Holiday Policies</h1>
-            <p class="mt-2 text-sm text-slate-500">Set up regional holidays and weekend schedules.</p>
+            <h1 class="text-2xl font-black tracking-tight text-slate-900 dark:text-white uppercase">Holiday <span class="text-cyan-500">Policies</span></h1>
+            <p class="mt-1 text-[11px] font-medium text-slate-500">Set up regional holidays and weekend schedules.</p>
         </div>
         <div class="flex gap-3">
-            <a href="{{ route('policies.holiday-calendar.index') }}" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800">
-                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
+            <a href="{{ route('policies.holiday-calendar.index') }}" class="inline-flex items-center gap-2 rounded-xl bg-slate-900 border border-white/10 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-white shadow-lg shadow-indigo-500/10 transition-all hover:bg-cyan-600 active:scale-95 dark:bg-white/5 dark:hover:bg-cyan-500/20 dark:hover:text-cyan-400">
+                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
                 <span>Calendar View</span>
             </a>
-            <a href="{{ route('policies.index') }}" class="rounded-xl border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-semibold text-slate-300 hover:bg-slate-700 transition-all">Back to Policies</a>
+            <a href="{{ route('policies.index') }}" class="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors flex items-center px-4 py-2">Back to Hub</a>
         </div>
     </div>
 
@@ -28,9 +28,10 @@
         {{-- Creation Form --}}
         <div class="xl:col-span-1">
             <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
-                <h2 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-6">Create New Policy</h2>
+                <h2 class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-6">Create New Policy</h2>
                 <div x-data="asyncForm({ reloadOnSuccess: true })">
-                    <div x-show="toast.show" x-transition class="mb-4 rounded-lg px-4 py-2 text-xs font-bold" :class="toast.type === 'success' ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'" style="display: none;">
+                    <div x-show="toast.show" x-transition class="mb-4 rounded-xl border border-white/10 bg-slate-900/90 px-5 py-3 text-[10px] font-bold text-white shadow-2xl backdrop-blur-xl dark:bg-slate-800/90" x-cloak>
+                        <div :class="toast.type === 'success' ? 'bg-emerald-500' : 'bg-rose-500'" class="h-1.5 w-1.5 rounded-full animate-pulse mr-2 inline-block"></div>
                         <span x-text="toast.message"></span>
                     </div>
                     
@@ -69,8 +70,8 @@
                             </div>
                         </div>
 
-                        <button type="submit" :disabled="saving" class="w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">
-                            <span x-text="saving ? 'Creating...' : 'Create Policy'"></span>
+                        <button type="submit" :disabled="saving" class="w-full rounded-xl bg-slate-900 border border-white/10 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-white shadow-lg shadow-indigo-500/10 transition-all hover:bg-cyan-600 active:scale-95 dark:bg-white/5 dark:hover:bg-cyan-500/20 dark:hover:text-cyan-400 disabled:opacity-50">
+                            <span x-text="saving ? 'Processing...' : 'Create Policy'"></span>
                         </button>
                     </form>
                 </div>
@@ -105,15 +106,15 @@
                                 <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider" x-text="'{{ $policy->holiday_dates_count }} Holidays Listed'"></span>
                             </div>
 
-                            <div class="flex justify-between items-center bg-slate-50 p-2 rounded-lg dark:bg-slate-950/20">
-                                <button type="submit" :disabled="saving" class="px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded bg-slate-900 text-white hover:bg-cyan-500 hover:text-slate-950 dark:bg-white dark:text-slate-900 transition-colors">
+                            <div class="flex justify-between items-center bg-slate-50 p-2 rounded-lg dark:bg-white/5">
+                                <button type="submit" :disabled="saving" class="px-4 py-1.5 text-[9px] font-black uppercase tracking-widest rounded-lg bg-slate-900 border border-white/10 text-white hover:bg-cyan-600 transition-all active:scale-95 dark:bg-white/5 dark:hover:bg-cyan-500/20 dark:hover:text-cyan-400">
                                     <span x-text="saving ? 'Saving...' : 'Update Policy'"></span>
                                 </button>
                                 
                                 <form x-ref="deleteForm" @submit.prevent="if (confirm('Permanently delete this policy?')) { const original = $refs.form; $refs.form = $refs.deleteForm; submit().finally(() => { $refs.form = original; }); }" method="POST" action="{{ route('policies.holiday-policies.destroy', $policy) }}">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" :disabled="saving" class="px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider text-rose-500 hover:text-rose-700">Delete</button>
+                                    <button type="submit" :disabled="saving" class="px-4 py-1.5 text-[9px] font-black uppercase tracking-widest text-rose-500 hover:text-rose-700 transition-colors">Delete</button>
                                 </form>
                             </div>
                         </form>

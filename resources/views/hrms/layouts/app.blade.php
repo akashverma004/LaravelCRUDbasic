@@ -24,10 +24,10 @@
     .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
     .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(34, 211, 238, 0.3); }
 </style>
-<body class="min-h-screen antialiased transition-colors duration-500 selection:bg-cyan-500 selection:text-white dark:bg-slate-950 dark:text-slate-100 bg-slate-50 text-slate-900">
+<body class="min-h-screen antialiased transition-colors duration-500 selection:bg-cyan-500 selection:text-white dark:bg-slate-950 dark:text-slate-100 bg-slate-50 text-slate-900 overflow-x-hidden">
     @include('hrms.components.navbar')
 
-    <main class="flex min-h-screen flex-col lg:pl-64">
+    <main class="flex min-h-screen flex-col lg:pl-64 overflow-x-hidden max-w-full">
         {{-- Topbar --}}
         <div class="hidden lg:block sticky top-0 z-40 border-b border-slate-200 bg-white/80 dark:border-white/5 dark:bg-slate-950/40 backdrop-blur-xl">
             <div class="mx-auto flex max-w-7xl items-center justify-end gap-4 px-6 py-3">
@@ -74,7 +74,7 @@
 
         @include('hrms.components.command-palette')
 
-        <div class="relative mx-auto w-full max-w-7xl flex-grow px-6 py-8">
+        <div class="relative mx-auto w-full max-w-7xl flex-grow px-6 pt-4 pb-10 overflow-hidden">
             {{-- Background Decoration --}}
             <div class="absolute -left-20 top-20 -z-10 h-80 w-80 rounded-full bg-cyan-500/5 blur-[100px] pointer-events-none"></div>
             <div class="absolute -right-20 bottom-20 -z-10 h-80 w-80 rounded-full bg-indigo-500/5 blur-[100px] pointer-events-none"></div>

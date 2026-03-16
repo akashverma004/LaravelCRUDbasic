@@ -12,17 +12,18 @@
         employees: @js($employees->map(fn ($employee) => ['id' => $employee->id, 'name' => $employee->full_name])->values())
     })"
     x-init="init()"
-    class="space-y-6"
+    class="space-y-6 relative"
 >
+
     {{-- Header --}}
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-6 border-b border-slate-200 dark:border-white/5">
         <div>
-            <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Departments</h1>
-            <p class="mt-2 text-sm text-slate-500">Manage your company's teams and their structure.</p>
+            <h1 class="text-2xl font-black tracking-tight text-slate-900 dark:text-white">Departments</h1>
+            <p class="mt-1 text-[11px] font-medium text-slate-500">Manage your company's teams and their structure.</p>
         </div>
         @if (Auth::user()->hasAnyRole(['admin', 'hr_manager']))
-            <button @click="openCreateModal()" class="inline-flex items-center gap-2 rounded-xl bg-cyan-500 px-4 py-2 text-sm font-bold text-white shadow-sm transition-colors hover:bg-cyan-600">
-                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+            <button @click="openCreateModal()" class="inline-flex items-center gap-2 rounded-lg bg-slate-900 border border-white/10 px-4 py-2 text-[11px] font-black uppercase tracking-widest text-white shadow-lg shadow-indigo-500/10 transition-all hover:bg-cyan-600 active:scale-[0.98] dark:bg-white/5 dark:hover:bg-cyan-500/20 dark:hover:text-cyan-400">
+                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
                 <span>Add Department</span>
             </button>
         @endif
@@ -123,5 +124,20 @@
         </div>
     </div>
     @endif
+    {{-- Universal Notification --}}
+    <div 
+        x-show="toast.show" 
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="translate-y-4 opacity-0 scale-95"
+        x-transition:enter-end="translate-y-0 opacity-100 scale-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="translate-y-0 opacity-100 scale-100"
+        x-transition:leave-end="translate-y-4 opacity-0 scale-95"
+        class="fixed bottom-8 right-8 z-[100] flex items-center gap-3 rounded-xl border border-white/10 bg-slate-900/90 px-5 py-3 text-xs font-bold text-white shadow-2xl backdrop-blur-xl dark:bg-slate-800/90"
+        x-cloak
+    >
+        <div :class="toast.type === 'success' ? 'bg-emerald-500' : 'bg-rose-500'" class="h-2 w-2 rounded-full animate-pulse"></div>
+        <span x-text="toast.message"></span>
+    </div>
 </div>
 @endsection

@@ -731,6 +731,7 @@ Alpine.data('leaveManager', () => ({
         reason: '',
         status: 'pending'
     },
+    saving: false,
     toast: { show: false, message: '', type: 'success' },
 
     balances: {},
@@ -790,6 +791,7 @@ Alpine.data('leaveManager', () => ({
     },
 
     async saveLeave() {
+        this.saving = true;
         try {
             if (this.isEditing) {
                 await axios.patch(`/leaves/${this.editLeaveId}`, this.form);
@@ -802,6 +804,8 @@ Alpine.data('leaveManager', () => ({
             await this.fetchData();
         } catch (e) {
             this.showToast(e.response?.data?.error || 'Failed to save leave request.', 'error');
+        } finally {
+            this.saving = false;
         }
     },
 
@@ -1168,6 +1172,21 @@ Alpine.data('employeeDirectory', (config = {}) => ({
             state: '',
             city: '',
             address: '',
+            zip_code: '',
+            personal_email: '',
+            date_of_birth: '',
+            gender: '',
+            blood_group: '',
+            marital_status: '',
+            bio: '',
+            emergency_contact_name: '',
+            emergency_contact_phone: '',
+            emergency_contact_relationship: '',
+            pan_number: '',
+            aadhaar_number: '',
+            bank_name: '',
+            bank_account_number: '',
+            bank_ifsc: '',
         };
     },
 
@@ -1694,6 +1713,8 @@ Alpine.data('adminDashboardActions', (config = {}) => ({
         manager_id: '',
         effective_date: config.defaultEffectiveDate || '',
     },
+    leaveTypeData: config.leaveTypeChartData || { labels: [], values: [] },
+    leaveTypeColors: ['#1e40af', '#059669', '#9ca3af', '#92400e'],
     departmentSaving: false,
     managerSaving: false,
     departmentErrors: {},

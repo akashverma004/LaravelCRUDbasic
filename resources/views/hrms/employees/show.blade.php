@@ -4,78 +4,95 @@
 @section('title', $employee->full_name . ' - PeopleFlow HRMS')
 
 @section('content')
-<div x-data="employeeProfile()" class="space-y-8">
+<div x-data="employeeProfile()" class="space-y-6 relative">
+    {{-- Universal Notification --}}
+    <div 
+        x-show="toast.show" 
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="translate-y-4 opacity-0 scale-95"
+        x-transition:enter-end="translate-y-0 opacity-100 scale-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="translate-y-0 opacity-100 scale-100"
+        x-transition:leave-end="translate-y-4 opacity-0 scale-95"
+        class="fixed bottom-8 right-8 z-[100] flex items-center gap-3 rounded-xl border border-white/10 bg-slate-900/90 px-5 py-3 text-xs font-bold text-white shadow-2xl backdrop-blur-xl dark:bg-slate-800/90"
+        x-cloak
+    >
+        <div :class="toast.type === 'success' ? 'bg-emerald-500' : 'bg-rose-500'" class="h-2 w-2 rounded-full animate-pulse"></div>
+        <span x-text="toast.message"></span>
+    </div>
 
     {{-- Profile Hero --}}
-    <div class="relative overflow-hidden rounded-2xl bg-white px-8 py-10 shadow-sm border border-slate-200 dark:border-slate-800 dark:bg-slate-900/50">
-        <div class="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-cyan-500/10 blur-[80px]"></div>
-        <div class="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-indigo-500/10 blur-[80px]"></div>
+    {{-- Profile Hero --}}
+    <div class="relative overflow-hidden rounded-2xl bg-white px-8 py-10 shadow-sm border border-slate-200 dark:border-white/5 dark:bg-slate-900/50">
+        <div class="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-cyan-500/10 blur-[100px]"></div>
+        <div class="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-indigo-500/10 blur-[100px]"></div>
         
-        <div class="relative flex flex-col items-center gap-8 lg:flex-row lg:items-start">
+        <div class="relative z-10 flex flex-col items-center gap-10 lg:flex-row lg:items-start text-center lg:text-left">
             {{-- Photo Container --}}
-            <div class="relative shrink-0">
-                <div class="h-32 w-32 overflow-hidden rounded-2xl border-4 border-slate-50 dark:border-slate-800 shadow-md">
+            <div class="relative group/photo">
+                <div class="h-32 w-32 overflow-hidden rounded-2xl border-4 border-white dark:border-white/5 shadow-2xl transition-transform group-hover/photo:scale-105">
                     @if($employee->profile_photo)
                         <img src="{{ Storage::url($employee->profile_photo) }}" alt="{{ $employee->full_name }}" class="h-full w-full object-cover">
                     @else
-                        <div class="flex h-full w-full items-center justify-center bg-slate-100 dark:bg-slate-800">
-                            <span class="text-3xl font-bold text-slate-500 dark:text-slate-400">{{ substr($employee->full_name, 0, 1) }}</span>
+                        <div class="flex h-full w-full items-center justify-center bg-slate-100 dark:bg-white/5">
+                            <span class="text-4xl font-black text-slate-300 dark:text-slate-600 uppercase">{{ substr($employee->full_name, 0, 1) }}</span>
                         </div>
                     @endif
                 </div>
-                <div class="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-white border-2 border-white dark:bg-slate-900 dark:border-slate-900 shadow-sm">
-                    <span class="h-3 w-3 rounded-full {{ $employee->status === 'active' ? 'bg-emerald-500' : 'bg-slate-400' }}"></span>
+                <div class="absolute -bottom-1.5 -right-1.5 flex h-7 w-7 items-center justify-center rounded-lg bg-white dark:bg-slate-900 shadow-xl border border-slate-100 dark:border-white/10 ring-4 ring-white dark:ring-slate-900/50">
+                    <div class="h-2.5 w-2.5 rounded-full {{ $employee->status === 'active' ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400' }}"></div>
                 </div>
             </div>
 
-            <div class="flex-1 text-center lg:text-left">
+            <div class="flex-1">
                 <div class="flex flex-wrap items-center justify-center gap-4 lg:justify-start">
-                    <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">{{ $employee->full_name }}</h1>
-                    <span class="rounded-lg bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">ID: {{ $employee->id }}</span>
+                    <h1 class="text-3xl font-black tracking-tighter text-slate-900 dark:text-white uppercase">{{ $employee->full_name }}</h1>
+                    <span class="rounded-lg bg-slate-900 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-white dark:bg-white/10 shadow-lg">ID: {{ $employee->id }}</span>
                 </div>
-                <p class="mt-2 text-sm font-medium text-slate-500">{{ $employee->job_title ?? 'Employee' }} • {{ $employee->department?->name ?? 'No Department' }}</p>
+                <p class="mt-3 text-[11px] font-bold text-slate-500 uppercase tracking-widest leading-none">
+                    <span class="text-cyan-600 dark:text-cyan-400">{{ $employee->job_title ?? 'Employee' }}</span>
+                    <span class="mx-2 text-slate-300 dark:text-white/10">/</span>
+                    <span class="text-slate-900 dark:text-white">{{ $employee->department?->name ?? 'No Department' }}</span>
+                </p>
                 
-                <div class="mt-4 flex flex-wrap items-center justify-center gap-6 lg:justify-start">
-                    <div class="flex items-center gap-2 text-slate-500">
-                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
-                        <span class="text-xs font-medium">Joined: {{ $employee->joined_on?->format('M Y') ?? 'Unknown' }}</span>
+                <div class="mt-6 flex flex-wrap items-center justify-center gap-8 lg:justify-start">
+                    <div class="flex items-center gap-2.5 text-slate-400">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
+                        <span class="text-[10px] font-black uppercase tracking-widest">Joined: {{ $employee->joined_on?->format('M Y') ?? 'Unknown' }}</span>
                     </div>
-                    <div class="flex items-center gap-2 text-slate-500">
-                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" /></svg>
-                        <span class="text-xs font-medium">{{ $employee->city ?? 'Remote' }}</span>
+                    <div class="flex items-center gap-2.5 text-slate-400">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" /></svg>
+                        <span class="text-[10px] font-black uppercase tracking-widest text-cyan-600 dark:text-cyan-400">{{ $employee->city ?? 'Remote' }}</span>
                     </div>
                 </div>
             </div>
 
             <div class="flex items-center gap-3">
                 @if($isAdmin || $isSelf)
-                <button @click="editing = !editing" class="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800">
-                    <span x-text="editing ? 'Cancel Edit' : 'Edit Profile'"></span>
+                <button @click="editing = !editing" class="inline-flex items-center gap-2 rounded-xl bg-slate-900 border border-white/10 px-6 py-2.5 text-[10px] font-black uppercase tracking-widest text-white shadow-xl hover:bg-cyan-600 transition-all active:scale-95 dark:bg-white/5 dark:hover:bg-cyan-500/20 dark:hover:text-cyan-400">
+                    <span x-text="editing ? 'Abort Edit' : 'Modify Record'"></span>
                 </button>
                 @endif
                 
                 <div x-data="{ open: false }" class="relative">
-                    <button @click="open = !open" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800">
-                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z" /></svg>
+                    <button @click="open = !open" class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50 border border-slate-100 text-slate-400 hover:bg-cyan-50 hover:text-cyan-600 transition-all dark:bg-white/5 dark:border-white/5">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z" /></svg>
                     </button>
-                    <div x-show="open" @click.away="open = false" x-transition class="absolute right-0 mt-2 z-50 w-48 origin-top-right rounded-xl border border-slate-200 bg-white shadow-lg dark:border-slate-800 dark:bg-slate-900" style="display: none;">
+                    <div x-show="open" @click.away="open = false" x-transition class="absolute right-0 mt-3 z-50 w-56 origin-top-right rounded-xl border border-slate-100 bg-white p-1.5 shadow-2xl dark:border-white/10 dark:bg-slate-900" x-cloak>
                         @if($isAdmin)
-                            <div class="p-1">
-                                <a href="{{ route('assets.index') }}" class="block rounded-lg px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">Assets</a>
-                                <a href="{{ route('payroll.index') }}" class="block rounded-lg px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">Payroll</a>
-                            </div>
-                            <div class="border-t border-slate-100 dark:border-slate-800 p-1">
-                                <form action="{{ route('employees.destroy', $employee->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this employee? This action cannot be undone.')">
-                                    @csrf @method('DELETE')
-                                    <button type="submit" class="w-full text-left rounded-lg px-4 py-2 text-sm text-rose-600 hover:bg-rose-50 dark:text-rose-500 dark:hover:bg-rose-500/10">Delete Employee</button>
-                                </form>
-                            </div>
+                            <a href="{{ route('assets.index') }}" class="block rounded-lg px-4 py-2.5 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 hover:text-cyan-600 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-cyan-400">Asset Registry</a>
+                            <a href="{{ route('payroll.index') }}" class="block rounded-lg px-4 py-2.5 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 hover:text-cyan-600 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-cyan-400">Payroll Tiling</a>
+                            <div class="my-1.5 border-t border-slate-50 dark:border-white/5"></div>
+                            <form action="{{ route('employees.destroy', $employee->id) }}" method="POST" onsubmit="return confirm('Purge this personnel record?')">
+                                @csrf @method('DELETE')
+                                <button type="submit" class="w-full text-left rounded-lg px-4 py-2.5 text-[10px] font-black uppercase tracking-widest text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10">Purge Record</button>
+                            </form>
                         @endif
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </div>v>
 
     {{-- Edit Mode Commit Bar --}}
     <div x-show="editing" x-transition class="sticky top-6 z-40 flex items-center justify-between rounded-xl border border-indigo-200 bg-indigo-50 px-6 py-4 shadow-sm dark:border-indigo-500/20 dark:bg-indigo-500/10" style="display: none;">
@@ -89,10 +106,16 @@
              </div>
         </div>
         <div class="flex gap-3">
-            <button @click="editing = false" class="rounded-lg px-4 py-2 text-sm font-semibold text-indigo-700 hover:bg-indigo-100 dark:text-indigo-300 dark:hover:bg-indigo-500/20 transition-colors">Discard</button>
-            <button @click="submitForm()" :disabled="saving" class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-6 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 transition-colors">
-                <span x-show="saving" class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-r-white"></span>
-                <span x-text="saving ? 'Saving...' : 'Save Changes'"></span>
+            <button @click="editing = false" class="text-[10px] font-black uppercase tracking-widest text-indigo-700 hover:text-indigo-900 dark:text-indigo-300 dark:hover:text-white transition-colors">Discard</button>
+            <button @click="submitForm()" :disabled="saving" class="group relative flex items-center justify-center gap-2 rounded-xl bg-slate-900 border border-white/10 px-6 py-2 text-[10px] font-black uppercase tracking-widest text-white shadow-xl shadow-indigo-500/10 transition-all hover:bg-cyan-600 active:scale-95 disabled:opacity-50 dark:bg-white/5 dark:hover:bg-cyan-500/20 dark:hover:text-cyan-400">
+                <span x-show="!saving" class="flex items-center gap-2">
+                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                    Save Changes
+                </span>
+                <span x-show="saving" class="flex items-center gap-2">
+                    <svg class="h-3.5 w-3.5 animate-spin" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                    Processing
+                </span>
             </button>
         </div>
     </div>

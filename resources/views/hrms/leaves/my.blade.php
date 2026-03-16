@@ -3,53 +3,65 @@
 @section('title', 'Time Off - PeopleFlow HRMS')
 
 @section('content')
-<div x-data="leaveManager()" x-init="init()" class="max-w-[1200px] mx-auto space-y-8 pb-10">
-    {{-- Hero Section --}}
-    <div class="relative overflow-hidden mb-8 rounded-3xl bg-slate-950 p-6 shadow-xl shadow-slate-950/20 border border-white/5">
-        {{-- Soft, Ethereal Glows --}}
-        <div class="absolute -right-32 -top-32 h-64 w-64 rounded-full bg-indigo-500/10 blur-[80px] pointer-events-none"></div>
-        <div class="absolute -left-32 -bottom-32 h-64 w-64 rounded-full bg-cyan-500/10 blur-[80px] pointer-events-none"></div>
+<div x-data="leaveManager()" x-init="init()" class="max-w-[1200px] mx-auto space-y-6 pb-10 relative">
 
-        <div class="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div class="space-y-3">
+    {{-- Header Section --}}
+    <div class="relative mb-6">
+        <div class="relative flex flex-col md:flex-row md:items-center justify-between gap-8">
+            <div class="space-y-4">
                 @if(isset($error))
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 text-[10px] font-bold">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-rose-50 border border-rose-100 text-rose-500 text-[10px] font-bold dark:bg-rose-500/10 dark:border-rose-500/20">
                         <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         <span>{{ $error }}</span>
                     </div>
                 @endif
                 
-                <div class="flex items-center gap-2">
-                    <div class="h-1.5 w-1.5 rounded-full bg-cyan-500/60 blur-[1px]"></div>
-                    <span class="text-[9px] font-black uppercase tracking-[0.2em] text-cyan-400/60">Balance Overview</span>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="text-[9px] font-black uppercase tracking-[0.2em] text-indigo-500 dark:text-indigo-400">Balance Overview</span>
+                        <div class="h-1 w-1 rounded-full bg-slate-300"></div>
+                        <span class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Self Service</span>
+                    </div>
+                    <button @click="openModal()" class="group hidden md:flex items-center gap-2 rounded-lg bg-slate-900 border border-white/10 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-white shadow-xl shadow-indigo-500/10 transition-all hover:bg-cyan-600 active:scale-95 dark:bg-white/5 dark:hover:bg-cyan-500/20 dark:hover:text-cyan-400">
+                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                        <span>Book Time Off</span>
+                    </button>
                 </div>
 
-                <div class="space-y-1">
-                    <h1 class="text-2xl lg:text-3xl font-black text-white tracking-tight">
+                <div class="space-y-1.5">
+                    <h1 class="text-2xl lg:text-3xl font-black text-slate-900 tracking-tight dark:text-white">
                         {{ isset($employee) ? 'Hi, ' . explode(' ', $employee->full_name)[0] : 'Hello' }} 👋
                     </h1>
-                    <p class="text-xs text-slate-400 font-medium leading-relaxed max-w-lg">
-                        You have <span class="text-white" x-text="Object.values(balances).reduce((a, b) => a + b.remaining, 0)"></span> days left to recharge.
+                    <p class="text-[11px] text-slate-500 font-medium leading-relaxed max-w-lg dark:text-slate-400">
+                        You have <span class="text-slate-900 font-black dark:text-white" x-text="Object.values(balances).reduce((a, b) => a + b.remaining, 0)"></span> days left to recharge.
                     </p>
                 </div>
                 
-                <div class="flex items-center gap-4 pt-1">
-                    <a href="{{ route('leaves.index') }}" class="group flex items-center gap-2 text-[10px] font-bold text-slate-500 hover:text-cyan-400 transition-colors">
-                        <div class="h-6 w-6 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-cyan-500/10 transition-colors">
+                <div class="flex flex-wrap items-center gap-6 pt-1">
+                    <a href="{{ route('leaves.index') }}" class="group flex items-center gap-2.5 text-[10px] font-bold text-slate-500 hover:text-cyan-600 transition-colors">
+                        <div class="h-6 w-6 rounded-lg bg-slate-100 flex items-center justify-center group-hover:bg-cyan-100 transition-colors dark:bg-white/5">
                             <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
                         </div>
                         <span>Who's Away Calendar</span>
                     </a>
+                    @if(Auth::user()->hasAnyRole(['admin', 'hr_manager']))
+                    <a href="{{ route('workflows.index') }}" class="group flex items-center gap-2.5 text-[10px] font-bold text-slate-500 hover:text-indigo-600 transition-colors">
+                        <div class="h-6 w-6 rounded-lg bg-slate-100 flex items-center justify-center group-hover:bg-indigo-100 transition-colors dark:bg-white/5">
+                            <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                        </div>
+                        <span>Workflow Inbox</span>
+                    </a>
+                    @endif
                 </div>
             </div>
 
-            <div>
-                <button @click="openModal()" class="group relative inline-flex h-11 items-center gap-2.5 rounded-full bg-white text-slate-900 px-6 text-xs font-black uppercase tracking-widest shadow-xl shadow-white/5 transition-all hover:scale-105 active:scale-95">
-                    <div class="h-5 w-5 rounded-full bg-slate-900 flex items-center justify-center">
-                        <svg class="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
-                    </div>
-                    <span>Book Leave</span>
-                </button>
+                {{-- Mobile Button --}}
+                <div class="md:hidden mt-4">
+                    <button @click="openModal()" class="w-full flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-slate-800 to-indigo-900 px-5 py-2.5 text-[11px] font-black uppercase tracking-widest text-white shadow-xl dark:from-cyan-500 dark:to-indigo-500 dark:text-slate-950">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                        <span>Book Time Off</span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -108,8 +120,8 @@
                                     <span class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400" x-text="type"></span>
                                 </div>
                                 <div class="flex items-baseline gap-2">
-                                    <span class="text-4xl font-black text-slate-900 dark:text-white tracking-tight" x-text="bal.remaining"></span>
-                                    <span class="text-xs font-bold text-slate-400">/ <span x-text="bal.limit"></span> days</span>
+                                    <span class="text-3xl font-black text-slate-900 dark:text-white tracking-tight" x-text="bal.remaining"></span>
+                                    <span class="text-[10px] font-bold text-slate-400">/ <span x-text="bal.limit"></span> days</span>
                                 </div>
                                 <div class="mt-6 flex items-center justify-between text-[9px] font-bold uppercase tracking-widest text-slate-400">
                                     <span>Used <span class="text-slate-900 dark:text-white" x-text="bal.used"></span> days</span>
@@ -277,12 +289,12 @@
                     <h3 class="text-[9px] font-black uppercase tracking-[0.2em] text-indigo-400/60">Insight</h3>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <p class="text-3xl font-black text-white tracking-tight" x-text="stats.approved + stats.pending"></p>
-                            <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest mt-1">Total</p>
+                            <p class="text-2xl font-black text-white tracking-tight" x-text="stats.approved + stats.pending"></p>
+                            <p class="text-[8px] font-black text-slate-500 uppercase tracking-widest mt-1">Total</p>
                         </div>
                         <div>
-                            <p class="text-3xl font-black text-amber-400 tracking-tight" x-text="stats.pending"></p>
-                            <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest mt-1">Pending</p>
+                            <p class="text-2xl font-black text-amber-400 tracking-tight" x-text="stats.pending"></p>
+                            <p class="text-[8px] font-black text-slate-500 uppercase tracking-widest mt-1">Pending</p>
                         </div>
                     </div>
                 </div>
@@ -300,12 +312,12 @@
                 </button>
             </div>
             
-            <div class="p-6">
-                <form @submit.prevent="saveLeave" id="leaveForm" class="space-y-5">
+            <div class="px-6 py-5">
+                <form @submit.prevent="saveLeave" id="leaveForm" class="space-y-4">
                     <template x-if="isAdmin">
-                        <div class="space-y-2">
-                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Team Member</label>
-                            <select x-model="form.employee_id" class="w-full rounded-2xl border border-slate-100 bg-slate-50/50 px-4 py-3 text-sm font-bold text-slate-900 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10 dark:border-white/5 dark:bg-white/5 dark:text-white" required>
+                        <div class="space-y-1">
+                            <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest">Team Member</label>
+                            <select x-model="form.employee_id" class="w-full rounded-lg border border-slate-100 bg-slate-50/50 px-3 py-2 text-[12px] font-bold text-slate-900 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10 dark:border-white/5 dark:bg-white/5 dark:text-white" required>
                                 <option value="">Select Employee</option>
                                 <template x-for="emp in employees" :key="emp.id">
                                     <option :value="emp.id" x-text="emp.full_name"></option>
@@ -314,19 +326,19 @@
                         </div>
                     </template>
 
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="space-y-2">
-                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Leave Type</label>
-                            <select x-model="form.leave_type" class="w-full rounded-2xl border border-slate-100 bg-slate-50/50 px-3 py-3 text-xs font-bold text-slate-900 focus:border-cyan-500 dark:border-white/5 dark:bg-white/5 dark:text-white" required>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="space-y-1">
+                            <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest">Leave Type</label>
+                            <select x-model="form.leave_type" class="w-full rounded-lg border border-slate-100 bg-slate-50/50 px-3 py-2 text-[12px] font-bold text-slate-900 focus:border-cyan-500 dark:border-white/5 dark:bg-white/5 dark:text-white" required>
                                 <option value="annual">Annual</option>
                                 <option value="sick">Sick</option>
                                 <option value="casual">Casual</option>
                                 <option value="unpaid">Unpaid</option>
                             </select>
                         </div>
-                        <div class="space-y-2">
-                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Duration</label>
-                            <select x-model="form.leave_session" class="w-full rounded-2xl border border-slate-100 bg-slate-50/50 px-3 py-3 text-xs font-bold text-slate-900 focus:border-cyan-500 dark:border-white/5 dark:bg-white/5 dark:text-white" required>
+                        <div class="space-y-1">
+                            <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest">Duration</label>
+                            <select x-model="form.leave_session" class="w-full rounded-lg border border-slate-100 bg-slate-50/50 px-3 py-2 text-[12px] font-bold text-slate-900 focus:border-cyan-500 dark:border-white/5 dark:bg-white/5 dark:text-white" required>
                                 <option value="full_day">Full Day</option>
                                 <option value="morning">Morning</option>
                                 <option value="evening">Evening</option>
@@ -334,29 +346,50 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="space-y-2">
-                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Start Date</label>
-                            <input type="date" x-model="form.start_date" class="w-full rounded-2xl border border-slate-100 bg-slate-50/50 px-3 py-3 text-xs font-bold text-slate-900 dark:border-white/5 dark:bg-white/5 dark:text-white" required>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="space-y-1">
+                            <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest">Start Date</label>
+                            <input type="date" x-model="form.start_date" class="w-full rounded-lg border border-slate-100 bg-slate-50/50 px-3 py-2 text-[12px] font-bold text-slate-900 dark:border-white/5 dark:bg-white/5 dark:text-white" required>
                         </div>
-                        <div class="space-y-2">
-                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest">End Date</label>
-                            <input type="date" x-model="form.end_date" class="w-full rounded-2xl border border-slate-100 bg-slate-50/50 px-3 py-3 text-xs font-bold text-slate-900 dark:border-white/5 dark:bg-white/5 dark:text-white" required>
+                        <div class="space-y-1">
+                            <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest">End Date</label>
+                            <input type="date" x-model="form.end_date" class="w-full rounded-lg border border-slate-100 bg-slate-50/50 px-3 py-2 text-[12px] font-bold text-slate-900 dark:border-white/5 dark:bg-white/5 dark:text-white" required>
                         </div>
                     </div>
 
-                    <div class="space-y-2">
-                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Message (Optional)</label>
-                        <textarea x-model="form.reason" rows="2" class="w-full rounded-2xl border border-slate-100 bg-slate-50/50 px-4 py-3 text-sm font-medium text-slate-900 focus:border-cyan-500 dark:border-white/5 dark:bg-white/5 dark:text-white" placeholder="Adding some context..."></textarea>
+                    <div class="space-y-1">
+                        <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest">Message (Optional)</label>
+                        <textarea x-model="form.reason" rows="2" class="w-full rounded-lg border border-slate-100 bg-slate-50/50 px-3 py-2 text-[12px] font-medium text-slate-900 focus:border-cyan-500 dark:border-white/5 dark:bg-white/5 dark:text-white" placeholder="Adding some context..."></textarea>
                     </div>
                 </form>
             </div>
 
             <div class="flex justify-end gap-3 bg-slate-50/50 px-6 py-4 dark:bg-white/5">
-                <button @click="showModal = false" class="text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">Cancel</button>
-                <button form="leaveForm" @click="saveLeave()" class="rounded-full bg-slate-900 px-6 py-2.5 text-[10px] font-black uppercase tracking-widest text-white shadow-xl shadow-slate-900/20 hover:bg-cyan-600 hover:shadow-cyan-600/20 transition-all active:scale-95 dark:bg-cyan-500 dark:text-slate-900">Request</button>
+                <button @click="showModal = false" class="text-[9px] font-bold uppercase tracking-widest text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">Cancel</button>
+                <button form="leaveForm" @click="saveLeave()" :disabled="saving" class="group relative flex items-center justify-center gap-2 rounded-lg bg-slate-900 border border-white/10 px-6 py-2.5 text-[10px] font-black uppercase tracking-widest text-white shadow-xl shadow-slate-900/20 hover:bg-cyan-600 transition-all active:scale-95 disabled:opacity-50 dark:bg-white/5 dark:hover:bg-cyan-500/20 dark:hover:text-cyan-400">
+                    <span x-show="!saving">Request</span>
+                    <span x-show="saving" class="flex items-center gap-2">
+                        <svg class="h-3 w-3 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                        Processing
+                    </span>
+                </button>
             </div>
         </div>
+    </div>
+    {{-- Universal Notification --}}
+    <div 
+        x-show="toast.show" 
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="translate-y-4 opacity-0 scale-95"
+        x-transition:enter-end="translate-y-0 opacity-100 scale-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="translate-y-0 opacity-100 scale-100"
+        x-transition:leave-end="translate-y-4 opacity-0 scale-95"
+        class="fixed bottom-8 right-8 z-[100] flex items-center gap-3 rounded-xl border border-white/10 bg-slate-900/90 px-5 py-3 text-xs font-bold text-white shadow-2xl backdrop-blur-xl"
+        x-cloak
+    >
+        <div :class="toast.type === 'success' ? 'bg-emerald-500' : 'bg-rose-500'" class="h-2 w-2 rounded-full animate-pulse"></div>
+        <span x-text="toast.message"></span>
     </div>
 </div>
 @endsection

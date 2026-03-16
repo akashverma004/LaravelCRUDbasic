@@ -8,12 +8,12 @@
     {{-- Header Section --}}
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-6 border-b border-slate-200 dark:border-white/5">
         <div>
-            <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Audit Logs</h1>
-            <p class="mt-2 text-sm text-slate-500">Track and monitor all system activity and changes.</p>
+            <h1 class="text-2xl font-black tracking-tight text-slate-900 dark:text-white">Audit Logs</h1>
+            <p class="mt-1 text-[11px] font-medium text-slate-500">Track and monitor all system activity and changes.</p>
         </div>
         <div class="flex items-center gap-3">
-             <button @click="fetchData()" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800">
-                <svg :class="loading ? 'animate-spin' : ''" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>
+             <button @click="fetchData()" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-700 shadow-sm transition-all hover:bg-slate-50 dark:border-white/5 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10">
+                <svg :class="loading ? 'animate-spin' : ''" class="h-3.5 w-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>
                 <span>Refresh Logs</span>
             </button>
         </div>
@@ -124,8 +124,8 @@
                 </div>
             </div>
             
-            <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end dark:bg-slate-900/50 dark:border-slate-800">
-                <button @click="detailsModal = false" class="rounded-xl bg-white border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700">Close</button>
+            <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end dark:bg-white/5 dark:border-white/5">
+                <button @click="detailsModal = false" class="inline-flex items-center gap-2 rounded-xl bg-slate-100 border border-slate-200 px-5 py-2 text-[10px] font-black uppercase tracking-widest text-slate-700 shadow-sm transition-all hover:bg-slate-200 dark:border-white/5 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10">Close</button>
             </div>
         </div>
     </div>

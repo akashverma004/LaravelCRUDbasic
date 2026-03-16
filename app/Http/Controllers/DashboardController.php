@@ -70,9 +70,13 @@ class DashboardController extends Controller
         $teamHeads = $this->dashboardService->getTeamHeads();
         $allEmployees = $this->dashboardService->getAllEmployees();
         $avgSalary = $this->dashboardService->calculateAverageSalaryByDepartment();
+        $leaveTypeData = $this->dashboardService->getLeaveRequestsByType();
+        $leaveTrendData = $this->dashboardService->getLeaveTrendData();
+        $activeSessions = $this->dashboardService->getActiveSessions();
 
         return view('hrms.dashboard', [
             ...$stats,
+            'activeSessions' => $activeSessions,
             'departmentBreakdown' => $departmentBreakdown,
             'departmentChartData' => [
                 'labels' => $departmentBreakdown->pluck('name'),
@@ -81,6 +85,11 @@ class DashboardController extends Controller
             'employees' => $employees,
             'leaveRequests' => $leaveRequests,
             'leaveStats' => $leaveStats,
+            'leaveTypeChartData' => [
+                'labels' => $leaveTypeData->pluck('leave_type')->map(fn($t) => ucfirst($t)),
+                'values' => $leaveTypeData->pluck('count'),
+            ],
+            'leaveTrendChartData' => $leaveTrendData,
             'employmentBreakdown' => $employmentBreakdown,
             'employeesByStatus' => $employeesByStatus,
             'topDepartments' => $topDepartments,

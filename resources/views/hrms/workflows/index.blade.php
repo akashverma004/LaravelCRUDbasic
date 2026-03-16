@@ -18,94 +18,86 @@
         fulfillUrlBase: '{{ url('/workflows') }}'
     })"
     x-init="init()"
-    class="space-y-8"
+    class="space-y-6 relative"
 >
-    {{-- Toast Notification --}}
-    <div
-        x-show="toast.show"
+    {{-- Universal Notification --}}
+    <div 
+        x-show="toast.show" 
         x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="opacity-0 translate-y-2"
-        x-transition:enter-end="opacity-100 translate-y-0"
+        x-transition:enter-start="translate-y-4 opacity-0 scale-95"
+        x-transition:enter-end="translate-y-0 opacity-100 scale-100"
         x-transition:leave="transition ease-in duration-200"
-        x-transition:leave-start="opacity-100 translate-y-0"
-        x-transition:leave-end="opacity-0 translate-y-2"
-        class="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-2xl px-5 py-3 shadow-2xl"
-        :class="toast.type === 'success' ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'"
-        style="display: none;"
+        x-transition:leave-start="translate-y-0 opacity-100 scale-100"
+        x-transition:leave-end="translate-y-4 opacity-0 scale-95"
+        class="fixed bottom-8 right-8 z-[100] flex items-center gap-3 rounded-xl border border-white/10 bg-slate-900/90 px-5 py-3 text-xs font-bold text-white shadow-2xl backdrop-blur-xl dark:bg-slate-800/90"
+        x-cloak
     >
-        <template x-if="toast.type === 'success'">
-            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-        </template>
-        <span x-text="toast.message" class="text-sm font-bold"></span>
+        <div :class="toast.type === 'success' ? 'bg-emerald-500' : 'bg-rose-500'" class="h-2 w-2 rounded-full animate-pulse"></div>
+        <span x-text="toast.message"></span>
     </div>
 
     {{-- Header Section --}}
-    <div class="relative overflow-hidden rounded-[2.5rem] bg-slate-900 px-8 py-10 shadow-2xl dark:bg-slate-950/40 dark:backdrop-blur-xl">
-        <div class="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-cyan-500/10 blur-[80px]"></div>
-        <div class="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-indigo-500/10 blur-[80px]"></div>
-        
-        <div class="relative flex flex-col items-start justify-between gap-6 lg:flex-row lg:items-center">
+    <div class="relative mb-8">
+        <div class="relative flex flex-col items-start justify-between gap-8 lg:flex-row lg:items-center">
             <div>
-                <h1 class="text-4xl font-black tracking-tight text-white lg:text-5xl">
-                    Dynamic <span class="text-cyan-400">Workflows</span>
+                <h1 class="text-3xl font-black tracking-tighter text-slate-900 lg:text-3xl dark:text-white uppercase">
+                    Execution <span class="text-cyan-500">Engines</span>
                 </h1>
-                <p class="mt-3 max-w-xl text-lg font-medium text-slate-400">
-                    Track requests, approvals, and fulfillment cycles across the organization.
-                </p>
+                <p class="mt-2 max-w-xl text-[11px] font-bold text-slate-500 uppercase tracking-widest leading-relaxed">Systemic tracking of requests, approvals, and fulfillment cycles across the lattice.</p>
             </div>
             <div class="flex flex-wrap items-center gap-3">
                 <button
                     x-show="isAdmin"
                     @click="openTemplateModal()"
-                    class="rounded-2xl border border-white/10 bg-white/5 px-6 py-4 text-xs font-black uppercase tracking-widest text-white shadow-lg backdrop-blur-md transition-all hover:bg-white/10"
+                    class="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-[10px] font-black uppercase tracking-widest text-slate-500 shadow-sm transition-all hover:bg-slate-50 hover:text-slate-900 dark:bg-white/5 dark:border-white/10 dark:text-slate-400 dark:hover:text-white"
                     style="display: none;"
                 >
-                    Manage Templates
+                    Design Hub
                 </button>
                 <button
                     @click="openCreateModal()"
                     :disabled="!canCreate"
-                    class="group relative flex items-center gap-3 overflow-hidden rounded-2xl bg-cyan-400 px-8 py-4 text-xs font-black uppercase tracking-widest text-slate-950 transition-all hover:bg-cyan-300 disabled:opacity-50"
+                    class="group relative flex items-center gap-2 rounded-xl bg-slate-900 border border-white/10 px-6 py-2.5 text-[10px] font-black uppercase tracking-widest text-white shadow-xl hover:bg-cyan-600 active:scale-95 disabled:opacity-50 dark:bg-white/5 dark:hover:bg-cyan-500/20 dark:hover:text-cyan-400 transition-all"
                 >
-                    <span>New Request</span>
-                    <svg class="h-5 w-5 transition-transform group-hover:rotate-90" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                    <span>Initiate Sequence</span>
+                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="3.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
                 </button>
             </div>
         </div>
     </div>
 
     {{-- Stats Grid --}}
-    <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+    <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         <template x-for="card in summaryCards" :key="card.key">
-            <div class="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:border-cyan-400 dark:border-slate-800 dark:bg-slate-900/50">
-                <p class="text-[10px] font-black uppercase tracking-widest text-slate-400" x-text="card.label"></p>
-                <div class="mt-4 flex items-end justify-between">
-                    <p class="text-4xl font-black text-slate-900 dark:text-white" x-text="summary[card.key] ?? 0"></p>
-                    <span class="rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest transition-colors" :class="card.tone" x-text="card.hint"></span>
+            <div class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:shadow-xl dark:border-white/5 dark:bg-slate-900/50">
+                <p class="text-[9px] font-black uppercase tracking-widest text-slate-400" x-text="card.label"></p>
+                <div class="mt-3 flex items-end justify-between">
+                    <p class="text-2xl font-black text-slate-900 dark:text-white leading-none tabular-nums" x-text="summary[card.key] ?? 0"></p>
+                    <span class="rounded-lg px-2 py-1 text-[8px] font-black uppercase tracking-widest shadow-sm transition-all group-hover:bg-slate-900 group-hover:text-white" :class="card.tone" x-text="card.hint"></span>
                 </div>
             </div>
         </template>
     </div>
 
     {{-- Filter Bar --}}
-    <div class="rounded-3xl border border-slate-200 bg-white/80 p-6 shadow-sm backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/80">
-        <div class="grid gap-6 xl:grid-cols-4">
-            <div class="xl:col-span-2">
-                <label class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Search Activities</label>
-                <input x-model.trim="filters.q" @input.debounce.250ms="fetchRequests()" type="text" placeholder="Title, requester, or content..." class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm font-bold text-slate-900 placeholder-slate-300 focus:border-cyan-400 focus:bg-white focus:ring-0 dark:border-slate-800 dark:bg-slate-950 dark:text-white">
+    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/5 dark:bg-slate-900/50">
+        <div class="grid gap-0 xl:grid-cols-4 divide-y xl:divide-y-0 xl:divide-x divide-slate-100 dark:divide-white/5">
+            <div class="xl:col-span-2 p-5">
+                <label class="text-[9px] font-black uppercase tracking-[0.2em] text-cyan-600 dark:text-cyan-400 leading-none">Activity Stream Filters</label>
+                <input x-model.trim="filters.q" @input.debounce.250ms="fetchRequests()" type="text" placeholder="Title, requester, or content..." class="mt-4 w-full rounded-xl border-0 bg-slate-50 px-5 py-3 text-[11px] font-black uppercase tracking-widest text-slate-900 placeholder-slate-300 focus:ring-4 focus:ring-cyan-500/10 dark:bg-white/5 dark:text-white transition-all">
             </div>
-            <div class="grid gap-4 md:grid-cols-3 xl:col-span-2">
-                <div>
-                    <label class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Scope</label>
-                    <select x-model="filters.scope" @change="fetchRequests()" class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm font-bold text-slate-900 transition-all focus:border-cyan-400 focus:bg-white focus:ring-0 dark:border-slate-800 dark:bg-slate-950 dark:text-white">
-                        <option value="all">Global</option>
-                        <option value="mine">Submissions</option>
+            <div class="grid gap-0 md:grid-cols-3 xl:col-span-2">
+                <div class="p-5 border-r border-slate-100 dark:divide-white/5">
+                    <label class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">View Scope</label>
+                    <select x-model="filters.scope" @change="fetchRequests()" class="mt-4 w-full rounded-xl border-0 bg-slate-50 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-900 focus:ring-4 focus:ring-cyan-500/10 dark:bg-white/5 dark:text-white transition-all appearance-none cursor-pointer">
+                        <option value="all">Global Matrix</option>
+                        <option value="mine">My Submissions</option>
                         <option value="approvals">Awaiting me</option>
                     </select>
                 </div>
-                <div>
-                    <label class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Status</label>
-                    <select x-model="filters.status" @change="fetchRequests()" class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm font-bold text-slate-900 transition-all focus:border-cyan-400 focus:bg-white focus:ring-0 dark:border-slate-800 dark:bg-slate-950 dark:text-white">
+                <div class="p-5 border-r border-slate-100 dark:divide-white/5">
+                    <label class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">State</label>
+                    <select x-model="filters.status" @change="fetchRequests()" class="mt-4 w-full rounded-xl border-0 bg-slate-50 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-900 focus:ring-4 focus:ring-cyan-500/10 dark:bg-white/5 dark:text-white transition-all appearance-none cursor-pointer">
                         <option value="all">Any Status</option>
                         <option value="pending">Pending</option>
                         <option value="approved">Approved</option>
@@ -113,9 +105,9 @@
                         <option value="rejected">Rejected</option>
                     </select>
                 </div>
-                <div>
-                    <label class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Category</label>
-                    <select x-model="filters.type" @change="fetchRequests()" class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm font-bold text-slate-900 transition-all focus:border-cyan-400 focus:bg-white focus:ring-0 dark:border-slate-800 dark:bg-slate-950 dark:text-white">
+                <div class="p-5">
+                    <label class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Category</label>
+                    <select x-model="filters.type" @change="fetchRequests()" class="mt-4 w-full rounded-xl border-0 bg-slate-50 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-900 focus:ring-4 focus:ring-cyan-500/10 dark:bg-white/5 dark:text-white transition-all appearance-none cursor-pointer">
                         <option value="all">All Types</option>
                         @foreach ($workflowTypes as $value => $label)
                             <option value="{{ $value }}">{{ $label }}</option>
@@ -428,8 +420,8 @@
                             <button @click="editTemplate(template)" class="w-full rounded-[2rem] border border-slate-100 bg-white p-6 text-left shadow-sm transition-all hover:border-cyan-400 dark:border-slate-800 dark:bg-slate-950/40">
                                 <div class="flex items-start justify-between">
                                     <div class="min-w-0">
-                                        <p class="text-[10px] font-black uppercase tracking-widest text-cyan-600" x-text="template.type_label"></p>
-                                        <h4 class="mt-2 text-lg font-black tracking-tight text-slate-900 dark:text-white" x-text="template.name"></h4>
+                                        <p class="text-[9px] font-black uppercase tracking-widest text-cyan-600" x-text="template.type_label"></p>
+                                        <h4 class="mt-1.5 text-md font-black tracking-tight text-slate-900 dark:text-white" x-text="template.name"></h4>
                                     </div>
                                     <span class="rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-widest" :class="template.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'" x-text="template.is_active ? 'Active' : 'Archived'"></span>
                                 </div>
@@ -444,9 +436,9 @@
 
                     {{-- Template Editor --}}
                     <div class="rounded-[2.5rem] border border-slate-100 bg-slate-50/50 p-8 dark:border-slate-800 dark:bg-slate-950/30">
-                        <div class="flex items-center justify-between mb-8">
-                            <h4 class="text-xl font-black tracking-tight text-slate-900 dark:text-white" x-text="templateForm.id ? 'Edit Configuration' : 'Design Template'"></h4>
-                            <button @click="resetTemplateForm()" class="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-cyan-500">Reset Canvas</button>
+                        <div class="flex items-center justify-between mb-6">
+                            <h4 class="text-lg font-black tracking-tight text-slate-900 dark:text-white" x-text="templateForm.id ? 'Edit Configuration' : 'Design Template'"></h4>
+                            <button @click="resetTemplateForm()" class="text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-cyan-500">Reset Canvas</button>
                         </div>
                         
                         <div class="grid gap-6">
