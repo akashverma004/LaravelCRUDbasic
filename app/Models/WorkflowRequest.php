@@ -70,6 +70,8 @@ class WorkflowRequest extends Model
         return [
             'reimbursement' => 'Reimbursement',
             'asset-request' => 'Asset Request',
+            'asset-return' => 'Asset Return',
+            'asset-repair' => 'Asset Repair',
             'profile-change' => 'Profile Change',
             'salary-change' => 'Salary Change',
             'offboarding' => 'Offboarding',

@@ -132,11 +132,11 @@
         {{-- Main Details --}}
         <div class="lg:col-span-2 space-y-6">
             {{-- Tabs --}}
-            <div class="flex gap-1.5 overflow-x-auto rounded-2xl border border-slate-200 bg-white p-1.5 shadow-sm dark:border-slate-800 dark:bg-slate-900/40 custom-scrollbar">
+            <div class="flex gap-2 overflow-x-auto rounded-xl border border-slate-200 bg-white p-2 shadow-sm dark:border-slate-800 dark:bg-slate-900/50 hide-scrollbar">
                 <template x-for="t in tabs" :key="t.id">
                     <button @click="activeTab = t.id" 
-                        class="flex shrink-0 items-center justify-center rounded-xl px-4 py-1.5 text-[10px] font-black uppercase tracking-widest transition-all"
-                        :class="activeTab === t.id ? 'bg-slate-900 text-white dark:bg-white/10 dark:text-cyan-400 shadow-sm' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white'"
+                        class="whitespace-nowrap rounded-lg px-4 py-2 text-sm font-semibold transition-colors"
+                        :class="activeTab === t.id ? 'bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-white' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-white'"
                         x-text="t.label"></button>
                 </template>
             </div>
@@ -365,44 +365,62 @@
                     {{-- TAB: Account --}}
                     <div x-show="activeTab === 'account'" class="space-y-12 animate-fade-in" style="display: none;">
                         {{-- Profile Settings --}}
-                        <div class="rounded-2xl border border-slate-100 bg-slate-50/50 p-8 dark:border-slate-800 dark:bg-slate-950/20">
-                            <h3 class="text-xs font-black uppercase tracking-widest text-slate-400 mb-8">Login Account Details</h3>
+                        <div class="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900/40">
+                            <div class="mb-8 flex items-start justify-between gap-4">
+                                <div>
+                                    <h3 class="text-lg font-bold text-slate-900 dark:text-white">Login Account Details</h3>
+                                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Update the name and email tied to your account sign-in.</p>
+                                </div>
+                                <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-slate-50 text-slate-400 dark:bg-slate-950/60 dark:text-slate-500">
+                                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6.75h3a2.25 2.25 0 012.25 2.25v8.25A2.25 2.25 0 0118.75 19.5H5.25A2.25 2.25 0 013 17.25V9a2.25 2.25 0 012.25-2.25h3m7.5 0V5.25A2.25 2.25 0 0013.5 3h-3A2.25 2.25 0 008.25 5.25v1.5m7.5 0h-7.5" /></svg>
+                                </div>
+                            </div>
                             <div class="grid gap-6 sm:grid-cols-2">
                                 <div>
                                     <label class="block text-[9px] font-black uppercase tracking-widest text-slate-400 ml-4 mb-2">Display Name</label>
-                                    <input type="text" x-model="accountForm.name" class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-900 dark:border-slate-800 dark:bg-slate-950 dark:text-white">
+                                    <input type="text" x-model="accountForm.name" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 transition-all focus:border-cyan-400 focus:bg-white focus:ring-4 focus:ring-cyan-500/10 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:border-cyan-500">
                                 </div>
                                 <div>
                                     <label class="block text-[9px] font-black uppercase tracking-widest text-slate-400 ml-4 mb-2">Login Email</label>
-                                    <input type="email" x-model="accountForm.email" class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-900 dark:border-slate-800 dark:bg-slate-950 dark:text-white">
+                                    <input type="email" x-model="accountForm.email" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 transition-all focus:border-cyan-400 focus:bg-white focus:ring-4 focus:ring-cyan-500/10 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:border-cyan-500">
                                 </div>
                             </div>
                             <div class="mt-8 flex justify-end">
-                                <button @click="updateAccount()" :disabled="savingAccount" class="rounded-2xl bg-slate-900 px-8 py-3 text-sm font-black text-white hover:bg-cyan-600 transition-colors dark:bg-white dark:text-slate-900 disabled:opacity-50">
+                                <button @click="updateAccount()" :disabled="savingAccount" class="inline-flex min-w-[190px] items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-bold text-white transition-all hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200">
+                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
                                     <span x-text="savingAccount ? 'Saving...' : 'Update Login Profile'"></span>
                                 </button>
                             </div>
                         </div>
 
                         {{-- Security --}}
-                        <div class="rounded-2xl border border-slate-100 bg-slate-50/50 p-8 dark:border-slate-800 dark:bg-slate-950/20">
-                            <h3 class="text-xs font-black uppercase tracking-widest text-slate-400 mb-8">Security & Password</h3>
+                        <div class="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900/40">
+                            <div class="mb-8 flex items-start justify-between gap-4">
+                                <div>
+                                    <h3 class="text-lg font-bold text-slate-900 dark:text-white">Security & Password</h3>
+                                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Change your password regularly to keep your account secure.</p>
+                                </div>
+                                <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-amber-50 text-amber-500 dark:bg-amber-500/10 dark:text-amber-400">
+                                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 0h10.5A2.25 2.25 0 0118.75 12.75v6A2.25 2.25 0 0116.5 21h-9A2.25 2.25 0 015.25 18.75v-6A2.25 2.25 0 017.5 10.5z" /></svg>
+                                </div>
+                            </div>
                             <div class="grid gap-6 sm:grid-cols-3">
                                 <div>
                                     <label class="block text-[9px] font-black uppercase tracking-widest text-slate-400 ml-4 mb-2">Current Password</label>
-                                    <input type="password" x-model="passwordForm.current_password" class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-900 dark:border-slate-800 dark:bg-slate-950 dark:text-white">
+                                    <input type="password" x-model="passwordForm.current_password" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 transition-all focus:border-cyan-400 focus:bg-white focus:ring-4 focus:ring-cyan-500/10 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:border-cyan-500">
                                 </div>
                                 <div>
                                     <label class="block text-[9px] font-black uppercase tracking-widest text-slate-400 ml-4 mb-2">New Password</label>
-                                    <input type="password" x-model="passwordForm.password" class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-900 dark:border-slate-800 dark:bg-slate-950 dark:text-white">
+                                    <input type="password" x-model="passwordForm.password" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 transition-all focus:border-cyan-400 focus:bg-white focus:ring-4 focus:ring-cyan-500/10 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:border-cyan-500">
                                 </div>
                                 <div>
                                     <label class="block text-[9px] font-black uppercase tracking-widest text-slate-400 ml-4 mb-2">Confirm New Password</label>
-                                    <input type="password" x-model="passwordForm.password_confirmation" class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-900 dark:border-slate-800 dark:bg-slate-950 dark:text-white">
+                                    <input type="password" x-model="passwordForm.password_confirmation" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 transition-all focus:border-cyan-400 focus:bg-white focus:ring-4 focus:ring-cyan-500/10 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:border-cyan-500">
                                 </div>
                             </div>
                             <div class="mt-8 flex justify-end">
-                                <button @click="updatePassword()" :disabled="savingPassword" class="rounded-2xl bg-cyan-500 px-8 py-3 text-sm font-black text-white hover:bg-cyan-600 transition-colors disabled:opacity-50 shadow-lg shadow-cyan-500/20">
+                                <button @click="updatePassword()" :disabled="savingPassword" class="inline-flex min-w-[190px] items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-bold text-white transition-all hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200">
+                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
                                     <span x-text="savingPassword ? 'Updating...' : 'Change Password'"></span>
                                 </button>
                             </div>
@@ -423,5 +441,12 @@
         to   { opacity: 1; transform: translateY(0); }
     }
     .animate-fade-in { animation: fade-in 0.3s ease-out; }
+    .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+    .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
 </style>
 @endsection

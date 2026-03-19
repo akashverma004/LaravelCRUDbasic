@@ -93,7 +93,7 @@ class HolidayPolicyController extends Controller
     public function destroy(Request $request, int $holidayPolicy): RedirectResponse|JsonResponse
     {
         $holidayPolicy = HolidayPolicy::query()->findOrFail($holidayPolicy);
-        $holidayPolicy->forceDelete();
+        $holidayPolicy->delete();
 
         if ($request->expectsJson()) {
             return response()->json([

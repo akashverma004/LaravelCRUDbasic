@@ -58,7 +58,7 @@ class AssetController extends Controller
             'category' => 'required|string|in:' . implode(',', array_keys(Asset::categories())),
             'serial_number' => 'nullable|string|max:255',
             'employee_id' => 'nullable|exists:employees,id',
-            'status' => 'required|string|in:available,assigned,damaged,lost,retired',
+            'status' => 'required|string|in:' . implode(',', array_keys(Asset::statuses())),
             'notes' => 'nullable|string',
         ]);
 
@@ -77,7 +77,7 @@ class AssetController extends Controller
         }
 
         $validated = $request->validate([
-            'status' => 'required|string|in:available,assigned,damaged,lost,retired',
+            'status' => 'required|string|in:' . implode(',', array_keys(Asset::statuses())),
             'employee_id' => 'nullable|exists:employees,id',
             'notes' => 'nullable|string',
         ]);

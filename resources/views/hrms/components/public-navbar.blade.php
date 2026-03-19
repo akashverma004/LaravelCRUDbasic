@@ -10,12 +10,12 @@
          class="mx-auto flex flex-none items-center justify-between transition-all duration-500 ease-in-out">
 
         {{-- Brand --}}
-        <a href="/" class="flex items-center gap-2.5 transition-transform duration-500"
+        <a href="/" class="flex items-center gap-3 transition-transform duration-500"
            :class="scrolled ? 'scale-90' : 'scale-100'">
-            <div class="flex h-10 w-10 items-center justify-center rounded-[12px] bg-gradient-to-br from-violet-500 to-indigo-600 shadow-lg shadow-violet-500/20">
-                <span class="text-xl font-black text-white">PF</span>
+            <div class="flex h-11 w-11 items-center justify-center rounded-[16px] bg-gradient-to-br from-violet-500 to-indigo-600 shadow-lg shadow-violet-500/20">
+                <span class="text-xl font-black tracking-tight text-white">PF</span>
             </div>
-            <span class="text-xl font-black tracking-tight text-slate-900 uppercase tracking-widest hidden sm:block">PeopleFlow</span>
+            <span class="hidden text-[1.9rem] font-black tracking-tight text-slate-900 leading-none sm:block">PeopleFlow</span>
         </a>
 
         {{-- Center Navigation --}}

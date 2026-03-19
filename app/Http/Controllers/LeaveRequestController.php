@@ -15,6 +15,7 @@ use App\Services\LeaveService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\View\View;
 
@@ -205,6 +206,7 @@ class LeaveRequestController extends Controller
     {
         $user = auth()->user();
         $tenantId = $user->tenant_id;
+        $isAdmin = $user->hasAnyRole(['admin', 'hr_manager']);
         
         $employee = Employee::where('email', $user->email)
             ->where('tenant_id', $tenantId)
@@ -267,6 +269,7 @@ class LeaveRequestController extends Controller
             ->whereDate('end_date', '>=', $today)
             ->with('employee:id,full_name,profile_photo,job_title')
             ->get()
+            ->filter(fn ($leave) => $leave->employee)
             ->map(fn($l) => [
                 'id' => $l->employee->id,
                 'name' => $l->employee->full_name,
@@ -282,6 +285,7 @@ class LeaveRequestController extends Controller
             ->with('employee:id,full_name,profile_photo,job_title')
             ->orderBy('start_date')
             ->get()
+            ->filter(fn ($leave) => $leave->employee)
             ->map(fn($l) => [
                 'id' => $l->employee->id,
                 'name' => $l->employee->full_name,
@@ -293,8 +297,15 @@ class LeaveRequestController extends Controller
 
         // 4. Admin only employees list if needed
         $employees = [];
-        if ($user->hasAnyRole(['admin', 'hr_manager'])) {
+        if ($isAdmin) {
             $employees = Employee::where('tenant_id', $tenantId)->orderBy('full_name')->get(['id', 'full_name']);
+        } else {
+            $employees = collect([
+                [
+                    'id' => $employee->id,
+                    'full_name' => $employee->full_name,
+                ],
+            ]);
         }
 
         return response()->json([
@@ -309,7 +320,7 @@ class LeaveRequestController extends Controller
                 'approved' => $leaves->where('status', 'approved')->count(),
             ],
             'employees' => $employees,
-            'isAdmin' => $user->hasAnyRole(['admin', 'hr_manager'])
+            'isAdmin' => $isAdmin,
         ]);
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -10,13 +11,13 @@ class UserController extends Controller
     public function showUsers(){
         // $users = DB::table('users')->where('id',2)->get();
 
-        $users = DB::table('users')->paginate(3);
+        $users = DB::table('users')->whereNull('deleted_at')->paginate(3);
         return view('allUsers', ['data' => $users]);
         // return $users;
     }
 
     public function singleUser(string $id){
-        $user = DB::table('users')->where('id', $id)->get();
+        $user = DB::table('users')->where('id', $id)->whereNull('deleted_at')->get();
         return view('user', ['data' => $user]);
     }
 
@@ -56,13 +57,13 @@ class UserController extends Controller
     }
 
     public function updatePage(string $id){
-        $user = DB::table('users')->find($id);
+        $user = DB::table('users')->where('id', $id)->whereNull('deleted_at')->first();
         // return $user;
         return view('updateUser', ['data' => $user]);
     }
 
     public function deleteUser(string $id) {   //truncate resets the table
-        $user = DB::table('users')->where('id', $id)->delete();
+        $user = User::query()->findOrFail($id)->delete();
         if($user){
             return redirect()->route('home');
         }

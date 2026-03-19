@@ -20,7 +20,7 @@ class EmployeeController extends Controller
     ) {
         $this->middleware('auth');
         // Only Admin/HR can create/edit/delete
-        $this->middleware('role:admin,hr_manager')->except(['index', 'show', 'search']);
+        $this->middleware('role:admin,hr_manager')->except(['index', 'show', 'search', 'update']);
     }
 
     public function index(): View
@@ -131,11 +131,33 @@ class EmployeeController extends Controller
 
     public function update(StoreEmployeeRequest $request, int $id)
     {
+        $user = auth()->user();
         $employee = $this->employeeService->getEmployeeById($id);
+        $currentUserEmployee = Employee::where('email', $user->email)
+            ->where('tenant_id', $user->tenant_id)
+            ->first();
+
+        $isAdmin = $user->hasAnyRole(['admin', 'hr_manager']);
+        $isSelf = $currentUserEmployee && $employee->id === $currentUserEmployee->id;
+
+        abort_unless($isAdmin || $isSelf, 403, 'You do not have permission to update this profile.');
+
         $this->employeeService->updateEmployee($employee, $request->validated());
         
         if ($request->expectsJson()) {
-            return response()->json(['message' => 'Employee updated successfully.']);
+            return response()->json([
+                'message' => 'Employee updated successfully.',
+                'employee' => $employee->fresh([
+                    'department',
+                    'role',
+                    'manager',
+                    'leaveRequests',
+                    'attendanceRecords',
+                    'educations',
+                    'experiences',
+                    'skills',
+                ]),
+            ]);
         }
         
         return redirect()->route('employees.show', $id)->with('status', 'Employee updated successfully.');
@@ -154,6 +176,21 @@ class EmployeeController extends Controller
         }
 
         return redirect()->route('employees.index')->with('status', 'Employee deleted successfully.');
+    }
+
+    public function restore(Request $request, int $id): RedirectResponse|JsonResponse
+    {
+        $employee = $this->employeeService->restoreEmployee($id);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Employee restored successfully.',
+                'employee' => $this->transformEmployee($employee),
+            ]);
+        }
+
+        return redirect()->route('employees.index')->with('status', 'Employee restored successfully.');
     }
 
     public function search(): View
@@ -201,6 +238,8 @@ class EmployeeController extends Controller
             'department_name' => $employee->department?->name,
             'role_name' => $employee->role?->display_name ?? $employee->role?->name,
             'profile_photo' => $employee->profile_photo,
+            'is_deleted' => $employee->trashed(),
+            'deleted_at' => $employee->deleted_at?->format('d M Y'),
             'show_url' => route('employees.show', $employee->id),
             'edit_url' => route('employees.edit', $employee->id),
             'delete_url' => route('employees.destroy', $employee->id),

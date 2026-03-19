@@ -3,7 +3,13 @@
 @section('title', 'Assets - PeopleFlow HRMS')
 
 @section('content')
-<div x-data="assetManager()" x-init="init()" class="space-y-6">
+<div
+    x-data="assetManager({
+        workflowsUrl: '{{ route('workflows.index') }}'
+    })"
+    x-init="init()"
+    class="space-y-6"
+>
     
     {{-- Header --}}
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-6 border-b border-slate-200 dark:border-white/5">
@@ -11,6 +17,12 @@
             <h1 class="text-2xl font-black tracking-tight text-slate-900 dark:text-white uppercase"><span class="text-cyan-500">Asset</span> Inventory</h1>
             <p class="mt-1 text-[11px] font-medium text-slate-500 uppercase tracking-wide">Manage company equipment and office tools across the grid.</p>
         </div>
+        <template x-if="!isAdmin">
+            <button @click="openWorkflowRequest()" class="inline-flex items-center gap-2 rounded-xl border border-cyan-200 bg-cyan-50 px-4 py-2.5 text-[10px] font-black uppercase tracking-widest text-cyan-700 shadow-sm transition-all hover:bg-cyan-100 dark:border-cyan-500/20 dark:bg-cyan-500/10 dark:text-cyan-300">
+                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                <span>Request Asset</span>
+            </button>
+        </template>
         <template x-if="isAdmin">
             <button @click="openAddModal()" class="inline-flex items-center gap-2 rounded-xl bg-slate-900 border border-white/10 px-5 py-2.5 text-[10px] font-black uppercase tracking-widest text-white shadow-xl hover:bg-cyan-600 transition-all active:scale-95 dark:bg-white/5 dark:hover:bg-cyan-500/20 dark:hover:text-cyan-400">
                 <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="3.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
@@ -49,6 +61,7 @@
                             :class="{
                                 'bg-emerald-500 text-white': asset.status === 'available',
                                 'bg-cyan-500 text-white': asset.status === 'assigned',
+                                'bg-amber-500 text-white': asset.status === 'maintenance',
                                 'bg-rose-500 text-white': ['damaged', 'lost'].includes(asset.status),
                                 'bg-slate-200 text-slate-600 dark:bg-white/10 dark:text-slate-400': ['retired'].includes(asset.status)
                             }" x-text="asset.status"></span>
@@ -67,6 +80,16 @@
                     <button @click="editAsset(asset)" class="mt-5 w-full rounded-xl bg-slate-50 border border-slate-100 py-2.5 text-[9px] font-black uppercase tracking-widest text-slate-500 hover:bg-cyan-500 hover:text-white transition-all dark:bg-white/5 dark:border-white/5 dark:text-slate-400 dark:hover:bg-cyan-500/20 dark:hover:text-cyan-400">
                         Modify Registry
                     </button>
+                </template>
+                <template x-if="!isAdmin">
+                    <div class="mt-5 grid gap-2 sm:grid-cols-2">
+                        <button @click="openReturnWorkflow(asset)" x-show="asset.status === 'assigned'" class="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-[9px] font-black uppercase tracking-widest text-slate-600 transition-all hover:border-cyan-300 hover:bg-cyan-50 hover:text-cyan-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:border-cyan-500/30 dark:hover:bg-cyan-500/10 dark:hover:text-cyan-300">
+                            Request Return
+                        </button>
+                        <button @click="openRepairWorkflow(asset)" x-show="['assigned', 'maintenance'].includes(asset.status)" class="rounded-xl bg-slate-900 px-3 py-2.5 text-[9px] font-black uppercase tracking-widest text-white transition-all hover:bg-cyan-500 hover:text-slate-950 dark:bg-white dark:text-slate-950 dark:hover:bg-cyan-400">
+                            Report Repair
+                        </button>
+                    </div>
                 </template>
             </div>
         </template>
@@ -104,6 +127,7 @@
                         <select x-model="addForm.status" class="w-full rounded-lg border border-slate-200 bg-transparent px-2 py-2 text-xs text-slate-900 focus:border-cyan-500 dark:border-slate-700 dark:text-white">
                             <option value="available">Available</option>
                             <option value="assigned">Assigned</option>
+                            <option value="maintenance">Maintenance</option>
                             <option value="damaged">Damaged</option>
                             <option value="lost">Lost</option>
                             <option value="retired">Retired</option>

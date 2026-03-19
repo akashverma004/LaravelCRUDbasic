@@ -88,9 +88,27 @@ class EmployeeService
         return $employee->delete();
     }
 
+    public function restoreEmployee(int $id): Employee
+    {
+        $employee = Employee::withTrashed()->findOrFail($id);
+        $employee->restore();
+
+        return $employee->fresh([
+            'department',
+            'role',
+            'manager',
+            'leaveRequests',
+            'attendanceRecords',
+            'educations',
+            'experiences',
+            'skills',
+        ]);
+    }
+
     public function getAllEmployees(array $filters = [])
     {
-        return Employee::with(['department', 'role'])
+        return Employee::withTrashed()
+            ->with(['department', 'role'])
             ->when(
                 ! empty($filters['q']),
                 fn ($query) => $query->where(function ($innerQuery) use ($filters) {
@@ -107,6 +125,7 @@ class EmployeeService
                 ! empty($filters['role_id']),
                 fn ($query) => $query->where('role_id', (int) $filters['role_id'])
             )
+            ->orderByRaw('CASE WHEN deleted_at IS NULL THEN 0 ELSE 1 END')
             ->orderBy('full_name')
             ->paginate(15)
             ->withQueryString();
@@ -114,7 +133,7 @@ class EmployeeService
 
     public function getEmployeeById(int $id): ?Employee
     {
-        return Employee::with([
+        return Employee::withTrashed()->with([
             'department', 'role', 'manager',
             'leaveRequests', 'attendanceRecords',
             'educations', 'experiences', 'skills',
@@ -130,7 +149,7 @@ class EmployeeService
 
     public function searchEmployees(string $query)
     {
-        return Employee::with('department')
+        return Employee::withTrashed()->with('department')
             ->where(function ($innerQuery) use ($query) {
                 $innerQuery
                     ->where('full_name', 'like', "%{$query}%")

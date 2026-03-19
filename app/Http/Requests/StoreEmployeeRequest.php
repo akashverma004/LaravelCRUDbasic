@@ -18,23 +18,25 @@ class StoreEmployeeRequest extends FormRequest
     {
         $employeeId = $this->route('id');
         $tenantId = TenantContext::id() ?? (int) auth()->user()?->tenant_id ?: 1;
+        $isUpdate = $this->isMethod('PATCH') || $this->isMethod('PUT');
+        $required = $isUpdate ? 'sometimes' : 'required';
 
         return [
-            'department_id' => ['required', 'integer', Rule::exists('departments', 'id')->where(fn ($query) => $query->where('tenant_id', $tenantId))],
-            'manager_id' => ['nullable', 'integer', Rule::exists('employees', 'id')->where(fn ($query) => $query->where('tenant_id', $tenantId))],
-            'role_id' => ['nullable', 'integer', Rule::exists('roles', 'id')->where(fn ($query) => $query->where('tenant_id', $tenantId))],
-            'full_name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', Rule::unique('employees', 'email')->ignore($employeeId)->where(fn ($query) => $query->where('tenant_id', $tenantId))],
-            'phone' => ['required', 'string', 'max:30'],
-            'job_title' => ['required', 'string', 'max:255'],
-            'employment_type' => ['required', 'in:full-time,part-time,contract,intern'],
-            'salary' => ['required', 'numeric', 'min:0', 'max:9999999999999'],
-            'joined_on' => ['required', 'date', 'before_or_equal:today'],
-            'status' => ['required', 'in:active,on-leave,resigned'],
-            'country' => ['required', Rule::in(array_keys(config('geo.countries', [])))],
-            'state' => ['required', Rule::in(array_keys(config('geo.states_in', [])))],
-            'city' => ['required', 'string', 'max:100'],
-            'address' => ['required', 'string', 'max:500'],
+            'department_id' => [$required, 'integer', Rule::exists('departments', 'id')->where(fn ($query) => $query->where('tenant_id', $tenantId))],
+            'manager_id' => ['sometimes', 'nullable', 'integer', Rule::exists('employees', 'id')->where(fn ($query) => $query->where('tenant_id', $tenantId))],
+            'role_id' => ['sometimes', 'nullable', 'integer', Rule::exists('roles', 'id')->where(fn ($query) => $query->where('tenant_id', $tenantId))],
+            'full_name' => [$required, 'string', 'max:255'],
+            'email' => [$required, 'email', 'max:255', Rule::unique('employees', 'email')->ignore($employeeId)->where(fn ($query) => $query->where('tenant_id', $tenantId))],
+            'phone' => [$required, 'string', 'max:30'],
+            'job_title' => [$required, 'string', 'max:255'],
+            'employment_type' => [$required, 'in:full-time,part-time,contract,intern'],
+            'salary' => [$required, 'numeric', 'min:0', 'max:9999999999999'],
+            'joined_on' => [$required, 'date', 'before_or_equal:today'],
+            'status' => [$required, 'in:active,on-leave,resigned'],
+            'country' => [$required, Rule::in(array_keys(config('geo.countries', [])))],
+            'state' => [$required, Rule::in(array_keys(config('geo.states_in', [])))],
+            'city' => [$required, 'string', 'max:100'],
+            'address' => [$required, 'string', 'max:500'],
             'zip_code' => ['nullable', 'string', 'max:20'],
             'hobbies' => ['nullable', 'string'],
             'likes' => ['nullable', 'string'],
@@ -59,10 +61,19 @@ class StoreEmployeeRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
-        $this->merge([
-            'country' => GeoLookup::normalizeCountryCode($this->input('country')),
-            'state' => GeoLookup::normalizeIndianStateCode($this->input('state')),
-        ]);
+        $normalized = [];
+
+        if ($this->has('country')) {
+            $normalized['country'] = GeoLookup::normalizeCountryCode($this->input('country'));
+        }
+
+        if ($this->has('state')) {
+            $normalized['state'] = GeoLookup::normalizeIndianStateCode($this->input('state'));
+        }
+
+        if ($normalized !== []) {
+            $this->merge($normalized);
+        }
     }
 
     public function messages(): array

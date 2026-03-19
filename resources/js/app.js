@@ -746,25 +746,27 @@ Alpine.data('leaveManager', () => ({
         this.loading = true;
         try {
             const { data } = await axios.get('/leaves/data');
-            this.leaves = data.leaves;
-            this.employees = data.employees;
-            this.isAdmin = data.isAdmin;
+            this.leaves = data.leaves || [];
+            this.employees = data.employees || [];
+            this.isAdmin = data.isAdmin === true;
             this.balances = data.balances || {};
             this.whoIsAway = data.whoIsAway || { today: [], upcoming: [] };
             this.stats = data.stats || { pending: 0, approved: 0 };
         } catch (e) {
             console.error('Failed to load leaves', e);
+            this.showToast(e.response?.data?.message || 'Failed to load leave dashboard.', 'error');
         } finally {
             this.loading = false;
         }
     },
 
     openModal() {
+        const defaultEmployeeId = this.isAdmin ? '' : (this.employees[0]?.id ?? '');
         this.isEditing = false;
         this.editLeaveId = null;
         this.form = {
-            employee_id: this.employees.length > 0 && !this.isAdmin ? this.employees[0].id : '',
-            leave_type: '',
+            employee_id: defaultEmployeeId,
+            leave_type: 'annual',
             leave_session: 'full_day',
             start_date: '',
             end_date: '',
@@ -782,8 +784,8 @@ Alpine.data('leaveManager', () => ({
             employee_id: leave.employee_id,
             leave_type: leave.leave_type,
             leave_session: leave.leave_session,
-            start_date: leave.start_date.split('T')[0],
-            end_date: leave.end_date.split('T')[0],
+            start_date: leave.start_date,
+            end_date: leave.end_date,
             reason: leave.reason,
             status: leave.status
         };
@@ -803,7 +805,13 @@ Alpine.data('leaveManager', () => ({
             this.showModal = false;
             await this.fetchData();
         } catch (e) {
-            this.showToast(e.response?.data?.error || 'Failed to save leave request.', 'error');
+            this.showToast(
+                e.response?.data?.message ||
+                e.response?.data?.error ||
+                Object.values(e.response?.data?.errors || {}).flat()[0] ||
+                'Failed to save leave request.',
+                'error'
+            );
         } finally {
             this.saving = false;
         }
@@ -816,7 +824,7 @@ Alpine.data('leaveManager', () => ({
             this.showToast('Leave request cancelled successfully!');
             await this.fetchData();
         } catch (e) {
-            this.showToast(e.response?.data?.error || 'Failed to cancel leave request.', 'error');
+            this.showToast(e.response?.data?.message || e.response?.data?.error || 'Failed to cancel leave request.', 'error');
         }
     },
 
@@ -831,16 +839,28 @@ Alpine.data('leaveManager', () => ({
 
     formatDateFull(dateStr) {
         return new Date(dateStr).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    },
+
+    usagePercent(balance) {
+        const limit = Number(balance?.limit || 0);
+        const used = Number(balance?.used || 0);
+
+        if (limit <= 0) {
+            return 0;
+        }
+
+        return Math.min(100, Math.round((used / limit) * 100));
     }
 }));
 
 // ── Asset Manager Component ──────────────────────────────────────────
-Alpine.data('assetManager', () => ({
+Alpine.data('assetManager', (config = {}) => ({
     loading: true,
     isAdmin: false,
     assets: [],
     categories: {},
     employees: [],
+    workflowsUrl: config.workflowsUrl || '/workflows',
     showAddModal: false,
     isEditing: false,
     editAssetId: null,
@@ -912,6 +932,31 @@ Alpine.data('assetManager', () => ({
     showToast(message, type = 'success') {
         this.toast = { show: true, message, type };
         setTimeout(() => { this.toast.show = false; }, 3000);
+    },
+
+    openWorkflowRequest() {
+        window.location.href = `${this.workflowsUrl}?action=new&type=asset-request`;
+    },
+
+    openReturnWorkflow(asset) {
+        window.location.href = this.buildWorkflowUrl('asset-return', asset);
+    },
+
+    openRepairWorkflow(asset) {
+        window.location.href = this.buildWorkflowUrl('asset-repair', asset);
+    },
+
+    buildWorkflowUrl(type, asset) {
+        const params = new URLSearchParams({
+            action: 'new',
+            type,
+            asset: String(asset.id),
+            asset_name: asset.name || '',
+            asset_category: asset.category || '',
+            serial_number: asset.serial_number || '',
+        });
+
+        return `${this.workflowsUrl}?${params.toString()}`;
     },
 }));
 
@@ -1127,6 +1172,7 @@ Alpine.data('employeeDirectory', (config = {}) => ({
     dataUrl: config.dataUrl || '/employees/data',
     storeUrl: config.storeUrl || '/employees',
     deleteUrlBase: config.deleteUrlBase || '/employees',
+    restoreUrlBase: config.restoreUrlBase || '/employees',
     storageBase: config.storageBase || '/storage',
     loading: false,
     saving: false,
@@ -1248,6 +1294,23 @@ Alpine.data('employeeDirectory', (config = {}) => ({
             await this.fetchData();
         } catch (error) {
             this.showToast(this.extractErrors(error, 'Failed to archive employee.').join(' '), 'error');
+        } finally {
+            this.deletingId = null;
+        }
+    },
+
+    async restoreEmployee(employee) {
+        if (!confirm(`Unarchive ${employee.full_name}?`)) return;
+
+        this.deletingId = employee.id;
+        try {
+            await axios.patch(`${this.restoreUrlBase}/${employee.id}/restore`, {}, {
+                headers: { Accept: 'application/json' }
+            });
+            this.showToast('Employee unarchived successfully.');
+            await this.fetchData(this.meta.current_page || 1);
+        } catch (error) {
+            this.showToast(this.extractErrors(error, 'Failed to unarchive employee.').join(' '), 'error');
         } finally {
             this.deletingId = null;
         }
@@ -2057,7 +2120,7 @@ Alpine.data('workflowInbox', (config = {}) => ({
         type: 'all',
     },
     form: {
-        type: 'reimbursement',
+        type: 'general',
         workflow_template_id: '',
         title: '',
         description: '',
@@ -2073,6 +2136,14 @@ Alpine.data('workflowInbox', (config = {}) => ({
             needed_by: '',
             preferred_model: '',
             business_reason: '',
+            asset_id: '',
+            asset_name: '',
+            serial_number: '',
+            return_condition: '',
+            requested_return_date: '',
+            issue_type: '',
+            reported_condition: '',
+            reported_at: '',
             field_name: '',
             current_value: '',
             requested_value: '',
@@ -2088,7 +2159,7 @@ Alpine.data('workflowInbox', (config = {}) => ({
     },
     templateForm: {
         id: null,
-        type: 'reimbursement',
+        type: 'general',
         name: '',
         description: '',
         default_title: '',
@@ -2153,7 +2224,7 @@ Alpine.data('workflowInbox', (config = {}) => ({
 
     resetCreateForm() {
         this.form = {
-            type: 'reimbursement',
+            type: 'general',
             workflow_template_id: '',
             title: '',
             description: '',
@@ -2423,7 +2494,7 @@ Alpine.data('workflowInbox', (config = {}) => ({
     resetTemplateForm() {
         this.templateForm = {
             id: null,
-            type: 'reimbursement',
+            type: 'general',
             name: '',
             description: '',
             default_title: '',
@@ -2532,22 +2603,64 @@ Alpine.data('workflowInbox', (config = {}) => ({
         const modal = params.get('modal');
         const action = params.get('action');
 
-        if (!workflowId) {
-            return;
+        if (action === 'new') {
+            this.openCreateModal();
+            this.applyDeepLinkCreatePreset(params);
+        } else if (workflowId) {
+            if (modal === 'timeline') {
+                this.openTimeline(workflowId);
+            } else if (action === 'resubmit') {
+                this.openResubmitModal(workflowId);
+            }
         }
 
-        if (modal === 'timeline') {
-            this.openTimeline(workflowId);
-        } else if (action === 'resubmit') {
-            this.openResubmitModal(workflowId);
-        }
-
-        params.delete('workflow');
-        params.delete('modal');
-        params.delete('action');
+        ['workflow', 'modal', 'action', 'type', 'asset', 'asset_name', 'asset_category', 'serial_number']
+            .forEach((key) => params.delete(key));
         const nextQuery = params.toString();
         const nextUrl = `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ''}`;
         window.history.replaceState({}, '', nextUrl);
+    },
+
+    applyDeepLinkCreatePreset(params) {
+        const type = params.get('type');
+        if (!type) {
+            return;
+        }
+
+        this.form.type = type;
+        this.form.workflow_template_id = '';
+        this.form.amount = type === 'reimbursement' ? this.form.amount : '';
+        this.form.details = this.emptyDetails();
+
+        if (type === 'asset-request') {
+            this.form.title = 'Asset request';
+            this.form.description = 'Requesting a new asset assignment for work use.';
+            return;
+        }
+
+        const assetId = params.get('asset');
+        const assetName = params.get('asset_name') || 'Assigned Asset';
+        const assetCategory = params.get('asset_category') || '';
+        const serialNumber = params.get('serial_number') || '';
+        const today = new Date().toISOString().slice(0, 10);
+
+        this.form.details.asset_id = assetId || '';
+        this.form.details.asset_name = assetName;
+        this.form.details.asset_category = assetCategory;
+        this.form.details.serial_number = serialNumber;
+
+        if (type === 'asset-return') {
+            this.form.title = `Return ${assetName}`;
+            this.form.description = 'Requesting approval to return this assigned asset.';
+            this.form.details.requested_return_date = today;
+            return;
+        }
+
+        if (type === 'asset-repair') {
+            this.form.title = `Repair request for ${assetName}`;
+            this.form.description = 'Reporting an issue with this assigned asset for repair or maintenance.';
+            this.form.details.reported_at = today;
+        }
     },
 
     assetOptionLabel(asset) {
@@ -2574,6 +2687,14 @@ Alpine.data('workflowInbox', (config = {}) => ({
             needed_by: '',
             preferred_model: '',
             business_reason: '',
+            asset_id: '',
+            asset_name: '',
+            serial_number: '',
+            return_condition: '',
+            requested_return_date: '',
+            issue_type: '',
+            reported_condition: '',
+            reported_at: '',
             field_name: '',
             current_value: '',
             requested_value: '',
@@ -2646,7 +2767,7 @@ Alpine.data('commandPalette', () => ({
         { title: 'Workflows & Inbox', category: 'Operations', url: '/workflows', type: 'page' },
         { title: 'Documents', category: 'Self-Service', url: '/documents', type: 'page' },
         { title: 'Performance', category: 'Growth', url: '/performance', type: 'page' },
-        { title: 'Employee Directory', category: 'Company', url: '/employees', type: 'page' },
+        { title: 'People', category: 'Company', url: '/employees', type: 'page' },
         { title: 'Departments', category: 'Company', url: '/departments', type: 'page' },
         { title: 'Policies', category: 'Company', url: '/policies', type: 'page' },
         { title: 'Asset Management', category: 'Operations', url: '/assets', type: 'page' },

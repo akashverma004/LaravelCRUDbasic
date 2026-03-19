@@ -142,7 +142,7 @@ class DashboardService
     {
         $startDate = now()->subDays($days);
         $totalEmployees = Employee::count();
-        $capacity = max(10, $totalEmployees); // Simple mock capacity
+        $capacity = max(1, $totalEmployees);
 
         $leaves = LeaveRequest::query()
             ->selectRaw('DATE(start_date) as date, COUNT(*) as count')
@@ -159,8 +159,8 @@ class DashboardService
             $date = $startDate->copy()->addDays($i)->toDateString();
             $labels[] = date('M d', strtotime($date));
             $found = $leaves->firstWhere('date', $date);
-            $bookings[] = $found ? $found->count : mt_rand(1, min(5, $capacity)); // Mock data if empty
-            $capacities[] = $capacity + mt_rand(-2, 5); // Fluctuating capacity for visual appeal
+            $bookings[] = $found ? $found->count : 0;
+            $capacities[] = $capacity;
         }
 
         return [

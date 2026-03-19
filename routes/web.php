@@ -40,6 +40,7 @@ Route::middleware(['auth', 'must.change.password', 'tenant', 'tenant.active', 't
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.home');
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/leave-trend-data', [DashboardController::class, 'leaveTrendData'])->name('dashboard.leave-trend-data');
 
     // Attendance Punch In / Out
     Route::prefix('attendance')->group(function () {
@@ -88,6 +89,7 @@ Route::middleware(['auth', 'must.change.password', 'tenant', 'tenant.active', 't
             Route::post('/assign-manager', [EmployeeController::class, 'assignManager'])->name('employees.assign-manager');
             Route::get('/{id}/edit', [EmployeeController::class, 'edit'])->name('employees.edit');
             Route::patch('/{id}', [EmployeeController::class, 'update'])->name('employees.update');
+            Route::patch('/{id}/restore', [EmployeeController::class, 'restore'])->name('employees.restore');
             Route::delete('/{id}', [EmployeeController::class, 'destroy'])->name('employees.destroy');
         });
     });

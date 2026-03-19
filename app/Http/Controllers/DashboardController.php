@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Services\DashboardService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -97,6 +99,19 @@ class DashboardController extends Controller
             'teamHeads' => $teamHeads,
             'allEmployees' => $allEmployees,
             'avgSalary' => $avgSalary,
+        ]);
+    }
+
+    public function leaveTrendData(Request $request): JsonResponse
+    {
+        $days = (int) $request->integer('days', 30);
+
+        if (! in_array($days, [7, 30, 60, 90], true)) {
+            $days = 30;
+        }
+
+        return response()->json([
+            'data' => $this->dashboardService->getLeaveTrendData($days),
         ]);
     }
 

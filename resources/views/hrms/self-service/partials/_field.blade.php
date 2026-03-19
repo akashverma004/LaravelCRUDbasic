@@ -11,14 +11,14 @@
             @if($readonly)
                 <div class="relative group">
                     <div class="flex items-center rounded-xl border border-slate-100 bg-slate-50 px-4 py-2.5 dark:border-slate-800 dark:bg-slate-950/40 transition-all">
-                        <span class="text-xs font-bold text-slate-400 uppercase tracking-tight" x-text="employee.{{ $field }} || 'NULL_SET'"></span>
+                        <span class="text-sm font-semibold text-slate-600 dark:text-slate-300" x-text="(() => { const value = employee.{{ $field }}; if (!value) return '-'; if ('{{ $type }}' === 'date') { const date = new Date(value); return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }); } return value; })()"></span>
                         <svg class="h-3 w-3 ml-auto text-slate-300" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
                     </div>
                 </div>
             @else
                 <template x-if="!editing">
                     <div class="flex items-center rounded-xl border border-slate-100 bg-slate-50 px-4 py-2.5 dark:border-slate-800 dark:bg-slate-950/40 transition-all hover:border-cyan-400/30">
-                        <span class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tight" x-text="employee.{{ $field }} || 'UNSET_PROPERTY'"></span>
+                        <span class="text-sm font-semibold text-slate-900 dark:text-white" x-text="(() => { const value = employee.{{ $field }}; if (!value) return '-'; if ('{{ $type }}' === 'date') { const date = new Date(value); return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }); } return value; })()"></span>
                     </div>
                 </template>
                 <template x-if="editing">

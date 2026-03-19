@@ -120,7 +120,7 @@
 
     {{-- Requests Inbox --}}
     <div class="rounded-[2.5rem] border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
-        <div class="flex items-center justify-between border-b border-slate-100 px-8 py-6 dark:border-slate-800">
+        <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4 dark:border-slate-800 sm:px-6">
             <div>
                 <h2 class="text-2xl font-black tracking-tight text-slate-900 dark:text-white">Activity Inbox</h2>
                 <p class="mt-1 text-xs font-bold uppercase tracking-widest text-slate-400">Streamlined approval pipeline</p>
@@ -189,8 +189,8 @@
 
     {{-- Create Request Modal --}}
     <div x-show="modals.create" class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-950/40 p-3 sm:items-center backdrop-blur-sm" style="display: none;">
-        <div @click.away="closeModal('create')" class="my-4 flex max-h-[calc(100vh-2rem)] w-full max-w-3xl flex-col overflow-hidden rounded-[2.5rem] border border-white/20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-2xl">
-            <div class="flex items-center justify-between border-b border-slate-100 px-8 py-6 dark:border-slate-800">
+        <div @click.away="closeModal('create')" class="my-4 flex max-h-[calc(100vh-2rem)] w-full max-w-2xl flex-col overflow-hidden rounded-[2rem] border border-white/20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4 dark:border-slate-800 sm:px-6">
                 <div>
                     <h3 class="text-2xl font-black tracking-tight text-slate-900 dark:text-white" x-text="formMode === 'resubmit' ? 'Edit & Resubmit' : 'New Web Request'"></h3>
                     <p class="text-xs font-bold uppercase tracking-widest text-slate-400">Initialize a new organizational process</p>
@@ -200,7 +200,7 @@
                 </button>
             </div>
 
-            <div class="overflow-y-auto px-8 py-8">
+            <div class="overflow-y-auto px-5 py-5 sm:px-6 sm:py-6">
                 <div class="grid gap-6 sm:grid-cols-2">
                     <div>
                         <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Process Category</label>
@@ -256,6 +256,124 @@
                         </div>
                     </template>
 
+
+                    <template x-if="form.type === 'asset-request'">
+                        <div class="sm:col-span-2 grid gap-6 rounded-3xl border border-cyan-100 bg-cyan-50/20 p-6 dark:border-cyan-900/30 dark:bg-cyan-950/20">
+                            <div class="grid gap-4 md:grid-cols-2">
+                                <div>
+                                    <label class="text-[9px] font-black uppercase tracking-widest text-cyan-600">Asset Category</label>
+                                    <select x-model="form.details.asset_category" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold dark:border-slate-800 dark:bg-slate-900">
+                                        <option value="">Select Category</option>
+                                        <option value="laptop">Laptop</option>
+                                        <option value="peripheral">Peripheral</option>
+                                        <option value="furniture">Furniture</option>
+                                        <option value="keys">Keys</option>
+                                        <option value="licence">Licence</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-[9px] font-black uppercase tracking-widest text-cyan-600">Urgency</label>
+                                    <select x-model="form.details.urgency" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold dark:border-slate-800 dark:bg-slate-900">
+                                        <option value="">Select Urgency</option>
+                                        <option value="low">Low</option>
+                                        <option value="medium">Medium</option>
+                                        <option value="high">High</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-[9px] font-black uppercase tracking-widest text-cyan-600">Needed By</label>
+                                    <input x-model="form.details.needed_by" type="date" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold dark:border-slate-800 dark:bg-slate-900">
+                                </div>
+                                <div>
+                                    <label class="text-[9px] font-black uppercase tracking-widest text-cyan-600">Preferred Model</label>
+                                    <input x-model.trim="form.details.preferred_model" type="text" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold dark:border-slate-800 dark:bg-slate-900" placeholder="Optional model or specification">
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="text-[9px] font-black uppercase tracking-widest text-cyan-600">Business Reason</label>
+                                    <textarea x-model.trim="form.details.business_reason" rows="3" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold dark:border-slate-800 dark:bg-slate-900" placeholder="Why this asset is needed for work"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+                    <template x-if="form.type === 'asset-return'">
+                        <div class="sm:col-span-2 grid gap-6 rounded-3xl border border-emerald-100 bg-emerald-50/40 p-6 dark:border-emerald-900/30 dark:bg-emerald-950/10">
+                            <div class="grid gap-4 md:grid-cols-2">
+                                <div>
+                                    <label class="text-[9px] font-black uppercase tracking-widest text-emerald-600">Assigned Asset</label>
+                                    <input :value="form.details.asset_name || 'Start this flow from Assets'" type="text" disabled class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-900 opacity-80 dark:border-slate-800 dark:bg-slate-900 dark:text-white">
+                                </div>
+                                <div>
+                                    <label class="text-[9px] font-black uppercase tracking-widest text-emerald-600">Serial Number</label>
+                                    <input :value="form.details.serial_number || 'Not available'" type="text" disabled class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-900 opacity-80 dark:border-slate-800 dark:bg-slate-900 dark:text-white">
+                                </div>
+                                <div>
+                                    <label class="text-[9px] font-black uppercase tracking-widest text-emerald-600">Condition</label>
+                                    <select x-model="form.details.return_condition" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold dark:border-slate-800 dark:bg-slate-900">
+                                        <option value="">Select Condition</option>
+                                        <option value="good">Good</option>
+                                        <option value="minor-issues">Minor Issues</option>
+                                        <option value="damaged">Damaged</option>
+                                        <option value="unknown">Unknown</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-[9px] font-black uppercase tracking-widest text-emerald-600">Return Date</label>
+                                    <input x-model="form.details.requested_return_date" type="date" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold dark:border-slate-800 dark:bg-slate-900">
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="text-[9px] font-black uppercase tracking-widest text-emerald-600">Return Note</label>
+                                    <textarea x-model.trim="form.details.reason" rows="3" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold dark:border-slate-800 dark:bg-slate-900" placeholder="Any handover note, issue, or context for the return"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+                    <template x-if="form.type === 'asset-repair'">
+                        <div class="sm:col-span-2 grid gap-6 rounded-3xl border border-amber-100 bg-amber-50/40 p-6 dark:border-amber-900/30 dark:bg-amber-950/10">
+                            <div class="grid gap-4 md:grid-cols-2">
+                                <div>
+                                    <label class="text-[9px] font-black uppercase tracking-widest text-amber-600">Affected Asset</label>
+                                    <input :value="form.details.asset_name || 'Start this flow from Assets'" type="text" disabled class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-900 opacity-80 dark:border-slate-800 dark:bg-slate-900 dark:text-white">
+                                </div>
+                                <div>
+                                    <label class="text-[9px] font-black uppercase tracking-widest text-amber-600">Serial Number</label>
+                                    <input :value="form.details.serial_number || 'Not available'" type="text" disabled class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-900 opacity-80 dark:border-slate-800 dark:bg-slate-900 dark:text-white">
+                                </div>
+                                <div>
+                                    <label class="text-[9px] font-black uppercase tracking-widest text-amber-600">Issue Type</label>
+                                    <select x-model="form.details.issue_type" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold dark:border-slate-800 dark:bg-slate-900">
+                                        <option value="">Select Issue</option>
+                                        <option value="hardware">Hardware</option>
+                                        <option value="software">Software</option>
+                                        <option value="accessory">Accessory</option>
+                                        <option value="wear-tear">Wear & Tear</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-[9px] font-black uppercase tracking-widest text-amber-600">Current Condition</label>
+                                    <select x-model="form.details.reported_condition" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold dark:border-slate-800 dark:bg-slate-900">
+                                        <option value="">Select Condition</option>
+                                        <option value="working">Working</option>
+                                        <option value="partially-working">Partially Working</option>
+                                        <option value="not-working">Not Working</option>
+                                        <option value="damaged">Damaged</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-[9px] font-black uppercase tracking-widest text-amber-600">Reported On</label>
+                                    <input x-model="form.details.reported_at" type="date" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold dark:border-slate-800 dark:bg-slate-900">
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="text-[9px] font-black uppercase tracking-widest text-amber-600">Problem Summary</label>
+                                    <textarea x-model.trim="form.details.reason" rows="3" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold dark:border-slate-800 dark:bg-slate-900" placeholder="Describe the issue, symptoms, and impact on work"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
                     {{-- Attachments --}}
                     <div class="sm:col-span-2">
                         <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Supportive Evidence</label>
@@ -288,12 +406,12 @@
 
     {{-- Decision Modal --}}
     <div x-show="modals.decision" class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-950/40 p-3 sm:items-center backdrop-blur-sm" style="display: none;">
-        <div @click.away="closeModal('decision')" class="my-4 flex max-h-[calc(100vh-2rem)] w-full max-w-lg flex-col overflow-hidden rounded-[2.5rem] border border-white/20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-2xl">
-            <div class="border-b border-slate-100 px-8 py-6 dark:border-slate-800">
+        <div @click.away="closeModal('decision')" class="my-4 flex max-h-[calc(100vh-2rem)] w-full max-w-md flex-col overflow-hidden rounded-[2rem] border border-white/20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-2xl">
+            <div class="border-b border-slate-100 px-5 py-4 dark:border-slate-800 sm:px-6">
                 <h3 class="text-2xl font-black tracking-tight text-slate-900 dark:text-white" x-text="decisionMode === 'approve' ? 'Review & Approve' : 'Record Rejection'"></h3>
                 <p class="mt-1 text-[10px] font-black uppercase tracking-widest text-slate-400" x-text="selectedRequest?.title"></p>
             </div>
-            <div class="overflow-y-auto px-8 py-8">
+            <div class="overflow-y-auto px-5 py-5 sm:px-6 sm:py-6">
                 <div class="rounded-3xl bg-slate-50/50 p-6 dark:bg-slate-950/40">
                     <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Executive Summary</p>
                     <p class="mt-3 text-sm font-bold text-slate-900 dark:text-white" x-text="selectedRequest?.type_label"></p>
@@ -316,8 +434,8 @@
 
     {{-- Timeline Modal --}}
     <div x-show="modals.timeline" class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-950/40 p-3 sm:items-center backdrop-blur-sm" style="display: none;">
-        <div @click.away="closeModal('timeline')" class="my-4 flex max-h-[calc(100vh-2rem)] w-full max-w-5xl flex-col overflow-hidden rounded-[2.5rem] border border-white/20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-2xl">
-            <div class="flex items-start justify-between gap-6 overflow-hidden p-8 sm:p-10">
+        <div @click.away="closeModal('timeline')" class="my-4 flex max-h-[calc(100vh-2rem)] w-full max-w-4xl flex-col overflow-hidden rounded-[2rem] border border-white/20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-2xl">
+            <div class="flex items-start justify-between gap-4 overflow-hidden px-5 py-5 sm:px-6 sm:py-6">
                 <div class="flex-1 min-w-0">
                     <h3 class="text-3xl font-black tracking-tight text-slate-900 dark:text-white" x-text="selectedRequest?.title"></h3>
                     <p class="mt-2 text-sm font-medium text-slate-500 dark:text-slate-400" x-text="selectedRequest?.description"></p>
@@ -327,8 +445,8 @@
                 </button>
             </div>
 
-            <div class="overflow-y-auto px-8 pb-10 sm:px-10">
-                <div class="grid gap-8 lg:grid-cols-[1.3fr,0.7fr]">
+            <div class="overflow-y-auto px-5 pb-6 sm:px-6">
+                <div class="grid gap-6 lg:grid-cols-[1.2fr,0.8fr]">
                     <div class="space-y-6">
                         <p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Audit Trail</p>
                         <div class="relative space-y-4">
@@ -396,8 +514,8 @@
 
     {{-- Template Management Modal --}}
     <div x-show="modals.templates" class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-950/40 p-3 sm:items-center backdrop-blur-sm" style="display: none;">
-        <div @click.away="closeModal('templates')" class="my-4 flex max-h-[calc(100vh-2rem)] w-full max-w-6xl flex-col overflow-hidden rounded-[2.5rem] border border-white/20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-2xl">
-            <div class="flex items-center justify-between border-b border-slate-100 px-8 py-6 dark:border-slate-800">
+        <div @click.away="closeModal('templates')" class="my-4 flex max-h-[calc(100vh-2rem)] w-full max-w-4xl flex-col overflow-hidden rounded-[2rem] border border-white/20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4 dark:border-slate-800 sm:px-6">
                 <div>
                     <h3 class="text-2xl font-black tracking-tight text-slate-900 dark:text-white">Workflow Governance</h3>
                     <p class="text-xs font-bold uppercase tracking-widest text-slate-400">Configure approval hierarchies & defaults</p>
@@ -407,8 +525,8 @@
                 </button>
             </div>
 
-            <div class="overflow-y-auto p-8 lg:p-10">
-                <div class="grid gap-10 lg:grid-cols-[1fr,1.2fr]">
+            <div class="overflow-y-auto p-5 sm:p-6">
+                <div class="grid gap-6 lg:grid-cols-[0.9fr,1.1fr]">
                     {{-- Templates Grid --}}
                     <div class="space-y-4">
                         <template x-if="!templates.length">
@@ -435,7 +553,7 @@
                     </div>
 
                     {{-- Template Editor --}}
-                    <div class="rounded-[2.5rem] border border-slate-100 bg-slate-50/50 p-8 dark:border-slate-800 dark:bg-slate-950/30">
+                    <div class="rounded-[1.5rem] border border-slate-100 bg-slate-50/50 p-5 dark:border-slate-800 dark:bg-slate-950/30 sm:p-6">
                         <div class="flex items-center justify-between mb-6">
                             <h4 class="text-lg font-black tracking-tight text-slate-900 dark:text-white" x-text="templateForm.id ? 'Edit Configuration' : 'Design Template'"></h4>
                             <button @click="resetTemplateForm()" class="text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-cyan-500">Reset Canvas</button>
@@ -491,3 +609,4 @@
     </div>
 </div>
 @endsection
+

@@ -189,7 +189,6 @@ class DocumentController extends Controller
 
         \App\Support\ActivityLogger::log('deleted', $doc, ['title' => $doc->title]);
 
-        Storage::disk('local')->delete($doc->file_path);
         $doc->delete();
 
         return response()->json(['success' => true, 'message' => 'Document deleted.']);

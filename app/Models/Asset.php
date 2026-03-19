@@ -31,4 +31,16 @@ class Asset extends Model
             'other' => 'Other Equipment',
         ];
     }
+
+    public static function statuses(): array
+    {
+        return [
+            'available' => 'Available',
+            'assigned' => 'Assigned',
+            'maintenance' => 'Maintenance',
+            'damaged' => 'Damaged',
+            'lost' => 'Lost',
+            'retired' => 'Retired',
+        ];
+    }
 }

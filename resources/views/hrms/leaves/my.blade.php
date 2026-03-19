@@ -6,65 +6,111 @@
 <div x-data="leaveManager()" x-init="init()" class="max-w-[1200px] mx-auto space-y-6 pb-10 relative">
 
     {{-- Header Section --}}
-    <div class="relative mb-6">
-        <div class="relative flex flex-col md:flex-row md:items-center justify-between gap-8">
-            <div class="space-y-4">
-                @if(isset($error))
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-rose-50 border border-rose-100 text-rose-500 text-[10px] font-bold dark:bg-rose-500/10 dark:border-rose-500/20">
-                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        <span>{{ $error }}</span>
+    <section class="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-gradient-to-br from-cyan-50 via-white to-sky-100 px-6 py-6 shadow-xl shadow-cyan-100/70 dark:border-white/5 md:px-8 md:py-8">
+        <div class="absolute -left-16 top-0 h-40 w-40 rounded-full bg-cyan-300/30 blur-3xl"></div>
+        <div class="absolute right-0 top-0 h-48 w-48 rounded-full bg-sky-300/20 blur-3xl"></div>
+
+        <div class="relative space-y-6">
+            @if(isset($error))
+                <div class="inline-flex items-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-1 text-[10px] font-bold text-rose-600">
+                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span>{{ $error }}</span>
+                </div>
+            @endif
+
+            <div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+                <div class="max-w-2xl space-y-4">
+                    <div class="flex flex-wrap items-center gap-3 text-[10px] font-black uppercase tracking-[0.24em] text-cyan-700">
+                        <span>Time Off Dashboard</span>
+                        <span class="h-1 w-1 rounded-full bg-cyan-300"></span>
+                        <span>Self Service</span>
                     </div>
-                @endif
-                
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <span class="text-[9px] font-black uppercase tracking-[0.2em] text-indigo-500 dark:text-indigo-400">Balance Overview</span>
-                        <div class="h-1 w-1 rounded-full bg-slate-300"></div>
-                        <span class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Self Service</span>
+
+                    <div class="space-y-2">
+                        <h1 class="text-3xl font-black tracking-tight text-slate-900 md:text-4xl dark:text-white">
+                            {{ isset($employee) ? 'Hi, ' . explode(' ', $employee->full_name)[0] : 'Hello' }}
+                        </h1>
+                        <p class="max-w-xl text-sm font-medium leading-relaxed text-slate-600 dark:text-slate-300">
+                            You have
+                            <span class="font-black text-slate-900 dark:text-white" x-text="Object.values(balances).reduce((a, b) => a + b.remaining, 0)"></span>
+                            days available across your leave balances. Track upcoming time off and plan around who's away next.
+                        </p>
                     </div>
-                    <button @click="openModal()" class="group hidden md:flex items-center gap-2 rounded-lg bg-slate-900 border border-white/10 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-white shadow-xl shadow-indigo-500/10 transition-all hover:bg-cyan-600 active:scale-95 dark:bg-white/5 dark:hover:bg-cyan-500/20 dark:hover:text-cyan-400">
-                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
-                        <span>Book Time Off</span>
-                    </button>
+
+                    <div class="flex flex-wrap items-center gap-3">
+                        <a href="{{ route('leaves.index') }}" class="inline-flex items-center gap-2 rounded-xl border border-cyan-200 bg-white px-4 py-2 text-[11px] font-black uppercase tracking-widest text-cyan-700 transition hover:bg-cyan-50">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
+                            <span>Who's Away Calendar</span>
+                        </a>
+                        @if(Auth::user()->hasAnyRole(['admin', 'hr_manager']))
+                            <a href="{{ route('workflows.index') }}" class="inline-flex items-center gap-2 rounded-xl border border-sky-200 bg-sky-50 px-4 py-2 text-[11px] font-black uppercase tracking-widest text-sky-700 transition hover:bg-sky-100">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                                <span>Workflow Inbox</span>
+                            </a>
+                        @endif
+                    </div>
                 </div>
 
-                <div class="space-y-1.5">
-                    <h1 class="text-2xl lg:text-3xl font-black text-slate-900 tracking-tight dark:text-white">
-                        {{ isset($employee) ? 'Hi, ' . explode(' ', $employee->full_name)[0] : 'Hello' }} 👋
-                    </h1>
-                    <p class="text-[11px] text-slate-500 font-medium leading-relaxed max-w-lg dark:text-slate-400">
-                        You have <span class="text-slate-900 font-black dark:text-white" x-text="Object.values(balances).reduce((a, b) => a + b.remaining, 0)"></span> days left to recharge.
-                    </p>
-                </div>
-                
-                <div class="flex flex-wrap items-center gap-6 pt-1">
-                    <a href="{{ route('leaves.index') }}" class="group flex items-center gap-2.5 text-[10px] font-bold text-slate-500 hover:text-cyan-600 transition-colors">
-                        <div class="h-6 w-6 rounded-lg bg-slate-100 flex items-center justify-center group-hover:bg-cyan-100 transition-colors dark:bg-white/5">
-                            <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
-                        </div>
-                        <span>Who's Away Calendar</span>
-                    </a>
-                    @if(Auth::user()->hasAnyRole(['admin', 'hr_manager']))
-                    <a href="{{ route('workflows.index') }}" class="group flex items-center gap-2.5 text-[10px] font-bold text-slate-500 hover:text-indigo-600 transition-colors">
-                        <div class="h-6 w-6 rounded-lg bg-slate-100 flex items-center justify-center group-hover:bg-indigo-100 transition-colors dark:bg-white/5">
-                            <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
-                        </div>
-                        <span>Workflow Inbox</span>
-                    </a>
-                    @endif
-                </div>
-            </div>
-
-                {{-- Mobile Button --}}
-                <div class="md:hidden mt-4">
-                    <button @click="openModal()" class="w-full flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-slate-800 to-indigo-900 px-5 py-2.5 text-[11px] font-black uppercase tracking-widest text-white shadow-xl dark:from-cyan-500 dark:to-indigo-500 dark:text-slate-950">
+                <div class="flex flex-col gap-3 lg:min-w-[220px]">
+                    <button @click="openModal()" class="hidden items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 py-3 text-[11px] font-black uppercase tracking-widest text-white transition hover:bg-cyan-600 md:inline-flex">
                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
                         <span>Book Time Off</span>
                     </button>
+                    <div class="rounded-2xl border border-cyan-100 bg-white/80 p-4 backdrop-blur-sm">
+                        <p class="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-700">Upcoming People On Leave</p>
+                        <div class="mt-3 space-y-3">
+                            <template x-if="whoIsAway.upcoming.length === 0">
+                                <p class="text-xs font-medium text-slate-500">No one is scheduled to be away in the next 7 days.</p>
+                            </template>
+                            <template x-for="person in whoIsAway.upcoming.slice(0, 3)" :key="`header-upcoming-${person.id}-${person.from}`">
+                                <div class="flex items-center justify-between gap-3 rounded-xl border border-slate-100 bg-white px-3 py-2">
+                                    <div class="min-w-0">
+                                        <p class="truncate text-sm font-bold text-slate-900 dark:text-white" x-text="person.name"></p>
+                                        <p class="truncate text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                                            <span x-text="person.type"></span>
+                                            <span class="mx-1 text-slate-500">•</span>
+                                            <span x-text="person.from"></span>
+                                        </p>
+                                    </div>
+                                    <span class="rounded-full bg-cyan-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-cyan-700">Upcoming</span>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
                 </div>
             </div>
+
+            <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                <div class="rounded-2xl border border-cyan-100 bg-white/80 p-4 backdrop-blur-sm">
+                    <p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Days Left</p>
+                    <p class="mt-3 text-3xl font-black tracking-tight text-slate-900 dark:text-white" x-text="Object.values(balances).reduce((a, b) => a + b.remaining, 0)"></p>
+                    <p class="mt-1 text-xs font-medium text-slate-500">Across annual, sick, casual and unpaid balances</p>
+                </div>
+                <div class="rounded-2xl border border-emerald-100 bg-white/80 p-4 backdrop-blur-sm">
+                    <p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Approved</p>
+                    <p class="mt-3 text-3xl font-black tracking-tight text-emerald-300" x-text="stats.approved"></p>
+                    <p class="mt-1 text-xs font-medium text-slate-500">Requests already approved</p>
+                </div>
+                <div class="rounded-2xl border border-amber-100 bg-white/80 p-4 backdrop-blur-sm">
+                    <p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Pending</p>
+                    <p class="mt-3 text-3xl font-black tracking-tight text-amber-300" x-text="stats.pending"></p>
+                    <p class="mt-1 text-xs font-medium text-slate-500">Requests waiting for review</p>
+                </div>
+                <div class="rounded-2xl border border-sky-100 bg-white/80 p-4 backdrop-blur-sm">
+                    <p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Team Away Soon</p>
+                    <p class="mt-3 text-3xl font-black tracking-tight text-cyan-600" x-text="whoIsAway.upcoming.length"></p>
+                    <p class="mt-1 text-xs font-medium text-slate-500">People scheduled in the next 7 days</p>
+                </div>
+            </div>
+
+            <div class="md:hidden">
+                <button @click="openModal()" class="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 py-3 text-[11px] font-black uppercase tracking-widest text-white transition hover:bg-cyan-600">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                    <span>Book Time Off</span>
+                </button>
+            </div>
         </div>
-    </div>
+    </section>
 
     {{-- Main Content Grid --}}
     <div class="grid grid-cols-1 gap-10 lg:grid-cols-12">
@@ -125,7 +171,7 @@
                                 </div>
                                 <div class="mt-6 flex items-center justify-between text-[9px] font-bold uppercase tracking-widest text-slate-400">
                                     <span>Used <span class="text-slate-900 dark:text-white" x-text="bal.used"></span> days</span>
-                                    <span x-text="Math.round((bal.used / bal.limit) * 100) + '%'"></span>
+                                    <span x-text="usagePercent(bal) + '%'"></span>
                                 </div>
                                 <div class="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-slate-50 dark:bg-white/5">
                                     <div class="h-full rounded-full transition-all duration-1000" 
@@ -135,7 +181,7 @@
                                             'bg-violet-400': type === 'casual',
                                             'bg-slate-400': type === 'unpaid'
                                         }"
-                                        :style="'width: ' + Math.min(100, (bal.used / bal.limit) * 100) + '%'"></div>
+                                        :style="'width: ' + usagePercent(bal) + '%'"></div>
                                 </div>
                             </div>
                         </template>
@@ -180,7 +226,7 @@
                                                     </div>
                                                     <div>
                                                         <p class="text-[13px] font-bold text-slate-900 dark:text-white capitalize" x-text="leave.leave_type"></p>
-                                                        <p class="text-[10px] text-slate-400 font-medium" x-text="formatDateShort(leave.start_date) + ' → ' + formatDateShort(leave.end_date)"></p>
+                                                        <p class="text-[10px] text-slate-400 font-medium" x-text="formatDateShort(leave.start_date) + ' to ' + formatDateShort(leave.end_date)"></p>
                                                     </div>
                                                 </div>
                                             </td>
@@ -262,39 +308,19 @@
                 </div>
             </section>
 
-            {{-- Upcoming Away --}}
-            <section>
-                <h3 class="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-6">Upcoming Away</h3>
-                <div class="space-y-4">
-                    <template x-if="whoIsAway.upcoming.length === 0">
-                        <p class="text-xs font-medium text-slate-400 italic">No upcoming away time.</p>
-                    </template>
-                    <template x-for="person in whoIsAway.upcoming" :key="person.id">
-                        <div class="flex items-center gap-3">
-                            <div class="h-1.5 w-1.5 rounded-full bg-slate-200 dark:bg-slate-700"></div>
-                            <p class="text-xs font-bold text-slate-700 dark:text-slate-300">
-                                <span class="text-slate-900 dark:text-white" x-text="person.name"></span>
-                                <span class="mx-1 text-slate-400 font-medium">from</span>
-                                <span class="text-cyan-600 dark:text-cyan-400" x-text="person.from"></span>
-                            </p>
-                        </div>
-                    </template>
-                </div>
-            </section>
-
             {{-- My Stats Summary --}}
-            <section class="relative overflow-hidden rounded-[2rem] bg-slate-950 p-6 shadow-xl shadow-slate-950/20 border border-white/5">
-                <div class="absolute -right-12 -top-12 h-24 w-24 rounded-full bg-indigo-500/20 blur-2xl pointer-events-none"></div>
+            <section class="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-gradient-to-br from-white to-slate-50 p-6 shadow-xl shadow-slate-200/40 dark:border-white/5 dark:bg-slate-900">
+                <div class="absolute -right-12 -top-12 h-24 w-24 rounded-full bg-cyan-200/60 blur-2xl pointer-events-none"></div>
                 <div class="relative space-y-5">
-                    <h3 class="text-[9px] font-black uppercase tracking-[0.2em] text-indigo-400/60">Insight</h3>
+                    <h3 class="text-[9px] font-black uppercase tracking-[0.2em] text-cyan-700">Insight</h3>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <p class="text-2xl font-black text-white tracking-tight" x-text="stats.approved + stats.pending"></p>
-                            <p class="text-[8px] font-black text-slate-500 uppercase tracking-widest mt-1">Total</p>
+                            <p class="text-2xl font-black tracking-tight text-slate-900 dark:text-white" x-text="stats.approved + stats.pending"></p>
+                            <p class="mt-1 text-[8px] font-black uppercase tracking-widest text-slate-500">Total</p>
                         </div>
                         <div>
                             <p class="text-2xl font-black text-amber-400 tracking-tight" x-text="stats.pending"></p>
-                            <p class="text-[8px] font-black text-slate-500 uppercase tracking-widest mt-1">Pending</p>
+                            <p class="mt-1 text-[8px] font-black uppercase tracking-widest text-slate-500">Pending</p>
                         </div>
                     </div>
                 </div>
@@ -367,7 +393,7 @@
             <div class="flex justify-end gap-3 bg-slate-50/50 px-6 py-4 dark:bg-white/5">
                 <button @click="showModal = false" class="text-[9px] font-bold uppercase tracking-widest text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">Cancel</button>
                 <button form="leaveForm" @click="saveLeave()" :disabled="saving" class="group relative flex items-center justify-center gap-2 rounded-lg bg-slate-900 border border-white/10 px-6 py-2.5 text-[10px] font-black uppercase tracking-widest text-white shadow-xl shadow-slate-900/20 hover:bg-cyan-600 transition-all active:scale-95 disabled:opacity-50 dark:bg-white/5 dark:hover:bg-cyan-500/20 dark:hover:text-cyan-400">
-                    <span x-show="!saving">Request</span>
+                    <span x-show="!saving" x-text="isEditing ? 'Update' : 'Request'"></span>
                     <span x-show="saving" class="flex items-center gap-2">
                         <svg class="h-3 w-3 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
                         Processing

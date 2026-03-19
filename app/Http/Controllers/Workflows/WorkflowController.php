@@ -837,6 +837,31 @@ class WorkflowController extends Controller
             ], fn ($value) => $value !== null && $value !== '');
         }
 
+        if ($type === 'asset-return') {
+            return array_filter([
+                'asset_id' => isset($details['asset_id']) && $details['asset_id'] !== '' ? (int) $details['asset_id'] : null,
+                'asset_name' => isset($details['asset_name']) ? trim((string) $details['asset_name']) : null,
+                'asset_category' => isset($details['asset_category']) ? strtolower(trim((string) $details['asset_category'])) : null,
+                'serial_number' => isset($details['serial_number']) ? trim((string) $details['serial_number']) : null,
+                'return_condition' => isset($details['return_condition']) ? strtolower(trim((string) $details['return_condition'])) : null,
+                'requested_return_date' => $details['requested_return_date'] ?? null,
+                'reason' => isset($details['reason']) ? trim((string) $details['reason']) : null,
+            ], fn ($value) => $value !== null && $value !== '');
+        }
+
+        if ($type === 'asset-repair') {
+            return array_filter([
+                'asset_id' => isset($details['asset_id']) && $details['asset_id'] !== '' ? (int) $details['asset_id'] : null,
+                'asset_name' => isset($details['asset_name']) ? trim((string) $details['asset_name']) : null,
+                'asset_category' => isset($details['asset_category']) ? strtolower(trim((string) $details['asset_category'])) : null,
+                'serial_number' => isset($details['serial_number']) ? trim((string) $details['serial_number']) : null,
+                'issue_type' => isset($details['issue_type']) ? strtolower(trim((string) $details['issue_type'])) : null,
+                'reported_condition' => isset($details['reported_condition']) ? strtolower(trim((string) $details['reported_condition'])) : null,
+                'reported_at' => $details['reported_at'] ?? null,
+                'reason' => isset($details['reason']) ? trim((string) $details['reason']) : null,
+            ], fn ($value) => $value !== null && $value !== '');
+        }
+
         if ($type === 'reimbursement') {
             return array_filter([
                 'category' => isset($details['category']) ? strtolower(trim((string) $details['category'])) : null,
@@ -889,6 +914,43 @@ class WorkflowController extends Controller
                 'details.preferred_model' => ['nullable', 'string', 'max:255'],
                 'details.business_reason' => ['required', 'string', 'max:1000'],
             ])->validate();
+
+            return;
+        }
+
+        if ($type === 'asset-return') {
+            validator(['details' => $details], [
+                'details.asset_id' => ['required', 'integer', 'exists:assets,id'],
+                'details.return_condition' => ['required', 'string', 'in:good,minor-issues,damaged,unknown'],
+                'details.requested_return_date' => ['required', 'date', 'after_or_equal:today'],
+                'details.reason' => ['required', 'string', 'max:1000'],
+            ])->validate();
+
+            $asset = $this->resolveEmployeeAssetForWorkflow((int) $details['asset_id'], $validated['employee_id'] ?? null);
+            if ($asset->status !== 'assigned') {
+                throw ValidationException::withMessages([
+                    'details.asset_id' => 'Only assigned assets can be returned through workflow.',
+                ]);
+            }
+
+            return;
+        }
+
+        if ($type === 'asset-repair') {
+            validator(['details' => $details], [
+                'details.asset_id' => ['required', 'integer', 'exists:assets,id'],
+                'details.issue_type' => ['required', 'string', 'in:hardware,software,accessory,wear-tear,other'],
+                'details.reported_condition' => ['required', 'string', 'in:working,partially-working,not-working,damaged'],
+                'details.reported_at' => ['required', 'date', 'before_or_equal:today'],
+                'details.reason' => ['required', 'string', 'max:1000'],
+            ])->validate();
+
+            $asset = $this->resolveEmployeeAssetForWorkflow((int) $details['asset_id'], $validated['employee_id'] ?? null);
+            if (! in_array($asset->status, ['assigned', 'maintenance'], true)) {
+                throw ValidationException::withMessages([
+                    'details.asset_id' => 'Only assigned assets can be reported for repair.',
+                ]);
+            }
 
             return;
         }
@@ -971,15 +1033,12 @@ class WorkflowController extends Controller
 
     private function applyApprovedWorkflow(WorkflowRequest $workflow): void
     {
-        $employee = $workflow->employee;
-        if (! $employee) {
-            return;
-        }
-
         $details = $workflow->details ?? [];
         $mutated = false;
+        $employee = $workflow->employee;
+        $asset = null;
 
-        if ($workflow->type === 'profile-change') {
+        if ($workflow->type === 'profile-change' && $employee) {
             $field = $details['field_name'] ?? null;
             if ($field && in_array($field, $this->allowedProfileChangeFields(), true)) {
                 $employee->update([$field => $details['requested_value'] ?? null]);
@@ -989,7 +1048,7 @@ class WorkflowController extends Controller
             }
         }
 
-        if ($workflow->type === 'salary-change' && ! empty($details['requested_salary'])) {
+        if ($workflow->type === 'salary-change' && $employee && ! empty($details['requested_salary'])) {
             $newSalary = (float) $details['requested_salary'];
             $employee->update(['salary' => $newSalary]);
 
@@ -1005,10 +1064,40 @@ class WorkflowController extends Controller
             $mutated = true;
         }
 
-        if ($workflow->type === 'offboarding') {
+        if ($workflow->type === 'offboarding' && $employee) {
             $employee->update(['status' => 'inactive']);
             $details['offboarding_applied'] = true;
             $mutated = true;
+        }
+
+        if ($workflow->type === 'asset-return' && ! empty($details['asset_id'])) {
+            $asset = $this->resolveWorkflowAsset($workflow, (int) $details['asset_id']);
+            if ($asset) {
+                $asset->update([
+                    'employee_id' => null,
+                    'status' => 'available',
+                    'assigned_at' => null,
+                    'notes' => trim(($asset->notes ? $asset->notes . PHP_EOL : '') . 'Returned via workflow #' . $workflow->id),
+                ]);
+
+                $details['asset_action'] = 'returned';
+                $details['asset_status'] = 'available';
+                $mutated = true;
+            }
+        }
+
+        if ($workflow->type === 'asset-repair' && ! empty($details['asset_id'])) {
+            $asset = $this->resolveWorkflowAsset($workflow, (int) $details['asset_id']);
+            if ($asset) {
+                $asset->update([
+                    'status' => 'maintenance',
+                    'notes' => trim(($asset->notes ? $asset->notes . PHP_EOL : '') . 'Repair requested via workflow #' . $workflow->id),
+                ]);
+
+                $details['asset_action'] = 'repair-opened';
+                $details['asset_status'] = 'maintenance';
+                $mutated = true;
+            }
         }
 
         if (! $mutated) {
@@ -1025,7 +1114,8 @@ class WorkflowController extends Controller
 
         ActivityLogger::log('workflow.applied', $workflow, [
             'type' => $workflow->type,
-            'employee_id' => $employee->id,
+            'employee_id' => $employee?->id,
+            'asset_id' => $asset?->id,
         ]);
     }
 
@@ -1083,6 +1173,15 @@ class WorkflowController extends Controller
     private function buildDetailsPreview(array $details): ?string
     {
         if (! empty($details['asset_category'])) {
+            if (! empty($details['asset_name']) || ! empty($details['asset_id'])) {
+                return implode(' - ', array_filter([
+                    $details['asset_name'] ?? ('Asset #' . $details['asset_id']),
+                    ! empty($details['issue_type']) ? ucfirst(str_replace('-', ' ', (string) $details['issue_type'])) : null,
+                    ! empty($details['return_condition']) ? ucfirst(str_replace('-', ' ', (string) $details['return_condition'])) : null,
+                    $details['requested_return_date'] ?? ($details['reported_at'] ?? null),
+                ]));
+            }
+
             return implode(' - ', array_filter([
                 ucfirst(str_replace('-', ' ', (string) $details['asset_category'])),
                 ! empty($details['urgency']) ? ucfirst((string) $details['urgency']) : null,
@@ -1157,6 +1256,45 @@ class WorkflowController extends Controller
         ];
     }
 
+    private function resolveEmployeeAssetForWorkflow(int $assetId, mixed $employeeId): Asset
+    {
+        $resolvedEmployeeId = $employeeId ? (int) $employeeId : null;
+
+        if (! $resolvedEmployeeId) {
+            $resolvedEmployeeId = Employee::query()
+                ->where('tenant_id', TenantContext::id())
+                ->where('email', request()->user()?->email)
+                ->value('id');
+        }
+
+        if (! $resolvedEmployeeId) {
+            throw ValidationException::withMessages([
+                'details.asset_id' => 'No employee record is linked to this account.',
+            ]);
+        }
+
+        $asset = Asset::query()
+            ->where('tenant_id', TenantContext::id())
+            ->where('id', $assetId)
+            ->where('employee_id', $resolvedEmployeeId)
+            ->first();
+
+        if (! $asset) {
+            throw ValidationException::withMessages([
+                'details.asset_id' => 'This asset is not assigned to the current employee.',
+            ]);
+        }
+
+        return $asset;
+    }
+
+    private function resolveWorkflowAsset(WorkflowRequest $workflow, int $assetId): ?Asset
+    {
+        return Asset::query()
+            ->where('tenant_id', $workflow->tenant_id)
+            ->where('id', $assetId)
+            ->first();
+    }
     private function normalizeTemplateSteps(array $steps): array
     {
         return collect($steps)
@@ -1211,3 +1349,4 @@ class WorkflowController extends Controller
         return isset($parts[1]) ? trim($parts[1]) : null;
     }
 }
+

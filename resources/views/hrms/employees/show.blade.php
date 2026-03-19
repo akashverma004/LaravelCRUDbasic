@@ -68,12 +68,6 @@
             </div>
 
             <div class="flex items-center gap-3">
-                @if($isAdmin || $isSelf)
-                <button @click="editing = !editing" class="inline-flex items-center gap-2 rounded-xl bg-slate-900 border border-white/10 px-6 py-2.5 text-[10px] font-black uppercase tracking-widest text-white shadow-xl hover:bg-cyan-600 transition-all active:scale-95 dark:bg-white/5 dark:hover:bg-cyan-500/20 dark:hover:text-cyan-400">
-                    <span x-text="editing ? 'Abort Edit' : 'Modify Record'"></span>
-                </button>
-                @endif
-                
                 <div x-data="{ open: false }" class="relative">
                     <button @click="open = !open" class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50 border border-slate-100 text-slate-400 hover:bg-cyan-50 hover:text-cyan-600 transition-all dark:bg-white/5 dark:border-white/5">
                         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z" /></svg>
@@ -91,32 +85,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </div>v>
-
-    {{-- Edit Mode Commit Bar --}}
-    <div x-show="editing" x-transition class="sticky top-6 z-40 flex items-center justify-between rounded-xl border border-indigo-200 bg-indigo-50 px-6 py-4 shadow-sm dark:border-indigo-500/20 dark:bg-indigo-500/10" style="display: none;">
-        <div class="flex items-center gap-3">
-             <div class="h-8 w-8 flex items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400">
-                  <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" /></svg>
-             </div>
-             <div>
-                  <p class="text-sm font-semibold text-indigo-900 dark:text-indigo-200">You are editing this profile</p>
-                  <p class="text-xs text-indigo-700 dark:text-indigo-400">Click save when you are finished making changes.</p>
-             </div>
-        </div>
-        <div class="flex gap-3">
-            <button @click="editing = false" class="text-[10px] font-black uppercase tracking-widest text-indigo-700 hover:text-indigo-900 dark:text-indigo-300 dark:hover:text-white transition-colors">Discard</button>
-            <button @click="submitForm()" :disabled="saving" class="group relative flex items-center justify-center gap-2 rounded-xl bg-slate-900 border border-white/10 px-6 py-2 text-[10px] font-black uppercase tracking-widest text-white shadow-xl shadow-indigo-500/10 transition-all hover:bg-cyan-600 active:scale-95 disabled:opacity-50 dark:bg-white/5 dark:hover:bg-cyan-500/20 dark:hover:text-cyan-400">
-                <span x-show="!saving" class="flex items-center gap-2">
-                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
-                    Save Changes
-                </span>
-                <span x-show="saving" class="flex items-center gap-2">
-                    <svg class="h-3.5 w-3.5 animate-spin" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-                    Processing
-                </span>
-            </button>
         </div>
     </div>
 
@@ -187,8 +155,13 @@
                 @foreach([
                     'work' => 'Work Info',
                     'personal' => 'Personal Info',
-                    'identity' => 'Identity & Banking',
+                    'emergency' => 'Emergency',
+                    'identity' => 'Identity',
+                    'bank' => 'Banking',
+                    'preferences' => 'Preferences',
+                    'education' => 'Education',
                     'experience' => 'Experience',
+                    'account' => 'Account',
                     'leaves' => 'Leave History',
                 ] as $tabId => $tabLabel)
                 <button
@@ -204,7 +177,23 @@
                 
                 {{-- TAB: Work Info --}}
                 <div x-show="activeTab === 'work'" class="space-y-6">
-                    <h2 class="text-lg font-bold text-slate-900 dark:text-white border-b border-slate-100 pb-4 dark:border-slate-800">Work Information</h2>
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
+                        <h2 class="text-lg font-bold text-slate-900 dark:text-white">Work Information</h2>
+                        @if($isAdmin || $isSelf)
+                        <div class="flex items-center gap-2">
+                            <template x-if="editingSection === 'work'">
+                                <div class="flex items-center gap-2">
+                                    <button @click="cancelEditing()" class="rounded-lg border border-slate-200 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300">Discard</button>
+                                    <button @click="submitForm()" :disabled="saving" class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-white disabled:opacity-50">
+                                        <span x-show="!saving">Save</span>
+                                        <span x-show="saving">Saving</span>
+                                    </button>
+                                </div>
+                            </template>
+                            <button @click="startEditing('work')" x-show="editingSection !== 'work'" class="rounded-lg border border-slate-200 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 hover:text-cyan-600 dark:border-slate-700 dark:text-slate-300" style="display: none;">Edit</button>
+                        </div>
+                        @endif
+                    </div>
                     <div class="grid gap-6 sm:grid-cols-2">
                         @include('hrms.self-service.partials._field', ['field' => 'full_name', 'label' => 'Full Name', 'readonly' => !$isAdmin])
                         @include('hrms.self-service.partials._field', ['field' => 'job_title', 'label' => 'Job Title', 'readonly' => !$isAdmin])
@@ -217,26 +206,188 @@
 
                 {{-- TAB: Personal Info --}}
                 <div x-show="activeTab === 'personal'" class="space-y-6" style="display: none;">
-                    <h2 class="text-lg font-bold text-slate-900 dark:text-white border-b border-slate-100 pb-4 dark:border-slate-800">Personal Data</h2>
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
+                        <h2 class="text-lg font-bold text-slate-900 dark:text-white">Personal Data</h2>
+                        @if($isAdmin || $isSelf)
+                        <div class="flex items-center gap-2">
+                            <template x-if="editingSection === 'personal'">
+                                <div class="flex items-center gap-2">
+                                    <button @click="cancelEditing()" class="rounded-lg border border-slate-200 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300">Discard</button>
+                                    <button @click="submitForm()" :disabled="saving" class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-white disabled:opacity-50">
+                                        <span x-show="!saving">Save</span>
+                                        <span x-show="saving">Saving</span>
+                                    </button>
+                                </div>
+                            </template>
+                            <button @click="startEditing('personal')" x-show="editingSection !== 'personal'" class="rounded-lg border border-slate-200 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 hover:text-cyan-600 dark:border-slate-700 dark:text-slate-300" style="display: none;">Edit</button>
+                        </div>
+                        @endif
+                    </div>
                     <div class="grid gap-6 sm:grid-cols-2">
                         @include('hrms.self-service.partials._field', ['field' => 'email', 'label' => 'Work Email', 'readonly' => true])
                         @include('hrms.self-service.partials._field', ['field' => 'personal_email', 'label' => 'Personal Email', 'type' => 'email'])
                         @include('hrms.self-service.partials._field', ['field' => 'phone', 'label' => 'Phone Number'])
                         @include('hrms.self-service.partials._field', ['field' => 'date_of_birth', 'label' => 'Date of Birth', 'type' => 'date'])
+                        @include('hrms.self-service.partials._select', ['field' => 'gender', 'label' => 'Gender', 'options' => [
+                            'male' => 'Male', 'female' => 'Female', 'non-binary' => 'Non Binary', 'other' => 'Other', 'prefer_not_to_say' => 'Prefer Not To Say'
+                        ]])
+                        @include('hrms.self-service.partials._select', ['field' => 'marital_status', 'label' => 'Marital Status', 'options' => [
+                            'single' => 'Single', 'married' => 'Married', 'divorced' => 'Divorced', 'widowed' => 'Widowed'
+                        ]])
+                        @include('hrms.self-service.partials._field', ['field' => 'blood_group', 'label' => 'Blood Group'])
+                        @include('hrms.self-service.partials._field', ['field' => 'pronouns', 'label' => 'Pronouns'])
                         <div class="sm:col-span-2">
                             @include('hrms.self-service.partials._textarea', ['field' => 'bio', 'label' => 'Bio', 'span' => 2])
                         </div>
+                        @include('hrms.self-service.partials._field', ['field' => 'address', 'label' => 'Address', 'span' => 2])
                     </div>
                 </div>
 
-                {{-- TAB: Identity & Banking --}}
-                <div x-show="activeTab === 'identity'" class="space-y-6" style="display: none;">
-                    <h2 class="text-lg font-bold text-slate-900 dark:text-white border-b border-slate-100 pb-4 dark:border-slate-800">Identity & Banking</h2>
+                {{-- TAB: Emergency --}}
+                <div x-show="activeTab === 'emergency'" class="space-y-6" style="display: none;">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
+                        <h2 class="text-lg font-bold text-slate-900 dark:text-white">Emergency Contact</h2>
+                        @if($isAdmin || $isSelf)
+                        <div class="flex items-center gap-2">
+                            <template x-if="editingSection === 'emergency'">
+                                <div class="flex items-center gap-2">
+                                    <button @click="cancelEditing()" class="rounded-lg border border-slate-200 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300">Discard</button>
+                                    <button @click="submitForm()" :disabled="saving" class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-white disabled:opacity-50">
+                                        <span x-show="!saving">Save</span>
+                                        <span x-show="saving">Saving</span>
+                                    </button>
+                                </div>
+                            </template>
+                            <button @click="startEditing('emergency')" x-show="editingSection !== 'emergency'" class="rounded-lg border border-slate-200 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 hover:text-cyan-600 dark:border-slate-700 dark:text-slate-300" style="display: none;">Edit</button>
+                        </div>
+                        @endif
+                    </div>
                     <div class="grid gap-6 sm:grid-cols-2">
-                        @include('hrms.self-service.partials._field', ['field' => 'pan_number', 'label' => 'PAN Number', 'readonly' => !$isAdmin])
-                        @include('hrms.self-service.partials._field', ['field' => 'aadhaar_number', 'label' => 'Aadhaar Number', 'readonly' => !$isAdmin])
-                        @include('hrms.self-service.partials._field', ['field' => 'bank_name', 'label' => 'Bank Name', 'readonly' => !$isAdmin])
-                        @include('hrms.self-service.partials._field', ['field' => 'bank_account_number', 'label' => 'Account Number', 'readonly' => !$isAdmin])
+                        @include('hrms.self-service.partials._field', ['field' => 'emergency_contact_name', 'label' => 'Contact Name', 'span' => 2])
+                        @include('hrms.self-service.partials._field', ['field' => 'emergency_contact_phone', 'label' => 'Contact Phone'])
+                        @include('hrms.self-service.partials._field', ['field' => 'emergency_contact_relationship', 'label' => 'Relationship'])
+                    </div>
+                </div>
+
+                {{-- TAB: Identity --}}
+                <div x-show="activeTab === 'identity'" class="space-y-6" style="display: none;">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
+                        <h2 class="text-lg font-bold text-slate-900 dark:text-white">Identity Information</h2>
+                        @if($isAdmin || $isSelf)
+                        <div class="flex items-center gap-2">
+                            <template x-if="editingSection === 'identity'">
+                                <div class="flex items-center gap-2">
+                                    <button @click="cancelEditing()" class="rounded-lg border border-slate-200 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300">Discard</button>
+                                    <button @click="submitForm()" :disabled="saving" class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-white disabled:opacity-50">
+                                        <span x-show="!saving">Save</span>
+                                        <span x-show="saving">Saving</span>
+                                    </button>
+                                </div>
+                            </template>
+                            <button @click="startEditing('identity')" x-show="editingSection !== 'identity'" class="rounded-lg border border-slate-200 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 hover:text-cyan-600 dark:border-slate-700 dark:text-slate-300" style="display: none;">Edit</button>
+                        </div>
+                        @endif
+                    </div>
+                    <div class="grid gap-6 sm:grid-cols-2">
+                        @include('hrms.self-service.partials._field', ['field' => 'pan_number', 'label' => 'PAN Number'])
+                        @include('hrms.self-service.partials._field', ['field' => 'aadhaar_number', 'label' => 'Aadhaar Number'])
+                        @include('hrms.self-service.partials._field', ['field' => 'passport_number', 'label' => 'Passport Number'])
+                        @include('hrms.self-service.partials._field', ['field' => 'passport_expiry', 'label' => 'Passport Expiry', 'type' => 'date'])
+                        @include('hrms.self-service.partials._field', ['field' => 'nationality', 'label' => 'Nationality'])
+                    </div>
+                </div>
+
+                {{-- TAB: Banking --}}
+                <div x-show="activeTab === 'bank'" class="space-y-6" style="display: none;">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
+                        <h2 class="text-lg font-bold text-slate-900 dark:text-white">Banking Details</h2>
+                        @if($isAdmin || $isSelf)
+                        <div class="flex items-center gap-2">
+                            <template x-if="editingSection === 'bank'">
+                                <div class="flex items-center gap-2">
+                                    <button @click="cancelEditing()" class="rounded-lg border border-slate-200 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300">Discard</button>
+                                    <button @click="submitForm()" :disabled="saving" class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-white disabled:opacity-50">
+                                        <span x-show="!saving">Save</span>
+                                        <span x-show="saving">Saving</span>
+                                    </button>
+                                </div>
+                            </template>
+                            <button @click="startEditing('bank')" x-show="editingSection !== 'bank'" class="rounded-lg border border-slate-200 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 hover:text-cyan-600 dark:border-slate-700 dark:text-slate-300" style="display: none;">Edit</button>
+                        </div>
+                        @endif
+                    </div>
+                    <div class="grid gap-6 sm:grid-cols-2">
+                        @include('hrms.self-service.partials._field', ['field' => 'bank_name', 'label' => 'Bank Name', 'span' => 2])
+                        @include('hrms.self-service.partials._field', ['field' => 'bank_account_number', 'label' => 'Account Number'])
+                        @include('hrms.self-service.partials._field', ['field' => 'bank_ifsc', 'label' => 'IFSC Code'])
+                    </div>
+                </div>
+
+                {{-- TAB: Preferences --}}
+                <div x-show="activeTab === 'preferences'" class="space-y-6" style="display: none;">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
+                        <h2 class="text-lg font-bold text-slate-900 dark:text-white">Preferences & Lifestyle</h2>
+                        @if($isAdmin || $isSelf)
+                        <div class="flex items-center gap-2">
+                            <template x-if="editingSection === 'preferences'">
+                                <div class="flex items-center gap-2">
+                                    <button @click="cancelEditing()" class="rounded-lg border border-slate-200 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300">Discard</button>
+                                    <button @click="submitForm()" :disabled="saving" class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-white disabled:opacity-50">
+                                        <span x-show="!saving">Save</span>
+                                        <span x-show="saving">Saving</span>
+                                    </button>
+                                </div>
+                            </template>
+                            <button @click="startEditing('preferences')" x-show="editingSection !== 'preferences'" class="rounded-lg border border-slate-200 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 hover:text-cyan-600 dark:border-slate-700 dark:text-slate-300" style="display: none;">Edit</button>
+                        </div>
+                        @endif
+                    </div>
+                    <div class="grid gap-6 sm:grid-cols-2">
+                        @include('hrms.self-service.partials._field', ['field' => 'hobbies', 'label' => 'Hobbies'])
+                        @include('hrms.self-service.partials._field', ['field' => 'likes', 'label' => 'Interests'])
+                        @include('hrms.self-service.partials._select', ['field' => 'food_preference', 'label' => 'Food Preference', 'options' => [
+                            'veg' => 'Vegetarian', 'non-veg' => 'Non-Vegetarian'
+                        ]])
+                        @include('hrms.self-service.partials._field', ['field' => 'linkedin_url', 'label' => 'LinkedIn Profile URL', 'type' => 'url'])
+                        @include('hrms.self-service.partials._textarea', ['field' => 'health_issues', 'label' => 'Health Considerations / Notes', 'span' => 2])
+                    </div>
+                </div>
+
+                {{-- TAB: Education --}}
+                <div x-show="activeTab === 'education'" class="space-y-6" style="display: none;">
+                    <h2 class="text-lg font-bold text-slate-900 dark:text-white border-b border-slate-100 pb-4 dark:border-slate-800">Education</h2>
+                    <div class="space-y-4">
+                        @forelse($employee->educations as $education)
+                            <div class="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900/50">
+                                <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                                    <div>
+                                        <h4 class="text-sm font-bold text-slate-900 dark:text-white">{{ $education->degree }}</h4>
+                                        <p class="mt-1 text-xs text-slate-500">{{ $education->institution }}</p>
+                                        @if($education->field_of_study)
+                                            <p class="mt-2 text-xs text-slate-400">{{ $education->field_of_study }}</p>
+                                        @endif
+                                    </div>
+                                    <p class="text-xs text-slate-400">
+                                        {{ $education->year_from ?: '----' }} to {{ $education->year_to ?: 'Present' }}
+                                    </p>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="py-12 text-center">
+                                <p class="text-sm text-slate-500">No education history specified.</p>
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+
+                {{-- TAB: Account --}}
+                <div x-show="activeTab === 'account'" class="space-y-6" style="display: none;">
+                    <h2 class="text-lg font-bold text-slate-900 dark:text-white border-b border-slate-100 pb-4 dark:border-slate-800">Account Overview</h2>
+                    <div class="grid gap-6 sm:grid-cols-2">
+                        @include('hrms.self-service.partials._field', ['field' => 'email', 'label' => 'Login Email', 'readonly' => true])
+                        @include('hrms.self-service.partials._field', ['field' => 'full_name', 'label' => 'Display Name', 'readonly' => true])
+                        @include('hrms.self-service.partials._select', ['field' => 'status', 'label' => 'Employment Status', 'options' => ['active' => 'Active', 'on-leave' => 'On Leave', 'resigned' => 'Resigned'], 'readonly' => true])
+                        @include('hrms.self-service.partials._field', ['field' => 'employment_type', 'label' => 'Employment Type', 'readonly' => true])
                     </div>
                 </div>
 
@@ -292,9 +443,21 @@
     document.addEventListener('alpine:init', () => {
         Alpine.data('employeeProfile', () => ({
             activeTab: 'work',
+            editingSection: null,
             editing: false,
             saving: false,
+            loading: false,
+            errors: {},
+            toast: { show: false, message: '', type: 'success' },
             employee: @json($employee),
+            sectionFields: {
+                work: ['full_name', 'job_title', 'department_id', 'manager_id', 'status', 'joined_on'],
+                personal: ['personal_email', 'phone', 'date_of_birth', 'gender', 'marital_status', 'blood_group', 'pronouns', 'bio', 'address'],
+                emergency: ['emergency_contact_name', 'emergency_contact_phone', 'emergency_contact_relationship'],
+                identity: ['pan_number', 'aadhaar_number', 'passport_number', 'passport_expiry', 'nationality'],
+                bank: ['bank_name', 'bank_account_number', 'bank_ifsc'],
+                preferences: ['hobbies', 'likes', 'food_preference', 'linkedin_url', 'health_issues'],
+            },
             form: {
                 full_name: @json($employee->full_name),
                 email: @json($employee->email),
@@ -317,35 +480,118 @@
                 gender: @json($employee->gender),
                 blood_group: @json($employee->blood_group),
                 marital_status: @json($employee->marital_status),
+                pronouns: @json($employee->pronouns),
                 bio: @json($employee->bio),
                 emergency_contact_name: @json($employee->emergency_contact_name),
                 emergency_contact_phone: @json($employee->emergency_contact_phone),
                 emergency_contact_relationship: @json($employee->emergency_contact_relationship),
+                passport_number: @json($employee->passport_number),
+                passport_expiry: @json($employee->passport_expiry?->format('Y-m-d')),
+                nationality: @json($employee->nationality),
                 pan_number: @json($employee->pan_number),
                 aadhaar_number: @json($employee->aadhaar_number),
                 bank_name: @json($employee->bank_name),
                 bank_account_number: @json($employee->bank_account_number),
                 bank_ifsc: @json($employee->bank_ifsc),
+                hobbies: @json($employee->hobbies),
+                likes: @json($employee->likes),
+                food_preference: @json($employee->food_preference),
+                linkedin_url: @json($employee->linkedin_url),
+                health_issues: @json($employee->health_issues),
+            },
+            startEditing(section) {
+                this.activeTab = section;
+                this.editingSection = section;
+                this.editing = true;
+                this.saving = false;
+                this.errors = {};
+            },
+            cancelEditing() {
+                this.editing = false;
+                this.editingSection = null;
+                this.errors = {};
+                this.form = {
+                    ...this.form,
+                    full_name: this.employee.full_name,
+                    email: this.employee.email,
+                    personal_email: this.employee.personal_email,
+                    phone: this.employee.phone,
+                    job_title: this.employee.job_title,
+                    department_id: this.employee.department_id,
+                    manager_id: this.employee.manager_id,
+                    role_id: this.employee.role_id,
+                    salary: this.employee.salary,
+                    status: this.employee.status,
+                    employment_type: this.employee.employment_type,
+                    country: this.employee.country,
+                    state: this.employee.state,
+                    city: this.employee.city,
+                    zip_code: this.employee.zip_code,
+                    address: this.employee.address,
+                    joined_on: this.employee.joined_on,
+                    date_of_birth: this.employee.date_of_birth,
+                    gender: this.employee.gender,
+                    blood_group: this.employee.blood_group,
+                    marital_status: this.employee.marital_status,
+                    pronouns: this.employee.pronouns,
+                    bio: this.employee.bio,
+                    emergency_contact_name: this.employee.emergency_contact_name,
+                    emergency_contact_phone: this.employee.emergency_contact_phone,
+                    emergency_contact_relationship: this.employee.emergency_contact_relationship,
+                    passport_number: this.employee.passport_number,
+                    passport_expiry: this.employee.passport_expiry,
+                    nationality: this.employee.nationality,
+                    pan_number: this.employee.pan_number,
+                    aadhaar_number: this.employee.aadhaar_number,
+                    bank_name: this.employee.bank_name,
+                    bank_account_number: this.employee.bank_account_number,
+                    bank_ifsc: this.employee.bank_ifsc,
+                    hobbies: this.employee.hobbies,
+                    likes: this.employee.likes,
+                    food_preference: this.employee.food_preference,
+                    linkedin_url: this.employee.linkedin_url,
+                    health_issues: this.employee.health_issues,
+                };
             },
             async submitForm() {
                 this.saving = true;
+                this.errors = {};
                 try {
-                    await axios.patch('{{ route('employees.update', $employee->id) }}', this.form, {
+                    const payload = {};
+                    const fields = this.sectionFields[this.editingSection] || [];
+
+                    fields.forEach((field) => {
+                        payload[field] = this.form[field] ?? null;
+                    });
+
+                    const { data } = await axios.patch('{{ route('employees.update', $employee->id) }}', payload, {
                         headers: {
                             'Accept': 'application/json'
                         }
                     });
-                    window.location.reload();
+
+                    if (data.employee) {
+                        this.employee = data.employee;
+                    } else {
+                        Object.assign(this.employee, payload);
+                    }
+
+                    Object.assign(this.form, payload);
+                    this.toast = { show: true, message: data.message || 'Employee updated successfully.', type: 'success' };
+                    this.editing = false;
+                    this.editingSection = null;
+                    setTimeout(() => { this.toast.show = false; }, 3000);
                 } catch (error) {
                     let msg = 'Failed to update profile.';
                     if(error.response && error.response.status === 422) {
-                        const errors = Object.values(error.response.data.errors).flat();
-                        msg = errors.join('\n');
+                        this.errors = error.response.data.errors || {};
+                        const errors = Object.values(this.errors).flat();
+                        msg = errors[0] || msg;
                     }
-                    alert(msg);
-                    console.error(error);
-                    this.saving = false;
+                    this.toast = { show: true, message: msg, type: 'error' };
+                    setTimeout(() => { this.toast.show = false; }, 3000);
                 }
+                this.saving = false;
             }
         }))
     });

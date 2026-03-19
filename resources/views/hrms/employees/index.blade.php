@@ -1,6 +1,6 @@
 @extends('hrms.layouts.app')
 
-@section('title', 'Directory - PeopleFlow HRMS')
+@section('title', 'People - PeopleFlow HRMS')
 
 @section('content')
 <div
@@ -8,6 +8,7 @@
         dataUrl: '{{ route('employees.data') }}',
         storeUrl: '{{ route('employees.store') }}',
         deleteUrlBase: '{{ url('/employees') }}',
+        restoreUrlBase: '{{ url('/employees') }}',
         storageBase: '{{ asset('storage') }}',
         filters: @js($filters),
         departments: @js($departments->map(fn ($department) => ['id' => $department->id, 'name' => $department->name])->values()),
@@ -23,8 +24,8 @@
     {{-- Header --}}
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-6 border-b border-slate-200 dark:border-white/5">
         <div>
-            <h1 class="text-2xl font-black tracking-tight text-slate-900 dark:text-white uppercase"><span class="text-cyan-500">Employee</span> Directory</h1>
-            <p class="mt-1 text-[11px] font-medium text-slate-500 uppercase tracking-wide">Find and manage your team members across all protocols.</p>
+            <h1 class="text-2xl font-black tracking-tight text-slate-900 dark:text-white uppercase"><span class="text-cyan-500">People</span> Hub</h1>
+            <p class="mt-1 text-[11px] font-medium text-slate-500 uppercase tracking-wide">Browse active and archived people records in one place.</p>
         </div>
         @if (Auth::user()->hasAnyRole(['admin', 'hr_manager']))
             <button @click="openCreateModal()" class="inline-flex items-center gap-2 rounded-xl bg-slate-900 border border-white/10 px-5 py-2.5 text-[10px] font-black uppercase tracking-widest text-white shadow-xl hover:bg-cyan-600 transition-all active:scale-95 dark:bg-white/5 dark:hover:bg-cyan-500/20 dark:hover:text-cyan-400">
@@ -70,7 +71,7 @@
     {{-- Employee List --}}
     <div class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/5 dark:bg-slate-900/50 overflow-hidden">
         <div class="flex items-center justify-between border-b border-slate-100 bg-slate-50/50 px-5 py-2.5 dark:border-white/5 dark:bg-white/5">
-            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest" x-text="`${meta.total || 0} Registered Personnel`"></p>
+            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest" x-text="`${meta.total || 0} People Records`"></p>
             <button @click="fetchData()" class="rounded-lg p-1.5 text-slate-400 hover:text-cyan-500 hover:bg-cyan-50 dark:hover:bg-white/5 transition-all">
                 <svg :class="loading ? 'animate-spin text-cyan-500' : ''" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"></path></svg>
             </button>
@@ -100,22 +101,31 @@
                             <div class="absolute -bottom-1 -right-1 h-3 w-3 rounded-full border-2 border-white dark:border-slate-900 shadow-sm" :class="employee.status === 'active' ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'"></div>
                         </div>
                         <div class="min-w-0">
-                            <h3 class="text-xs font-black uppercase tracking-tight text-slate-900 dark:text-white leading-none" x-text="employee.full_name"></h3>
+                            <div class="flex items-center gap-2">
+                                <h3 class="text-xs font-black uppercase tracking-tight text-slate-900 dark:text-white leading-none" x-text="employee.full_name"></h3>
+                                <span x-show="employee.is_deleted" class="rounded-md bg-amber-50 px-2 py-0.5 text-[8px] font-black uppercase tracking-widest text-amber-600 dark:bg-amber-500/10 dark:text-amber-400" style="display: none;">Archived</span>
+                            </div>
                             <div class="mt-1.5 flex items-center gap-2">
                                 <span class="text-[9px] font-black uppercase tracking-widest text-slate-400" x-text="employee.job_title || 'Personnel'"></span>
                                 <div class="h-1 w-1 rounded-full bg-slate-200 dark:bg-white/10"></div>
                                 <span class="text-[9px] font-black uppercase tracking-widest text-cyan-600 dark:text-cyan-400" x-text="employee.department_name || 'Unassigned'"></span>
+                                <template x-if="employee.deleted_at">
+                                    <span class="text-[9px] font-black uppercase tracking-widest text-amber-500" x-text="`Archived ${employee.deleted_at}`"></span>
+                                </template>
                             </div>
                         </div>
                     </div>
 
                     <div class="flex items-center gap-2">
                         <a :href="employee.show_url" class="rounded px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors">
-                            Manage
+                            View
                         </a>
                         @if (Auth::user()->hasAnyRole(['admin', 'hr_manager']))
-                            <button @click="deleteEmployee(employee)" :disabled="deletingId === employee.id" class="rounded px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-rose-500 hover:bg-rose-50 transition-colors">
-                                Delete
+                            <button x-show="!employee.is_deleted" @click="deleteEmployee(employee)" :disabled="deletingId === employee.id" class="rounded px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-rose-500 hover:bg-rose-50 transition-colors" style="display: none;">
+                                Archive
+                            </button>
+                            <button x-show="employee.is_deleted" @click="restoreEmployee(employee)" :disabled="deletingId === employee.id" class="rounded px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-600 hover:bg-emerald-50 transition-colors dark:text-emerald-400 dark:hover:bg-emerald-500/10" style="display: none;">
+                                Unarchive
                             </button>
                         @endif
                     </div>
@@ -177,7 +187,7 @@
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Department *</label>
-                                <select x-model="form.department_id" class="w-full rounded-lg border border-slate-200 bg-transparent px-3 py-1.5 text-[12px] focus:border-cyan-500 dark:border-slate-700 dark:text-white">
+                                <select x-model="form.department_id" class="employee-dark-select w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-[12px] text-slate-900 focus:border-cyan-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white">
                                     <option value="">Choose...</option>
                                     <template x-for="department in departments" :key="department.id">
                                         <option :value="String(department.id)" x-text="department.name"></option>
@@ -186,7 +196,7 @@
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Manager</label>
-                                <select x-model="form.manager_id" class="w-full rounded-lg border border-slate-200 bg-transparent px-3 py-1.5 text-[12px] focus:border-cyan-500 dark:border-slate-700 dark:text-white">
+                                <select x-model="form.manager_id" class="employee-dark-select w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-[12px] text-slate-900 focus:border-cyan-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white">
                                     <option value="">Choose...</option>
                                     <template x-for="manager in managers" :key="manager.id">
                                         <option :value="String(manager.id)" x-text="manager.name"></option>
@@ -195,7 +205,7 @@
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">System Role</label>
-                                <select x-model="form.role_id" class="w-full rounded-lg border border-slate-200 bg-transparent px-3 py-1.5 text-[12px] focus:border-cyan-500 dark:border-slate-700 dark:text-white">
+                                <select x-model="form.role_id" class="employee-dark-select w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-[12px] text-slate-900 focus:border-cyan-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white">
                                     <option value="">Choose...</option>
                                     <template x-for="role in roles" :key="role.id">
                                         <option :value="String(role.id)" x-text="role.name"></option>
@@ -204,7 +214,7 @@
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Employment Type *</label>
-                                <select x-model="form.employment_type" class="w-full rounded-lg border border-slate-200 bg-transparent px-3 py-1.5 text-[12px] focus:border-cyan-500 dark:border-slate-700 dark:text-white">
+                                <select x-model="form.employment_type" class="employee-dark-select w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-[12px] text-slate-900 focus:border-cyan-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white">
                                     <option value="full-time">Full Time</option>
                                     <option value="part-time">Part Time</option>
                                     <option value="contract">Contract</option>
@@ -221,7 +231,7 @@
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Status *</label>
-                                <select x-model="form.status" class="w-full rounded-lg border border-slate-200 bg-transparent px-3 py-1.5 text-[12px] focus:border-cyan-500 dark:border-slate-700 dark:text-white">
+                                <select x-model="form.status" class="employee-dark-select w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-[12px] text-slate-900 focus:border-cyan-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white">
                                     <option value="active">Active</option>
                                     <option value="on-leave">On Leave</option>
                                     <option value="resigned">Resigned</option>
@@ -248,7 +258,7 @@
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Gender</label>
-                                <select x-model="form.gender" class="w-full rounded-lg border border-slate-200 bg-transparent px-3 py-1.5 text-[12px] focus:border-cyan-500 dark:border-slate-700 dark:text-white">
+                                <select x-model="form.gender" class="employee-dark-select w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-[12px] text-slate-900 focus:border-cyan-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white">
                                     <option value="">Choose...</option>
                                     <option value="male">Male</option>
                                     <option value="female">Female</option>
@@ -258,7 +268,7 @@
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Marital Status</label>
-                                <select x-model="form.marital_status" class="w-full rounded-lg border border-slate-200 bg-transparent px-3 py-1.5 text-[12px] focus:border-cyan-500 dark:border-slate-700 dark:text-white">
+                                <select x-model="form.marital_status" class="employee-dark-select w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-[12px] text-slate-900 focus:border-cyan-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white">
                                     <option value="">Choose...</option>
                                     <option value="single">Single</option>
                                     <option value="married">Married</option>
@@ -268,7 +278,7 @@
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Blood Group</label>
-                                <select x-model="form.blood_group" class="w-full rounded-lg border border-slate-200 bg-transparent px-3 py-1.5 text-[12px] focus:border-cyan-500 dark:border-slate-700 dark:text-white">
+                                <select x-model="form.blood_group" class="employee-dark-select w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-[12px] text-slate-900 focus:border-cyan-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white">
                                     <option value="">Choose...</option>
                                     <option value="A+">A+</option><option value="A-">A-</option>
                                     <option value="B+">B+</option><option value="B-">B-</option>
@@ -285,7 +295,7 @@
                         <div class="grid gap-4 sm:grid-cols-4">
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Country *</label>
-                                <select x-model="form.country" class="w-full rounded-lg border border-slate-200 bg-transparent px-3 py-2 text-sm focus:border-cyan-500 dark:border-slate-700 dark:text-white">
+                                <select x-model="form.country" class="employee-dark-select w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-900 focus:border-cyan-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white">
                                     <template x-for="c in countries" :key="c.code">
                                         <option :value="c.code" x-text="c.name"></option>
                                     </template>
@@ -293,7 +303,7 @@
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">State *</label>
-                                <select x-model="form.state" class="w-full rounded-lg border border-slate-200 bg-transparent px-3 py-2 text-sm focus:border-cyan-500 dark:border-slate-700 dark:text-white">
+                                <select x-model="form.state" class="employee-dark-select w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-900 focus:border-cyan-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white">
                                     <option value="">Choose...</option>
                                     <template x-for="s in states" :key="s.code">
                                         <option :value="s.code" x-text="s.name"></option>
@@ -398,4 +408,22 @@
         <span x-text="toast.message"></span>
     </div>
 </div>
+
+<style>
+    .employee-dark-select {
+        color-scheme: dark;
+        background-color: #f8fafc;
+        color: #0f172a;
+    }
+
+    .employee-dark-select option {
+        background-color: #0f172a;
+        color: #f8fafc;
+    }
+
+    .dark .employee-dark-select {
+        background-color: #020617;
+        color: #f8fafc;
+    }
+</style>
 @endsection
