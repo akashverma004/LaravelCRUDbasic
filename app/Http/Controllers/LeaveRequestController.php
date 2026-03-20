@@ -6,6 +6,7 @@ use App\Http\Requests\StoreLeaveRequest;
 use App\Models\Department;
 use App\Models\Employee;
 use App\Models\HolidayPolicy;
+use App\Models\LeavePolicy;
 use App\Models\LeaveRequest;
 use App\Models\User;
 use App\Notifications\LeaveApproved;
@@ -222,13 +223,24 @@ class LeaveRequestController extends Controller
             ->get()
             ->map(fn($l) => $this->transformLeave($l));
 
-        // 2. Balances
-        $policy = $employee->leavePolicy ?: new \App\Models\EmployeeLeavePolicy([
-            'annual_limit' => 20, 
-            'sick_limit' => 10, 
-            'casual_limit' => 10, 
-            'unpaid_limit' => 30
-        ]);
+        // 2. Resolve Policy (Employee Specific -> Active Global -> Default Fallback)
+        $policy = $employee->leavePolicy;
+        
+        if (!$policy) {
+            $policy = \App\Models\LeavePolicy::where('tenant_id', $tenantId)
+                ->where('is_active', true)
+                ->first();
+        }
+
+        // Final fallback if neither exists
+        if (!$policy) {
+            $policy = (object)[
+                'annual_limit' => 0,
+                'sick_limit' => 0,
+                'casual_limit' => 0,
+                'unpaid_limit' => 0
+            ];
+        }
 
         $used = LeaveRequest::where('employee_id', $employee->id)
             ->where('status', 'approved')

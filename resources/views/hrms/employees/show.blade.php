@@ -23,54 +23,53 @@
 
     {{-- Profile Hero --}}
     {{-- Profile Hero --}}
-    <div class="relative overflow-hidden rounded-2xl bg-white px-8 py-10 shadow-sm border border-slate-200 dark:border-white/5 dark:bg-slate-900/50">
-        <div class="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-cyan-500/10 blur-[100px]"></div>
-        <div class="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-indigo-500/10 blur-[100px]"></div>
+    <div class="relative overflow-hidden rounded-xl bg-white px-6 py-5 shadow-sm border border-slate-200 dark:border-white/5 dark:bg-slate-900/50">
+        <div class="absolute -right-20 -top-20 h-48 w-48 rounded-full bg-cyan-500/5 blur-[80px]"></div>
         
-        <div class="relative z-10 flex flex-col items-center gap-10 lg:flex-row lg:items-start text-center lg:text-left">
+        <div class="relative z-10 flex flex-col items-center gap-6 lg:flex-row lg:items-center text-center lg:text-left">
             {{-- Photo Container --}}
             <div class="relative group/photo">
-                <div class="h-32 w-32 overflow-hidden rounded-2xl border-4 border-white dark:border-white/5 shadow-2xl transition-transform group-hover/photo:scale-105">
+                <div class="h-20 w-20 overflow-hidden rounded-xl border-2 border-white dark:border-white/5 shadow-xl transition-transform group-hover/photo:scale-105">
                     @if($employee->profile_photo)
                         <img src="{{ Storage::url($employee->profile_photo) }}" alt="{{ $employee->full_name }}" class="h-full w-full object-cover">
                     @else
                         <div class="flex h-full w-full items-center justify-center bg-slate-100 dark:bg-white/5">
-                            <span class="text-4xl font-black text-slate-300 dark:text-slate-600 uppercase">{{ substr($employee->full_name, 0, 1) }}</span>
+                            <span class="text-2xl font-black text-slate-300 dark:text-slate-600 uppercase">{{ substr($employee->full_name, 0, 1) }}</span>
                         </div>
                     @endif
                 </div>
-                <div class="absolute -bottom-1.5 -right-1.5 flex h-7 w-7 items-center justify-center rounded-lg bg-white dark:bg-slate-900 shadow-xl border border-slate-100 dark:border-white/10 ring-4 ring-white dark:ring-slate-900/50">
-                    <div class="h-2.5 w-2.5 rounded-full {{ $employee->status === 'active' ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400' }}"></div>
+                <div class="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-lg bg-white dark:bg-slate-900 shadow-lg border border-slate-100 dark:border-white/10 ring-2 ring-white dark:ring-slate-900/50">
+                    <div class="h-2 w-2 rounded-full {{ $employee->status === 'active' ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400' }}"></div>
                 </div>
             </div>
 
             <div class="flex-1">
-                <div class="flex flex-wrap items-center justify-center gap-4 lg:justify-start">
-                    <h1 class="text-3xl font-black tracking-tighter text-slate-900 dark:text-white uppercase">{{ $employee->full_name }}</h1>
-                    <span class="rounded-lg bg-slate-900 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-white dark:bg-white/10 shadow-lg">ID: {{ $employee->id }}</span>
+                <div class="flex flex-wrap items-center justify-center gap-3 lg:justify-start">
+                    <h1 class="text-xl font-black tracking-tighter text-slate-900 dark:text-white uppercase">{{ $employee->full_name }}</h1>
+                    <span class="rounded-lg bg-slate-900 px-2 py-0.5 text-[8px] font-black uppercase tracking-widest text-white dark:bg-white/10 shadow-md">ID: {{ $employee->id }}</span>
                 </div>
-                <p class="mt-3 text-[11px] font-bold text-slate-500 uppercase tracking-widest leading-none">
+                <p class="mt-1 text-[9px] font-bold text-slate-500 uppercase tracking-widest leading-none">
                     <span class="text-cyan-600 dark:text-cyan-400">{{ $employee->job_title ?? 'Employee' }}</span>
-                    <span class="mx-2 text-slate-300 dark:text-white/10">/</span>
+                    <span class="mx-1.5 text-slate-300 dark:text-white/10">/</span>
                     <span class="text-slate-900 dark:text-white">{{ $employee->department?->name ?? 'No Department' }}</span>
                 </p>
                 
-                <div class="mt-6 flex flex-wrap items-center justify-center gap-8 lg:justify-start">
-                    <div class="flex items-center gap-2.5 text-slate-400">
-                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
-                        <span class="text-[10px] font-black uppercase tracking-widest">Joined: {{ $employee->joined_on?->format('M Y') ?? 'Unknown' }}</span>
+                <div class="mt-3 flex flex-wrap items-center justify-center gap-5 lg:justify-start">
+                    <div class="flex items-center gap-2 text-slate-400">
+                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
+                        <span class="text-[9px] font-black uppercase tracking-widest">{{ $employee->joined_on?->format('M Y') ?? 'Unknown' }}</span>
                     </div>
-                    <div class="flex items-center gap-2.5 text-slate-400">
-                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" /></svg>
-                        <span class="text-[10px] font-black uppercase tracking-widest text-cyan-600 dark:text-cyan-400">{{ $employee->city ?? 'Remote' }}</span>
+                    <div class="flex items-center gap-2 text-slate-400">
+                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" /></svg>
+                        <span class="text-[9px] font-black uppercase tracking-widest text-cyan-600 dark:text-cyan-400">{{ $employee->city ?? 'Remote' }}</span>
                     </div>
                 </div>
             </div>
 
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2">
                 <div x-data="{ open: false }" class="relative">
-                    <button @click="open = !open" class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50 border border-slate-100 text-slate-400 hover:bg-cyan-50 hover:text-cyan-600 transition-all dark:bg-white/5 dark:border-white/5">
-                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z" /></svg>
+                    <button @click="open = !open" class="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50 border border-slate-100 text-slate-400 hover:bg-cyan-50 hover:text-cyan-600 transition-all dark:bg-white/5 dark:border-white/5">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z" /></svg>
                     </button>
                     <div x-show="open" @click.away="open = false" x-transition class="absolute right-0 mt-3 z-50 w-56 origin-top-right rounded-xl border border-slate-100 bg-white p-1.5 shadow-2xl dark:border-white/10 dark:bg-slate-900" x-cloak>
                         @if($isAdmin)
@@ -89,91 +88,87 @@
     </div>
 
     {{-- Main Content --}}
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
         
         {{-- Sidebar --}}
-        <div class="space-y-6">
+        <div class="space-y-4">
             {{-- Quick Info --}}
-            <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
-                <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-4">Quick Info</h3>
-                <div class="space-y-4">
-                    <div class="flex flex-col gap-1">
-                        <span class="text-xs text-slate-500">Manager</span>
-                        <span class="text-sm font-medium text-slate-900 dark:text-white">{{ $employee->manager?->full_name ?? 'None' }}</span>
+            <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
+                <h3 class="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-3 ml-1">Quick Info</h3>
+                <div class="space-y-3">
+                    <div class="flex flex-col gap-0.5">
+                        <span class="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Manager</span>
+                        <span class="text-xs font-semibold text-slate-900 dark:text-white">{{ $employee->manager?->full_name ?? 'None' }}</span>
                     </div>
-                    <div class="flex flex-col gap-1">
-                        <span class="text-xs text-slate-500">Employment Type</span>
-                        <span class="text-sm font-medium text-slate-900 dark:text-white capitalize">{{ str_replace('-', ' ', $employee->employment_type) }}</span>
+                    <div class="flex flex-col gap-0.5">
+                        <span class="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Employment</span>
+                        <span class="text-xs font-semibold text-slate-900 dark:text-white capitalize">{{ str_replace('-', ' ', $employee->employment_type) }}</span>
                     </div>
                     @if($isAdmin)
-                    <div class="flex flex-col gap-1">
-                        <span class="text-xs text-slate-500">Salary</span>
-                        <span class="text-sm font-medium text-slate-900 dark:text-white">{{ $employee->salary ? '₹' . number_format($employee->salary) : 'Not Specified' }}</span>
+                    <div class="flex flex-col gap-0.5">
+                        <span class="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Remuneration</span>
+                        <span class="text-xs font-semibold text-slate-900 dark:text-white">{{ $employee->salary ? '₹' . number_format($employee->salary) : 'Not Specified' }}</span>
                     </div>
                     @endif
-                    <div class="flex flex-col gap-1">
-                        <span class="text-xs text-slate-500">Location</span>
-                        <span class="text-sm font-medium text-slate-900 dark:text-white">{{ $employee->city ?? 'Remote' }}</span>
-                    </div>
                 </div>
             </div>
 
             {{-- Activity Overview --}}
-            <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
-                <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-4">Activity</h3>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="rounded-xl border border-slate-100 bg-slate-50 p-4 text-center dark:border-slate-800 dark:bg-slate-900/50">
-                        <p class="text-2xl font-bold text-slate-900 dark:text-white">{{ $employee->leaveRequests->count() }}</p>
-                        <p class="mt-1 text-xs text-slate-500">Leaves</p>
+            <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
+                <h3 class="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-3 ml-1">Activity Tracking</h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="rounded-lg border border-slate-100 bg-slate-50 p-3 text-center dark:border-slate-800 dark:bg-slate-900/50">
+                        <p class="text-lg font-black text-slate-900 dark:text-white">{{ $employee->leaveRequests->count() }}</p>
+                        <p class="mt-0.5 text-[8px] font-bold uppercase tracking-widest text-slate-500">Leaves</p>
                     </div>
-                    <div class="rounded-xl border border-slate-100 bg-slate-50 p-4 text-center dark:border-slate-800 dark:bg-slate-900/50">
-                        <p class="text-2xl font-bold text-slate-900 dark:text-white">{{ $employee->attendanceRecords->count() }}</p>
-                        <p class="mt-1 text-xs text-slate-500">Attendance</p>
+                    <div class="rounded-lg border border-slate-100 bg-slate-50 p-3 text-center dark:border-slate-800 dark:bg-slate-900/50">
+                        <p class="text-lg font-black text-slate-900 dark:text-white">{{ $employee->attendanceRecords->count() }}</p>
+                        <p class="mt-0.5 text-[8px] font-bold uppercase tracking-widest text-slate-500">Days</p>
                     </div>
                 </div>
             </div>
 
             {{-- Skills --}}
-            <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
-                <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-4">Skills</h3>
-                <div class="flex flex-wrap gap-2">
+            <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
+                <h3 class="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-3 ml-1">Skills Architecure</h3>
+                <div class="flex flex-wrap gap-1.5">
                     @forelse($employee->skills as $skill)
-                        <span class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
-                            {{ $skill->name }}
+                        <span class="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-[8px] font-bold uppercase tracking-widest text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                             {{ $skill->name }}
                         </span>
                     @empty
-                        <p class="text-xs text-slate-500">No skills listed.</p>
+                        <p class="text-[8px] font-bold uppercase tracking-widest text-slate-400">Unspecified</p>
                     @endforelse
                 </div>
             </div>
         </div>
 
         {{-- Main Details Tabs --}}
-        <div class="lg:col-span-2 space-y-6">
+        <div class="lg:col-span-2 space-y-4">
             {{-- Tabs --}}
-            <div class="flex gap-2 overflow-x-auto rounded-xl border border-slate-200 bg-white p-2 shadow-sm dark:border-slate-800 dark:bg-slate-900/50 hide-scrollbar">
+            <div class="flex gap-1.5 overflow-x-auto rounded-xl border border-slate-200 bg-white p-1.5 shadow-sm dark:border-slate-800 dark:bg-slate-900/50 hide-scrollbar">
                 @foreach([
-                    'work' => 'Work Info',
-                    'personal' => 'Personal Info',
+                    'work' => 'Work',
+                    'personal' => 'Personal',
                     'emergency' => 'Emergency',
                     'identity' => 'Identity',
                     'bank' => 'Banking',
-                    'preferences' => 'Preferences',
+                    'preferences' => 'Lifestyle',
                     'education' => 'Education',
-                    'experience' => 'Experience',
+                    'experience' => 'Exp',
                     'account' => 'Account',
-                    'leaves' => 'Leave History',
+                    'leaves' => 'Leaves',
                 ] as $tabId => $tabLabel)
                 <button
                     @click="activeTab = '{{ $tabId }}'"
-                    class="whitespace-nowrap rounded-lg px-4 py-2 text-sm font-semibold transition-colors"
-                    :class="activeTab === '{{ $tabId }}' ? 'bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-white' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-white'"
+                    class="whitespace-nowrap rounded-lg px-3 py-1.5 text-[9px] font-black uppercase tracking-widest transition-all"
+                    :class="activeTab === '{{ $tabId }}' ? 'bg-slate-900 text-white dark:bg-white/10 dark:text-white' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/50'"
                 >{{ $tabLabel }}</button>
                 @endforeach
             </div>
 
             {{-- Content Module --}}
-            <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/50 min-h-[400px]">
+            <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900/50 min-h-[350px]">
                 
                 {{-- TAB: Work Info --}}
                 <div x-show="activeTab === 'work'" class="space-y-6">
@@ -194,7 +189,7 @@
                         </div>
                         @endif
                     </div>
-                    <div class="grid gap-6 sm:grid-cols-2">
+                    <div class="grid gap-4 sm:grid-cols-2">
                         @include('hrms.self-service.partials._field', ['field' => 'full_name', 'label' => 'Full Name', 'readonly' => !$isAdmin])
                         @include('hrms.self-service.partials._field', ['field' => 'job_title', 'label' => 'Job Title', 'readonly' => !$isAdmin])
                         @include('hrms.self-service.partials._select', ['field' => 'department_id', 'label' => 'Department', 'options' => $departments->pluck('name', 'id')->toArray(), 'readonly' => !$isAdmin])
@@ -205,25 +200,25 @@
                 </div>
 
                 {{-- TAB: Personal Info --}}
-                <div x-show="activeTab === 'personal'" class="space-y-6" style="display: none;">
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
-                        <h2 class="text-lg font-bold text-slate-900 dark:text-white">Personal Data</h2>
+                <div x-show="activeTab === 'personal'" class="space-y-4" style="display: none;">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
+                        <h2 class="text-base font-bold text-slate-900 dark:text-white uppercase tracking-tight">Personal Data</h2>
                         @if($isAdmin || $isSelf)
                         <div class="flex items-center gap-2">
                             <template x-if="editingSection === 'personal'">
                                 <div class="flex items-center gap-2">
-                                    <button @click="cancelEditing()" class="rounded-lg border border-slate-200 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300">Discard</button>
-                                    <button @click="submitForm()" :disabled="saving" class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-white disabled:opacity-50">
+                                    <button @click="cancelEditing()" class="rounded-lg border border-slate-200 px-2 py-1.5 text-[8px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300">Discard</button>
+                                    <button @click="submitForm()" :disabled="saving" class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-3 py-1.5 text-[8px] font-black uppercase tracking-widest text-white disabled:opacity-50">
                                         <span x-show="!saving">Save</span>
                                         <span x-show="saving">Saving</span>
                                     </button>
                                 </div>
                             </template>
-                            <button @click="startEditing('personal')" x-show="editingSection !== 'personal'" class="rounded-lg border border-slate-200 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 hover:text-cyan-600 dark:border-slate-700 dark:text-slate-300" style="display: none;">Edit</button>
+                            <button @click="startEditing('personal')" x-show="editingSection !== 'personal'" class="rounded-xl border border-slate-200 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 hover:text-cyan-600 dark:border-slate-700 dark:text-slate-300" style="display: none;">Edit</button>
                         </div>
                         @endif
                     </div>
-                    <div class="grid gap-6 sm:grid-cols-2">
+                    <div class="grid gap-4 sm:grid-cols-2">
                         @include('hrms.self-service.partials._field', ['field' => 'email', 'label' => 'Work Email', 'readonly' => true])
                         @include('hrms.self-service.partials._field', ['field' => 'personal_email', 'label' => 'Personal Email', 'type' => 'email'])
                         @include('hrms.self-service.partials._field', ['field' => 'phone', 'label' => 'Phone Number'])
@@ -244,25 +239,25 @@
                 </div>
 
                 {{-- TAB: Emergency --}}
-                <div x-show="activeTab === 'emergency'" class="space-y-6" style="display: none;">
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
-                        <h2 class="text-lg font-bold text-slate-900 dark:text-white">Emergency Contact</h2>
+                <div x-show="activeTab === 'emergency'" class="space-y-4" style="display: none;">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
+                        <h2 class="text-base font-bold text-slate-900 dark:text-white uppercase tracking-tight">Emergency Contact</h2>
                         @if($isAdmin || $isSelf)
                         <div class="flex items-center gap-2">
                             <template x-if="editingSection === 'emergency'">
                                 <div class="flex items-center gap-2">
-                                    <button @click="cancelEditing()" class="rounded-lg border border-slate-200 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300">Discard</button>
-                                    <button @click="submitForm()" :disabled="saving" class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-white disabled:opacity-50">
+                                    <button @click="cancelEditing()" class="rounded-lg border border-slate-200 px-2 py-1.5 text-[8px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300">Discard</button>
+                                    <button @click="submitForm()" :disabled="saving" class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-3 py-1.5 text-[8px] font-black uppercase tracking-widest text-white disabled:opacity-50">
                                         <span x-show="!saving">Save</span>
                                         <span x-show="saving">Saving</span>
                                     </button>
                                 </div>
                             </template>
-                            <button @click="startEditing('emergency')" x-show="editingSection !== 'emergency'" class="rounded-lg border border-slate-200 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 hover:text-cyan-600 dark:border-slate-700 dark:text-slate-300" style="display: none;">Edit</button>
+                            <button @click="startEditing('emergency')" x-show="editingSection !== 'emergency'" class="rounded-xl border border-slate-200 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 hover:text-cyan-600 dark:border-slate-700 dark:text-slate-300" style="display: none;">Edit</button>
                         </div>
                         @endif
                     </div>
-                    <div class="grid gap-6 sm:grid-cols-2">
+                    <div class="grid gap-4 sm:grid-cols-2">
                         @include('hrms.self-service.partials._field', ['field' => 'emergency_contact_name', 'label' => 'Contact Name', 'span' => 2])
                         @include('hrms.self-service.partials._field', ['field' => 'emergency_contact_phone', 'label' => 'Contact Phone'])
                         @include('hrms.self-service.partials._field', ['field' => 'emergency_contact_relationship', 'label' => 'Relationship'])
@@ -270,25 +265,25 @@
                 </div>
 
                 {{-- TAB: Identity --}}
-                <div x-show="activeTab === 'identity'" class="space-y-6" style="display: none;">
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
-                        <h2 class="text-lg font-bold text-slate-900 dark:text-white">Identity Information</h2>
+                <div x-show="activeTab === 'identity'" class="space-y-4" style="display: none;">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
+                        <h2 class="text-base font-bold text-slate-900 dark:text-white uppercase tracking-tight">Identity Information</h2>
                         @if($isAdmin || $isSelf)
                         <div class="flex items-center gap-2">
                             <template x-if="editingSection === 'identity'">
                                 <div class="flex items-center gap-2">
-                                    <button @click="cancelEditing()" class="rounded-lg border border-slate-200 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300">Discard</button>
-                                    <button @click="submitForm()" :disabled="saving" class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-white disabled:opacity-50">
+                                    <button @click="cancelEditing()" class="rounded-lg border border-slate-200 px-2 py-1.5 text-[8px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300">Discard</button>
+                                    <button @click="submitForm()" :disabled="saving" class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-3 py-1.5 text-[8px] font-black uppercase tracking-widest text-white disabled:opacity-50">
                                         <span x-show="!saving">Save</span>
                                         <span x-show="saving">Saving</span>
                                     </button>
                                 </div>
                             </template>
-                            <button @click="startEditing('identity')" x-show="editingSection !== 'identity'" class="rounded-lg border border-slate-200 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 hover:text-cyan-600 dark:border-slate-700 dark:text-slate-300" style="display: none;">Edit</button>
+                            <button @click="startEditing('identity')" x-show="editingSection !== 'identity'" class="rounded-xl border border-slate-200 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 hover:text-cyan-600 dark:border-slate-700 dark:text-slate-300" style="display: none;">Edit</button>
                         </div>
                         @endif
                     </div>
-                    <div class="grid gap-6 sm:grid-cols-2">
+                    <div class="grid gap-4 sm:grid-cols-2">
                         @include('hrms.self-service.partials._field', ['field' => 'pan_number', 'label' => 'PAN Number'])
                         @include('hrms.self-service.partials._field', ['field' => 'aadhaar_number', 'label' => 'Aadhaar Number'])
                         @include('hrms.self-service.partials._field', ['field' => 'passport_number', 'label' => 'Passport Number'])
@@ -298,25 +293,25 @@
                 </div>
 
                 {{-- TAB: Banking --}}
-                <div x-show="activeTab === 'bank'" class="space-y-6" style="display: none;">
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
-                        <h2 class="text-lg font-bold text-slate-900 dark:text-white">Banking Details</h2>
+                <div x-show="activeTab === 'bank'" class="space-y-4" style="display: none;">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
+                        <h2 class="text-base font-bold text-slate-900 dark:text-white uppercase tracking-tight">Banking Details</h2>
                         @if($isAdmin || $isSelf)
                         <div class="flex items-center gap-2">
                             <template x-if="editingSection === 'bank'">
                                 <div class="flex items-center gap-2">
-                                    <button @click="cancelEditing()" class="rounded-lg border border-slate-200 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300">Discard</button>
-                                    <button @click="submitForm()" :disabled="saving" class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-white disabled:opacity-50">
+                                    <button @click="cancelEditing()" class="rounded-lg border border-slate-200 px-2 py-1.5 text-[8px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300">Discard</button>
+                                    <button @click="submitForm()" :disabled="saving" class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-3 py-1.5 text-[8px] font-black uppercase tracking-widest text-white disabled:opacity-50">
                                         <span x-show="!saving">Save</span>
                                         <span x-show="saving">Saving</span>
                                     </button>
                                 </div>
                             </template>
-                            <button @click="startEditing('bank')" x-show="editingSection !== 'bank'" class="rounded-lg border border-slate-200 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 hover:text-cyan-600 dark:border-slate-700 dark:text-slate-300" style="display: none;">Edit</button>
+                            <button @click="startEditing('bank')" x-show="editingSection !== 'bank'" class="rounded-xl border border-slate-200 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 hover:text-cyan-600 dark:border-slate-700 dark:text-slate-300" style="display: none;">Edit</button>
                         </div>
                         @endif
                     </div>
-                    <div class="grid gap-6 sm:grid-cols-2">
+                    <div class="grid gap-4 sm:grid-cols-2">
                         @include('hrms.self-service.partials._field', ['field' => 'bank_name', 'label' => 'Bank Name', 'span' => 2])
                         @include('hrms.self-service.partials._field', ['field' => 'bank_account_number', 'label' => 'Account Number'])
                         @include('hrms.self-service.partials._field', ['field' => 'bank_ifsc', 'label' => 'IFSC Code'])
@@ -324,32 +319,34 @@
                 </div>
 
                 {{-- TAB: Preferences --}}
-                <div x-show="activeTab === 'preferences'" class="space-y-6" style="display: none;">
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
-                        <h2 class="text-lg font-bold text-slate-900 dark:text-white">Preferences & Lifestyle</h2>
+                <div x-show="activeTab === 'preferences'" class="space-y-4" style="display: none;">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
+                        <h2 class="text-base font-bold text-slate-900 dark:text-white uppercase tracking-tight">Preferences & Lifestyle</h2>
                         @if($isAdmin || $isSelf)
                         <div class="flex items-center gap-2">
                             <template x-if="editingSection === 'preferences'">
                                 <div class="flex items-center gap-2">
-                                    <button @click="cancelEditing()" class="rounded-lg border border-slate-200 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300">Discard</button>
-                                    <button @click="submitForm()" :disabled="saving" class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-white disabled:opacity-50">
+                                    <button @click="cancelEditing()" class="rounded-lg border border-slate-200 px-2 py-1.5 text-[8px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300">Discard</button>
+                                    <button @click="submitForm()" :disabled="saving" class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-3 py-1.5 text-[8px] font-black uppercase tracking-widest text-white disabled:opacity-50">
                                         <span x-show="!saving">Save</span>
                                         <span x-show="saving">Saving</span>
                                     </button>
                                 </div>
                             </template>
-                            <button @click="startEditing('preferences')" x-show="editingSection !== 'preferences'" class="rounded-lg border border-slate-200 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 hover:text-cyan-600 dark:border-slate-700 dark:text-slate-300" style="display: none;">Edit</button>
+                            <button @click="startEditing('preferences')" x-show="editingSection !== 'preferences'" class="rounded-xl border border-slate-200 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 hover:text-cyan-600 dark:border-slate-700 dark:text-slate-300" style="display: none;">Edit</button>
                         </div>
                         @endif
                     </div>
-                    <div class="grid gap-6 sm:grid-cols-2">
+                    <div class="grid gap-4 sm:grid-cols-2">
                         @include('hrms.self-service.partials._field', ['field' => 'hobbies', 'label' => 'Hobbies'])
                         @include('hrms.self-service.partials._field', ['field' => 'likes', 'label' => 'Interests'])
                         @include('hrms.self-service.partials._select', ['field' => 'food_preference', 'label' => 'Food Preference', 'options' => [
                             'veg' => 'Vegetarian', 'non-veg' => 'Non-Vegetarian'
                         ]])
                         @include('hrms.self-service.partials._field', ['field' => 'linkedin_url', 'label' => 'LinkedIn Profile URL', 'type' => 'url'])
-                        @include('hrms.self-service.partials._textarea', ['field' => 'health_issues', 'label' => 'Health Considerations / Notes', 'span' => 2])
+                        <div class="sm:col-span-2">
+                            @include('hrms.self-service.partials._textarea', ['field' => 'health_issues', 'label' => 'Health Considerations / Notes', 'span' => 2])
+                        </div>
                     </div>
                 </div>
 

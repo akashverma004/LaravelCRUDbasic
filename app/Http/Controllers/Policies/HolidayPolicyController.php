@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Policies;
 
 use App\Http\Controllers\Controller;
-
 use App\Models\HolidayPolicy;
 use App\Support\GeoLookup;
 use Illuminate\Http\JsonResponse;
@@ -15,21 +14,9 @@ use Illuminate\View\View;
 
 class HolidayPolicyController extends Controller
 {
-    public function index(): View
+    public function index(): RedirectResponse
     {
-        $policies = HolidayPolicy::query()
-            ->withCount('holidayDates')
-            ->orderBy('country_code')
-            ->orderBy('state_code')
-            ->orderBy('name')
-            ->get();
-
-        return view('hrms.policies.holiday-policies', [
-            'policies' => $policies,
-            'weekdays' => ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
-            'countries' => config('geo.countries', []),
-            'states' => config('geo.states_in', []),
-        ]);
+        return redirect()->route('policies.index');
     }
 
     public function store(Request $request): RedirectResponse|JsonResponse
@@ -58,18 +45,28 @@ class HolidayPolicyController extends Controller
         }
 
         return redirect()
-            ->route('policies.holiday-policies.index')
+            ->route('policies.index')
             ->with('status', 'Holiday policy created.');
     }
 
     public function update(Request $request, int $holidayPolicy): RedirectResponse|JsonResponse
     {
-        $holidayPolicy = HolidayPolicy::query()->findOrFail($holidayPolicy);
+        $policy = HolidayPolicy::query()->findOrFail($holidayPolicy);
+        
+        // Handle simple status toggles with checkboxes
+        if ($request->has('is_active') && count($request->all()) <= 3) { // csrf, method, is_active
+            $policy->update(['is_active' => (bool) $request->input('is_active')]);
+             if ($request->expectsJson()) {
+                return response()->json(['success' => true, 'message' => 'Policy status updated.']);
+            }
+            return redirect()->route('policies.index');
+        }
+
         $validated = $this->validatePolicyPayload($request);
 
-        $holidayPolicy->update([
+        $policy->update([
             'name' => $validated['name'],
-            'code' => $validated['code'] ? Str::upper($validated['code']) : $holidayPolicy->code,
+            'code' => $validated['code'] ? Str::upper($validated['code']) : $policy->code,
             'description' => $validated['description'] ?? null,
             'country_code' => Str::upper($validated['country_code']),
             'state_code' => Str::upper($validated['state_code']),
@@ -81,19 +78,19 @@ class HolidayPolicyController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Holiday policy updated.',
-                'policy' => $this->transformPolicy($holidayPolicy->fresh()->loadCount('holidayDates')),
+                'policy' => $this->transformPolicy($policy->fresh()->loadCount('holidayDates')),
             ]);
         }
 
         return redirect()
-            ->route('policies.holiday-policies.index')
+            ->route('policies.index')
             ->with('status', 'Holiday policy updated.');
     }
 
     public function destroy(Request $request, int $holidayPolicy): RedirectResponse|JsonResponse
     {
-        $holidayPolicy = HolidayPolicy::query()->findOrFail($holidayPolicy);
-        $holidayPolicy->delete();
+        $policy = HolidayPolicy::query()->findOrFail($holidayPolicy);
+        $policy->delete();
 
         if ($request->expectsJson()) {
             return response()->json([
@@ -103,7 +100,7 @@ class HolidayPolicyController extends Controller
         }
 
         return redirect()
-            ->route('policies.holiday-policies.index')
+            ->route('policies.index')
             ->with('status', 'Holiday policy deleted.');
     }
 

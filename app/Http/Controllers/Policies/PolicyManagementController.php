@@ -27,44 +27,49 @@ class PolicyManagementController extends Controller
 
     public function index(): View
     {
-        $types = collect(PolicyDefinitions::all())
-            ->map(fn (array $config, string $type) => [
-                'type'        => $type,
-                'title'       => $config['title'],
-                'description' => $config['description'],
-                'route'       => route('policies.edit', $type),
-            ])
+        $allDefinitions = PolicyDefinitions::all();
+        $types = collect($allDefinitions)
+            ->reject(fn($config, $type) => $type === 'holiday') // Handled specifically
+            ->map(function (array $config, string $type) {
+                $modelClass = $config['model'];
+                $defaultCode = $this->defaultCode($type);
+                $policy = $modelClass::query()->where('code', $defaultCode)->first();
+                
+                if (!$policy) {
+                    $policy = $modelClass::query()->create([
+                        'name'        => $config['title'] . ' (Default)',
+                        'code'        => $defaultCode,
+                        'description' => $config['description'],
+                        'is_active'   => true,
+                        'created_by'  => auth()->id(),
+                        'updated_by'  => auth()->id(),
+                    ]);
+                }
+
+                return [
+                    'type'        => $type,
+                    'title'       => $config['title'],
+                    'description' => $config['description'],
+                    'policy'      => $policy,
+                    'definition'  => $config,
+                    'route'       => route('policies.update', $type),
+                ];
+            })
             ->values();
 
-        return view('hrms.policies.index', compact('types'));
+        // Fetch Holiday Policies for the special card
+        $holidayPolicies = \App\Models\HolidayPolicy::withCount('holidayDates')->get();
+
+        // Fetch Departments and Roles for dropdowns
+        $departments = \App\Models\Department::all();
+        $roles = \App\Models\Role::all();
+
+        return view('hrms.policies.index', compact('types', 'holidayPolicies', 'departments', 'roles'));
     }
 
-    public function edit(string $type): View
+    public function edit(string $type): RedirectResponse
     {
-        $definition = PolicyDefinitions::resolve($type);
-        $modelClass = $definition['model'];
-
-        // Explicitly tenant-scoped: the BelongsToTenant global scope handles the WHERE.
-        // firstOrCreate is keyed on (code) within the current tenant scope.
-        $defaultCode = $this->defaultCode($type);
-        $policy = $modelClass::query()->where('code', $defaultCode)->first();
-
-        if (! $policy) {
-            $policy = $modelClass::query()->create([
-                'name'        => $definition['title'] . ' (Default)',
-                'code'        => $defaultCode,
-                'description' => $definition['description'],
-                'is_active'   => true,
-                'created_by'  => auth()->id(),
-                'updated_by'  => auth()->id(),
-            ]);
-        }
-
-        return view('hrms.policies.edit', [
-            'type'       => $type,
-            'definition' => $definition,
-            'policy'     => $policy,
-        ]);
+        return redirect()->route('policies.index');
     }
 
     public function update(Request $request, string $type): RedirectResponse|JsonResponse
