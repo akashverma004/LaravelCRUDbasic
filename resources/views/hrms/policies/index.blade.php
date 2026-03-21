@@ -56,12 +56,12 @@
         @foreach ($types as $item)
             <div class="group relative overflow-hidden rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition-all hover:border-cyan-500/30 hover:shadow-md dark:border-white/5 dark:bg-slate-900/50">
                 <div class="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50 text-slate-950 transition-colors group-hover:bg-cyan-500 group-hover:text-white dark:bg-white/5 dark:text-slate-400 dark:group-hover:bg-cyan-500/20 dark:group-hover:text-cyan-400">
-                    {!! $item['icon'] !!}
+                    {!! $item['icon'] ?? '<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>' !!}
                 </div>
-                <h2 class="text-[11px] font-black tracking-tight text-slate-900 uppercase transition-colors group-hover:text-cyan-600 dark:text-white">{{ $item['name'] }}</h2>
+                <h2 class="text-[11px] font-black tracking-tight text-slate-900 uppercase transition-colors group-hover:text-cyan-600 dark:text-white">{{ $item['title'] ?? 'Policy' }}</h2>
                 <p class="mt-1.5 text-[8px] font-bold uppercase leading-relaxed tracking-wide text-slate-400 line-clamp-1">{{ str_replace(' policy', '', $item['description']) }}</p>
                 <div class="mt-3 flex items-center gap-2">
-                    <button @click="activeModal = '{{ $item['id'] }}'" class="flex items-center gap-1.5 text-[8px] font-black uppercase tracking-widest text-cyan-500 hover:text-cyan-600">
+                    <button @click="activeModal = '{{ $item['type'] ?? '' }}'" class="flex items-center gap-1.5 text-[8px] font-black uppercase tracking-widest text-cyan-500 hover:text-cyan-600">
                         <span>Configure</span>
                         <svg class="h-2.5 w-2.5 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke-width="4" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
                     </button>
@@ -172,11 +172,11 @@
     {{-- Dynamic Policy Modals --}}
     @foreach ($types as $item)
         <div x-show="activeModal === 'policy-{{ $item['type'] }}'" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" x-transition.opacity>
-            <div x-show="activeModal === '{{ $item['id'] }}'" x-transition x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm">
+            <div x-show="activeModal === '{{ $item['type'] }}'" x-transition x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm">
                 <div @click.away="activeModal = null" class="w-full max-w-2xl rounded-[20px] bg-white shadow-2xl dark:bg-slate-900 border border-slate-200 dark:border-white/5 overflow-hidden max-h-[85vh] flex flex-col">
                     <div class="flex items-center justify-between border-b border-slate-50 px-5 py-3 dark:border-white/5 shrink-0">
                         <div>
-                            <h3 class="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-[0.2em]">{{ $item['name'] }} Policy</h3>
+                            <h3 class="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-[0.2em]">{{ $item['title'] ?? 'Policy' }}</h3>
                             <p class="text-[8px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">{{ $item['description'] }} Settings</p>
                         </div>
                         <button @click="activeModal = null" class="text-slate-400 hover:text-slate-900 transition-colors">

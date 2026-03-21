@@ -46,6 +46,27 @@ class DashboardController extends Controller
                 $wfhPolicy = \App\Models\WfhPolicy::active()->effectiveOn()->first();
                 $attendancePolicy = \App\Models\AttendancePolicy::active()->effectiveOn()->first();
 
+                $rawLeaveChart = \App\Models\LeaveRequest::where('employee_id', $employee->id)
+                    ->where('status', 'approved')
+                    ->selectRaw('leave_type, count(*) as count')
+                    ->groupBy('leave_type')
+                    ->get();
+                $leaveChartData = [
+                    'labels' => $rawLeaveChart->isEmpty() ? collect(['None']) : $rawLeaveChart->pluck('leave_type')->map(fn($t) => ucfirst($t)),
+                    'values' => $rawLeaveChart->isEmpty() ? collect([1]) : $rawLeaveChart->pluck('count'),
+                ];
+
+                $leaveTrendChartData = [
+                    'labels' => collect(range(5, 0))->map(fn($i) => now()->subMonths($i)->format('M')),
+                    'bookings' => collect(range(5, 0))->map(function($i) use ($employee) {
+                        return \App\Models\LeaveRequest::where('employee_id', $employee->id)
+                            ->where('status', 'approved')
+                            ->whereYear('start_date', now()->subMonths($i)->year)
+                            ->whereMonth('start_date', now()->subMonths($i)->month)
+                            ->count();
+                    })
+                ];
+
                 return view('hrms.employee-dashboard', [
                     'employee' => $employee,
                     'myLeaves' => $myLeaves,
@@ -55,6 +76,8 @@ class DashboardController extends Controller
                     'noticePolicy' => $noticePolicy,
                     'wfhPolicy' => $wfhPolicy,
                     'attendancePolicy' => $attendancePolicy,
+                    'leaveChartData' => $leaveChartData,
+                    'leaveTrendChartData' => $leaveTrendChartData,
                 ]);
             }
         }
