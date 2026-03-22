@@ -43,7 +43,7 @@
             <h2 class="text-[11px] font-black tracking-tight text-slate-900 uppercase transition-colors group-hover:text-cyan-600 dark:text-white">Holiday Protocols</h2>
             <p class="mt-1.5 text-[8px] font-bold uppercase leading-relaxed tracking-wide text-slate-400">Architect regional schedules.</p>
             <div class="mt-3 flex items-center gap-3">
-                <button @click="activeModal = 'holiday'" class="flex items-center gap-1.5 text-[8px] font-black uppercase tracking-widest text-cyan-500 hover:text-cyan-600">
+                <button @click.stop.prevent="activeModal = 'holiday'" class="flex items-center gap-1.5 text-[8px] font-black uppercase tracking-widest text-cyan-500 hover:text-cyan-600">
                     <span>Manage</span>
                     <svg class="h-3 w-3 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke-width="4" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
                 </button>
@@ -61,7 +61,7 @@
                 <h2 class="text-[11px] font-black tracking-tight text-slate-900 uppercase transition-colors group-hover:text-cyan-600 dark:text-white">{{ $item['title'] ?? 'Policy' }}</h2>
                 <p class="mt-1.5 text-[8px] font-bold uppercase leading-relaxed tracking-wide text-slate-400 line-clamp-1">{{ str_replace(' policy', '', $item['description']) }}</p>
                 <div class="mt-3 flex items-center gap-2">
-                    <button @click="activeModal = '{{ $item['type'] ?? '' }}'" class="flex items-center gap-1.5 text-[8px] font-black uppercase tracking-widest text-cyan-500 hover:text-cyan-600">
+                    <button @click.stop.prevent="activeModal = '{{ $item['type'] ?? '' }}'" class="flex items-center gap-1.5 text-[8px] font-black uppercase tracking-widest text-cyan-500 hover:text-cyan-600">
                         <span>Configure</span>
                         <svg class="h-2.5 w-2.5 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke-width="4" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
                     </button>
@@ -72,8 +72,9 @@
 
     {{-- MODALS --}}
 
-    <div x-show="activeModal === 'holiday'" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" x-transition.opacity>
-        <div @click.away="activeModal = null" class="w-full max-w-3xl rounded-[20px] bg-white shadow-2xl dark:bg-slate-900 border border-slate-200 dark:border-white/5 overflow-hidden max-h-[85vh] flex flex-col" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="scale-95 opacity-0">
+    <div x-show="activeModal === 'holiday'" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-4" x-transition.opacity>
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="activeModal = null"></div>
+        <div class="relative z-10 w-full max-w-3xl rounded-[20px] bg-white shadow-2xl dark:bg-slate-900 border border-slate-200 dark:border-white/5 overflow-hidden max-h-[85vh] flex flex-col" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="scale-95 opacity-0">
             <div class="flex items-center justify-between border-b border-slate-50 px-5 py-3 dark:border-white/5 shrink-0">
                 <div>
                     <h3 class="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-[0.2em]">Holiday Protocols</h3>
@@ -171,12 +172,12 @@
 
     {{-- Dynamic Policy Modals --}}
     @foreach ($types as $item)
-        <div x-show="activeModal === '{{ $item['type'] }}'" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" x-transition.opacity>
-            <div x-show="activeModal === '{{ $item['type'] }}'" x-transition x-cloak class="w-full max-w-2xl rounded-[20px] bg-white shadow-2xl dark:bg-slate-900 border border-slate-200 dark:border-white/5 overflow-hidden max-h-[85vh] flex flex-col pt-0">
-                <div @click.away="activeModal = null" class="w-full h-full flex flex-col">
-                    <div class="flex items-center justify-between border-b border-slate-50 px-5 py-3 dark:border-white/5 shrink-0">
-                        <div>
-                            <h3 class="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-[0.2em]">{{ $item['title'] ?? 'Policy' }}</h3>
+        <div x-show="activeModal === '{{ $item['type'] }}'" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-4" x-transition.opacity>
+            <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="activeModal = null"></div>
+            <div x-transition class="relative z-10 w-full max-w-2xl rounded-[20px] bg-white shadow-2xl dark:bg-slate-900 border border-slate-200 dark:border-white/5 overflow-hidden max-h-[85vh] flex flex-col">
+                <div class="flex items-center justify-between border-b border-slate-50 px-5 py-3 dark:border-white/5 shrink-0">
+                    <div>
+                        <h3 class="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-[0.2em]">{{ $item['title'] ?? 'Policy' }}</h3>
                             <p class="text-[8px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">{{ $item['description'] }} Settings</p>
                         </div>
                         <button @click="activeModal = null" class="text-slate-400 hover:text-slate-900 transition-colors">
