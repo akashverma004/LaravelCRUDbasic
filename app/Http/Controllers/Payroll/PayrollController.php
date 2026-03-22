@@ -185,9 +185,12 @@ class PayrollController extends Controller
             $workedDays = $effectiveStart->diffInDays($effectiveEnd) + 1;
             $prorateRatio = $isProrated ? ($workedDays / $totalDaysInMonth) : 1;
 
-            // Prorated base salary
-            $proratedBaseSalary = round($struct->base_salary * $prorateRatio, 2);
-            $dailyRate = $struct->base_salary / $totalDaysInMonth;
+            // Option A: Treat base_salary as Annual CTC, calculate Fixed Monthly Base.
+            $monthlyBase = $struct->base_salary / 12;
+
+            // Prorated base salary based on the fixed monthly base
+            $proratedBaseSalary = round($monthlyBase * $prorateRatio, 2);
+            $dailyRate = $monthlyBase / $totalDaysInMonth;
             $hourlyRate = $standardHoursPerDay > 0 ? ($dailyRate / $standardHoursPerDay) : 0;
 
             // Calculate unpaid leave deductions (only within effective period)

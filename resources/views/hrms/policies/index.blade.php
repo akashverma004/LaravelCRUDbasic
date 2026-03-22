@@ -171,9 +171,9 @@
 
     {{-- Dynamic Policy Modals --}}
     @foreach ($types as $item)
-        <div x-show="activeModal === 'policy-{{ $item['type'] }}'" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" x-transition.opacity>
-            <div x-show="activeModal === '{{ $item['type'] }}'" x-transition x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm">
-                <div @click.away="activeModal = null" class="w-full max-w-2xl rounded-[20px] bg-white shadow-2xl dark:bg-slate-900 border border-slate-200 dark:border-white/5 overflow-hidden max-h-[85vh] flex flex-col">
+        <div x-show="activeModal === '{{ $item['type'] }}'" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" x-transition.opacity>
+            <div x-show="activeModal === '{{ $item['type'] }}'" x-transition x-cloak class="w-full max-w-2xl rounded-[20px] bg-white shadow-2xl dark:bg-slate-900 border border-slate-200 dark:border-white/5 overflow-hidden max-h-[85vh] flex flex-col pt-0">
+                <div @click.away="activeModal = null" class="w-full h-full flex flex-col">
                     <div class="flex items-center justify-between border-b border-slate-50 px-5 py-3 dark:border-white/5 shrink-0">
                         <div>
                             <h3 class="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-[0.2em]">{{ $item['title'] ?? 'Policy' }}</h3>

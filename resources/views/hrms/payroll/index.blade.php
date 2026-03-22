@@ -60,7 +60,7 @@
         {{-- Panel Title --}}
         <div class="px-6 pt-5 pb-4 shrink-0 border-b border-slate-100 dark:border-slate-800">
             <p class="text-[9px] font-black uppercase tracking-[0.2em] text-indigo-500 dark:text-indigo-400 mb-1">Compensation & Salary</p>
-            <p class="text-[11px] text-slate-500">Set the base pay, allowances, and deductions for this employee. All amounts are per month.</p>
+            <p class="text-[11px] text-slate-500">Set the Annual CTC (Package), allowances, and deductions. Monthly Net Pay will be dynamically calculated.</p>
         </div>
 
         {{-- Panel Body (scrollable) --}}
@@ -68,12 +68,15 @@
 
             {{-- Base Salary --}}
             <div>
-                <label class="block text-[10px] font-black text-slate-500 uppercase tracking-wider mb-2">Monthly Base Salary (₹)</label>
+                <label class="block text-[10px] font-black text-slate-500 uppercase tracking-wider mb-2">Annual Package / CTC (₹)</label>
                 <div class="relative">
                     <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">₹</span>
-                    <input type="number" x-model="structureForm.base_salary" placeholder="e.g. 60000"
+                    <input type="number" x-model="structureForm.base_salary" placeholder="e.g. 500000"
                         class="w-full rounded-xl border border-slate-200 bg-slate-50 pl-8 pr-4 py-3 text-sm font-bold text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white transition-all" />
                 </div>
+                <p x-show="structureForm.base_salary" class="mt-2 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                    <span x-text="'Monthly Base: ₹' + (parseFloat(structureForm.base_salary) / 12).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})"></span>
+                </p>
             </div>
 
             {{-- Allowances --}}
@@ -366,9 +369,9 @@
                     <tr class="border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/40">
                         <th class="px-6 py-3.5 text-[10px] font-black uppercase tracking-wider text-slate-400">Employee</th>
                         <th class="px-6 py-3.5 text-[10px] font-black uppercase tracking-wider text-slate-400">Role</th>
-                        <th class="hidden md:table-cell px-6 py-3.5 text-right text-[10px] font-black uppercase tracking-wider text-slate-400">Base Pay</th>
-                        <th class="hidden lg:table-cell px-6 py-3.5 text-right text-[10px] font-black uppercase tracking-wider text-slate-400">Allowances</th>
-                        <th class="hidden lg:table-cell px-6 py-3.5 text-right text-[10px] font-black uppercase tracking-wider text-slate-400">Deductions</th>
+                        <th class="hidden md:table-cell px-6 py-3.5 text-right text-[10px] font-black uppercase tracking-wider text-slate-400">Annual CTC (Package)</th>
+                        <th class="hidden lg:table-cell px-6 py-3.5 text-right text-[10px] font-black uppercase tracking-wider text-slate-400">Monthly Allowances</th>
+                        <th class="hidden lg:table-cell px-6 py-3.5 text-right text-[10px] font-black uppercase tracking-wider text-slate-400">Monthly Deductions</th>
                         <th class="px-6 py-3.5 text-right text-[10px] font-black uppercase tracking-wider text-slate-400">Net / Month</th>
                         <th class="px-6 py-3.5 text-center text-[10px] font-black uppercase tracking-wider text-slate-400">Status</th>
                         <th class="px-4 py-3.5"></th>
@@ -426,7 +429,7 @@
                                 <template x-if="emp.pay_structure">
                                     <span class="text-sm font-black text-slate-900 dark:text-white"
                                         x-text="formatCurrency(
-                                            parseFloat(emp.pay_structure.base_salary||0) +
+                                            (parseFloat(emp.pay_structure.base_salary||0) / 12) +
                                             (emp.pay_structure.allowances||[]).reduce((s,a)=>s+parseFloat(a.amount||0),0) -
                                             (emp.pay_structure.deductions||[]).reduce((s,d)=>s+parseFloat(d.amount||0),0)
                                         )">
