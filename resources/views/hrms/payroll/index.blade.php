@@ -596,6 +596,29 @@
                                 <span class="text-xs font-bold text-rose-600 dark:text-rose-400" x-text="'-' + formatCurrency(selectedPayslip.details.unpaid_leave_deduction.amount)"></span>
                             </div>
                         </template>
+
+                        {{-- Adjustments (Reimbursements, Bonuses, etc.) --}}
+                        <template x-if="selectedPayslip.details?.adjustments && selectedPayslip.details.adjustments.length > 0">
+                            <template x-for="adj in selectedPayslip.details.adjustments" :key="adj.label">
+                                <div class="flex justify-between items-center py-2.5 px-4 rounded-xl border"
+                                    :class="adj.type === 'addition'
+                                        ? 'bg-violet-50/60 dark:bg-violet-500/5 border-violet-100 dark:border-violet-500/10'
+                                        : 'bg-rose-50/60 dark:bg-rose-500/5 border-rose-100 dark:border-rose-500/10'">
+                                    <div>
+                                        <span class="text-[11px] font-bold"
+                                            :class="adj.type === 'addition' ? 'text-violet-700 dark:text-violet-400' : 'text-rose-700 dark:text-rose-400'"
+                                            x-text="adj.label"></span>
+                                        <span class="ml-1.5 text-[8px] font-black uppercase tracking-widest"
+                                            :class="adj.type === 'addition' ? 'text-violet-400' : 'text-rose-400'">
+                                            Reimbursement
+                                        </span>
+                                    </div>
+                                    <span class="text-xs font-bold"
+                                        :class="adj.type === 'addition' ? 'text-violet-600 dark:text-violet-400' : 'text-rose-600 dark:text-rose-400'"
+                                        x-text="(adj.type === 'addition' ? '+' : '-') + formatCurrency(adj.amount)"></span>
+                                </div>
+                            </template>
+                        </template>
                     </div>
 
                     {{-- Net Pay --}}

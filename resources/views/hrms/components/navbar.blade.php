@@ -116,6 +116,10 @@
                         <svg class="h-4 w-4 shrink-0 transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
                         <span class="text-[10px] font-black uppercase tracking-widest">Workflow</span>
                     </a>
+                    <a href="{{ route('attendance.index') }}" class="mb-1 flex items-center gap-2.5 overflow-hidden rounded-xl border px-3 py-2 transition-all duration-200 group {{ request()->routeIs('attendance.*') ? $navActiveClass : $navIdleClass }}">
+                        <svg class="h-4 w-4 shrink-0 transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <span class="text-[10px] font-black uppercase tracking-widest">Attendance</span>
+                    </a>
                     <a href="{{ route('tenant-users.index') }}" class="mb-1 flex items-center gap-2.5 overflow-hidden rounded-xl border px-3 py-2 transition-all duration-200 group {{ request()->routeIs('tenant-users.*') || request()->routeIs('roles.*') || request()->routeIs('users.*') ? $navActiveClass : $navIdleClass }}">
                         <svg class="h-4 w-4 shrink-0 transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z" /></svg>
                         <span class="text-[10px] font-black uppercase tracking-widest">Lattice</span>

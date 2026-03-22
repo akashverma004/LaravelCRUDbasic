@@ -38,4 +38,11 @@ Route::middleware(['auth', 'tenant', 'tenant.active'])->group(function () {
         Route::post('/assign', [\App\Http\Controllers\Shifts\ShiftController::class, 'assign'])->name('shifts.assign');
         Route::delete('/schedule/{schedule}', [\App\Http\Controllers\Shifts\ShiftController::class, 'destroy'])->name('shifts.schedule.destroy');
     });
+
+    // P8: Attendance Management (HR/Admin)
+    Route::prefix('attendance-management')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Hrms\AttendanceManagementController::class, 'index'])->name('attendance.index');
+        Route::get('/data', [\App\Http\Controllers\Hrms\AttendanceManagementController::class, 'data'])->name('attendance.data');
+        Route::post('/update', [\App\Http\Controllers\Hrms\AttendanceManagementController::class, 'update'])->name('attendance.update');
+    });
 });

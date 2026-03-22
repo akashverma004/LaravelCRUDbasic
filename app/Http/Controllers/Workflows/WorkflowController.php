@@ -1070,6 +1070,25 @@ class WorkflowController extends Controller
             $mutated = true;
         }
 
+        // ── Reimbursement → queue as a payroll adjustment ──────────────────
+        if ($workflow->type === 'reimbursement' && $employee && $workflow->amount > 0) {
+            $category = $details['category'] ?? 'Reimbursement';
+            $label = $workflow->title ?: ucfirst($category) . ' Reimbursement';
+
+            \App\Models\PayrollAdjustment::create([
+                'tenant_id'           => $workflow->tenant_id,
+                'employee_id'         => $employee->id,
+                'workflow_request_id' => $workflow->id,
+                'label'               => $label,
+                'type'                => 'addition',
+                'amount'              => $workflow->amount,
+                'status'              => 'pending',
+            ]);
+
+            $details['payroll_adjustment_queued'] = true;
+            $mutated = true;
+        }
+
         if ($workflow->type === 'asset-return' && ! empty($details['asset_id'])) {
             $asset = $this->resolveWorkflowAsset($workflow, (int) $details['asset_id']);
             if ($asset) {
