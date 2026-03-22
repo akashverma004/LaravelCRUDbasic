@@ -28,7 +28,9 @@ class Employee extends Model
         'employment_type',
         'salary',
         'joined_on',
+        'last_working_day',
         'status',
+        // Resignation
         'country',
         'state',
         'city',
@@ -66,6 +68,7 @@ class Employee extends Model
 
     protected $casts = [
         'joined_on' => 'date',
+        'last_working_day' => 'date',
         'date_of_birth' => 'date',
         'passport_expiry' => 'date',
         'salary' => 'decimal:2',
@@ -119,6 +122,16 @@ class Employee extends Model
     public function skills(): HasMany
     {
         return $this->hasMany(EmployeeSkill::class);
+    }
+
+    public function payStructure(): HasOne
+    {
+        return $this->hasOne(PayStructure::class);
+    }
+
+    public function payslips(): HasMany
+    {
+        return $this->hasMany(Payslip::class);
     }
 
     public function setCountryAttribute(?string $value): void

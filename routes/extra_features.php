@@ -24,6 +24,8 @@ Route::middleware(['auth', 'tenant', 'tenant.active'])->group(function () {
         Route::get('/', [\App\Http\Controllers\Payroll\PayrollController::class, 'index'])->name('payroll.index');
         Route::get('/data', [\App\Http\Controllers\Payroll\PayrollController::class, 'data'])->name('payroll.data');
         Route::post('/structures', [\App\Http\Controllers\Payroll\PayrollController::class, 'storeStructure'])->name('payroll.structures.store');
+        Route::put('/structures/{payStructure}', [\App\Http\Controllers\Payroll\PayrollController::class, 'updateStructure'])->name('payroll.structures.update');
+        Route::delete('/structures/{payStructure}', [\App\Http\Controllers\Payroll\PayrollController::class, 'destroyStructure'])->name('payroll.structures.destroy');
         Route::post('/generate', [\App\Http\Controllers\Payroll\PayrollController::class, 'generatePayslips'])->name('payroll.generate');
         Route::post('/payslips/{payslip}/pay', [\App\Http\Controllers\Payroll\PayrollController::class, 'markAsPaid'])->name('payroll.payslips.pay');
     });

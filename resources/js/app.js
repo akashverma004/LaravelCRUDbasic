@@ -968,12 +968,18 @@ Alpine.data('payrollManager', () => ({
     payslips: [],
     structures: [],
     availableEmployees: [],
+    stats: { totalEmployees: 0, totalPayroll: 0, draftCount: 0, paidCount: 0 },
     showGenerateModal: false,
     showStructureModal: false,
     toast: { show: false, message: '', type: 'success' },
     generating: false,
     generateMonth: '',
-    structureForm: { employee_id: '', base_salary: '' },
+    isEditing: false,
+    editStructureId: null,
+    structureForm: { employee_id: '', base_salary: '', allowances: [], deductions: [] },
+    searchQuery: '',
+    selectedPayslip: null,
+    showDetailsModal: false,
 
     async init() {
         await this.fetchData();
@@ -984,10 +990,11 @@ Alpine.data('payrollManager', () => ({
         try {
             const { data } = await axios.get('/payroll/data');
             this.isAdmin = data.isAdmin;
-            this.payslips = data.payslips;
+            this.payslips = data.payslips || [];
             if (this.isAdmin) {
-                this.structures = data.structures;
-                this.availableEmployees = data.availableEmployees;
+                this.structures = data.structures || [];
+                this.availableEmployees = data.availableEmployees || [];
+                this.stats = data.stats || this.stats;
             }
         } catch (e) {
             console.error('Failed to load payroll', e);
@@ -996,11 +1003,97 @@ Alpine.data('payrollManager', () => ({
         }
     },
 
+    get filteredPayslips() {
+        if (!this.searchQuery.trim()) return this.payslips;
+        const q = this.searchQuery.toLowerCase();
+        return this.payslips.filter(ps =>
+            (ps.month || '').toLowerCase().includes(q) ||
+            (ps.employee?.full_name || '').toLowerCase().includes(q)
+        );
+    },
+
+    formatCurrency(val) {
+        return '₹ ' + parseFloat(val || 0).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    },
+
+    // ── Structure CRUD ─────────────────────────────────────────
+    openAddStructure() {
+        this.isEditing = false;
+        this.editStructureId = null;
+        this.structureForm = { employee_id: '', base_salary: '', allowances: [], deductions: [] };
+        this.showStructureModal = true;
+    },
+
+    editStructure(s) {
+        this.isEditing = true;
+        this.editStructureId = s.id;
+        this.structureForm = {
+            employee_id: s.employee_id,
+            base_salary: s.base_salary,
+            allowances: (s.allowances || []).map(a => ({ ...a })),
+            deductions: (s.deductions || []).map(d => ({ ...d })),
+        };
+        this.showStructureModal = true;
+    },
+
+    addAllowance() {
+        this.structureForm.allowances.push({ name: '', amount: '' });
+    },
+    removeAllowance(i) {
+        this.structureForm.allowances.splice(i, 1);
+    },
+    addDeduction() {
+        this.structureForm.deductions.push({ name: '', amount: '' });
+    },
+    removeDeduction(i) {
+        this.structureForm.deductions.splice(i, 1);
+    },
+
+    async saveStructure() {
+        try {
+            // Clean up empty rows
+            const payload = {
+                ...this.structureForm,
+                allowances: this.structureForm.allowances.filter(a => a.name && a.amount),
+                deductions: this.structureForm.deductions.filter(d => d.name && d.amount),
+            };
+            if (this.isEditing) {
+                await axios.put(`/payroll/structures/${this.editStructureId}`, payload);
+                this.showToast('Salary structure updated!');
+            } else {
+                await axios.post('/payroll/structures', payload);
+                this.showToast('Salary structure added!');
+            }
+            this.showStructureModal = false;
+            await this.fetchData();
+        } catch (e) {
+            const msg = e.response?.data?.message
+                || Object.values(e.response?.data?.errors || {}).flat()[0]
+                || 'Failed to save structure.';
+            this.showToast(msg, 'error');
+        }
+    },
+
+    async deleteStructure(s) {
+        if (!confirm(`Remove salary structure for ${s.employee?.full_name}?`)) return;
+        try {
+            await axios.delete(`/payroll/structures/${s.id}`);
+            this.showToast('Structure removed.');
+            await this.fetchData();
+        } catch (e) {
+            this.showToast('Failed to remove structure.', 'error');
+        }
+    },
+
+    // ── Payslip actions ────────────────────────────────────────
     async markAsPaid(ps) {
         if (!confirm('Mark this payslip as paid?')) return;
         try {
             await axios.post(`/payroll/payslips/${ps.id}/pay`);
             ps.status = 'paid';
+            this.stats.draftCount = Math.max(0, this.stats.draftCount - 1);
+            this.stats.paidCount++;
+            this.stats.totalPayroll = parseFloat(this.stats.totalPayroll) + parseFloat(ps.net_pay);
             this.showToast('Payment confirmed!');
         } catch (e) {
             this.showToast('Failed to update status.', 'error');
@@ -1022,21 +1115,6 @@ Alpine.data('payrollManager', () => ({
         }
     },
 
-    async saveStructure() {
-        try {
-            await axios.post('/payroll/structures', this.structureForm);
-            this.showStructureModal = false;
-            this.structureForm = { employee_id: '', base_salary: '' };
-            this.showToast('Structure added!');
-            await this.fetchData();
-        } catch (e) {
-            this.showToast('Failed to add structure.', 'error');
-        }
-    },
-
-    selectedPayslip: null,
-    showDetailsModal: false,
-
     viewPayslip(ps) {
         this.selectedPayslip = ps;
         this.showDetailsModal = true;
@@ -1047,6 +1125,7 @@ Alpine.data('payrollManager', () => ({
         setTimeout(() => { this.toast.show = false; }, 3000);
     },
 }));
+
 
 // ── Shift Manager Component ────────────────────────────────────────
 Alpine.data('shiftManager', () => ({
