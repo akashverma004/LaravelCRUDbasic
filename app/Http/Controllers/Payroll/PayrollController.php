@@ -26,34 +26,30 @@ class PayrollController extends Controller
 
         // Admin/HR see all structures and payslips
         if ($user->hasAnyRole(['admin', 'hr_manager'])) {
-            $structures = PayStructure::where('tenant_id', $tenantId)
-                ->with('employee:id,full_name,job_title,status,last_working_day')
-                ->get();
-
             $payslips = Payslip::where('tenant_id', $tenantId)
                 ->with('employee:id,full_name')
                 ->orderByDesc('created_at')
                 ->get();
 
+            // ALL employees with their pay structure (null if not configured yet)
             $employees = Employee::where('tenant_id', $tenantId)
-                ->whereDoesntHave('payStructure')
-                ->where('status', '!=', 'resigned')
-                ->get(['id', 'full_name', 'job_title']);
+                ->with('payStructure')
+                ->orderBy('full_name')
+                ->get(['id', 'full_name', 'job_title', 'status', 'last_working_day', 'joined_on']);
 
             // Summary stats
             $stats = [
-                'totalEmployees' => $structures->count(),
-                'totalPayroll' => $payslips->where('status', 'paid')->sum('net_pay'),
-                'draftCount' => $payslips->where('status', 'draft')->count(),
-                'paidCount' => $payslips->where('status', 'paid')->count(),
+                'totalEmployees' => $employees->filter(fn($e) => $e->payStructure !== null)->count(),
+                'totalPayroll'   => $payslips->where('status', 'paid')->sum('net_pay'),
+                'draftCount'     => $payslips->where('status', 'draft')->count(),
+                'paidCount'      => $payslips->where('status', 'paid')->count(),
             ];
 
             return response()->json([
-                'isAdmin' => true,
-                'structures' => $structures,
-                'payslips' => $payslips,
-                'availableEmployees' => $employees,
-                'stats' => $stats,
+                'isAdmin'   => true,
+                'employees' => $employees,
+                'payslips'  => $payslips,
+                'stats'     => $stats,
             ]);
         }
 
@@ -70,18 +66,28 @@ class PayrollController extends Controller
     public function storeStructure(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'employee_id' => 'required|exists:employees,id|unique:pay_structures,employee_id',
-            'base_salary' => 'required|numeric|min:0',
-            'allowances' => 'nullable|array',
-            'allowances.*.name' => 'required_with:allowances|string|max:100',
+            'employee_id'         => 'required|exists:employees,id',
+            'base_salary'         => 'required|numeric|min:0',
+            'allowances'          => 'nullable|array',
+            'allowances.*.name'   => 'required_with:allowances|string|max:100',
             'allowances.*.amount' => 'required_with:allowances|numeric|min:0',
-            'deductions' => 'nullable|array',
-            'deductions.*.name' => 'required_with:deductions|string|max:100',
+            'deductions'          => 'nullable|array',
+            'deductions.*.name'   => 'required_with:deductions|string|max:100',
             'deductions.*.amount' => 'required_with:deductions|numeric|min:0',
         ]);
 
         $tenantId = TenantContext::id();
-        $structure = PayStructure::create(array_merge($validated, ['tenant_id' => $tenantId]));
+
+        // updateOrCreate — works for both "Set Up" (new) and "Edit" (existing)
+        $structure = PayStructure::updateOrCreate(
+            ['employee_id' => $validated['employee_id'], 'tenant_id' => $tenantId],
+            [
+                'base_salary' => $validated['base_salary'],
+                'allowances'  => $validated['allowances'] ?? [],
+                'deductions'  => $validated['deductions'] ?? [],
+            ]
+        );
+
         $structure->load('employee:id,full_name,job_title,status,last_working_day');
 
         return response()->json(['success' => true, 'structure' => $structure]);

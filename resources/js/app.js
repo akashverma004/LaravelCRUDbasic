@@ -966,18 +966,17 @@ Alpine.data('payrollManager', () => ({
     isAdmin: false,
     activeTab: 'payslips',
     payslips: [],
-    structures: [],
-    availableEmployees: [],
+    employees: [],           // ALL employees, each has .pay_structure (or null)
     stats: { totalEmployees: 0, totalPayroll: 0, draftCount: 0, paidCount: 0 },
     showGenerateModal: false,
     showStructureModal: false,
     toast: { show: false, message: '', type: 'success' },
     generating: false,
     generateMonth: '',
-    isEditing: false,
-    editStructureId: null,
     structureForm: { employee_id: '', base_salary: '', allowances: [], deductions: [] },
+    structureModalEmployee: null,  // the employee being configured
     searchQuery: '',
+    employeeSearch: '',
     selectedPayslip: null,
     showDetailsModal: false,
 
@@ -992,8 +991,7 @@ Alpine.data('payrollManager', () => ({
             this.isAdmin = data.isAdmin;
             this.payslips = data.payslips || [];
             if (this.isAdmin) {
-                this.structures = data.structures || [];
-                this.availableEmployees = data.availableEmployees || [];
+                this.employees = data.employees || [];
                 this.stats = data.stats || this.stats;
             }
         } catch (e) {
@@ -1017,18 +1015,19 @@ Alpine.data('payrollManager', () => ({
     },
 
     // ── Structure CRUD ─────────────────────────────────────────
-    openAddStructure() {
-        this.isEditing = false;
-        this.editStructureId = null;
-        this.structureForm = { employee_id: '', base_salary: '', allowances: [], deductions: [] };
+    // Opens modal to SET UP salary for an employee without one
+    openSetupStructure(emp) {
+        this.structureModalEmployee = emp;
+        this.structureForm = { employee_id: emp.id, base_salary: '', allowances: [], deductions: [] };
         this.showStructureModal = true;
     },
 
-    editStructure(s) {
-        this.isEditing = true;
-        this.editStructureId = s.id;
+    // Opens modal to EDIT an existing salary structure
+    openEditStructure(emp) {
+        const s = emp.pay_structure;
+        this.structureModalEmployee = emp;
         this.structureForm = {
-            employee_id: s.employee_id,
+            employee_id: emp.id,
             base_salary: s.base_salary,
             allowances: (s.allowances || []).map(a => ({ ...a })),
             deductions: (s.deductions || []).map(d => ({ ...d })),
@@ -1051,20 +1050,15 @@ Alpine.data('payrollManager', () => ({
 
     async saveStructure() {
         try {
-            // Clean up empty rows
             const payload = {
                 ...this.structureForm,
                 allowances: this.structureForm.allowances.filter(a => a.name && a.amount),
                 deductions: this.structureForm.deductions.filter(d => d.name && d.amount),
             };
-            if (this.isEditing) {
-                await axios.put(`/payroll/structures/${this.editStructureId}`, payload);
-                this.showToast('Salary structure updated!');
-            } else {
-                await axios.post('/payroll/structures', payload);
-                this.showToast('Salary structure added!');
-            }
+            // Always POST to storeStructure — backend uses updateOrCreate
+            await axios.post('/payroll/structures', payload);
             this.showStructureModal = false;
+            this.showToast('Salary structure saved!');
             await this.fetchData();
         } catch (e) {
             const msg = e.response?.data?.message
@@ -1074,8 +1068,10 @@ Alpine.data('payrollManager', () => ({
         }
     },
 
-    async deleteStructure(s) {
-        if (!confirm(`Remove salary structure for ${s.employee?.full_name}?`)) return;
+    async deleteStructure(emp) {
+        const s = emp.pay_structure;
+        if (!s) return;
+        if (!confirm(`Remove salary structure for ${emp.full_name}? They will no longer be on payroll.`)) return;
         try {
             await axios.delete(`/payroll/structures/${s.id}`);
             this.showToast('Structure removed.');
@@ -1083,6 +1079,15 @@ Alpine.data('payrollManager', () => ({
         } catch (e) {
             this.showToast('Failed to remove structure.', 'error');
         }
+    },
+
+    get filteredEmployees() {
+        if (!this.employeeSearch.trim()) return this.employees;
+        const q = this.employeeSearch.toLowerCase();
+        return this.employees.filter(e =>
+            (e.full_name || '').toLowerCase().includes(q) ||
+            (e.job_title || '').toLowerCase().includes(q)
+        );
     },
 
     // ── Payslip actions ────────────────────────────────────────
