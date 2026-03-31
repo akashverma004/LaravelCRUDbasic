@@ -1,6 +1,6 @@
 import './bootstrap';
 
-import Alpine from 'alpinejs';
+import { Livewire, Alpine } from '../../vendor/livewire/livewire/dist/livewire.esm';
 
 window.Alpine = Alpine;
 
@@ -1111,10 +1111,14 @@ Alpine.data('payrollManager', () => ({
         try {
             const { data } = await axios.post('/payroll/generate', { month: this.generateMonth });
             this.showGenerateModal = false;
-            this.showToast(data.message);
-            await this.fetchData();
+            
+            // Show toast for a longer time so user reads "queued"
+            this.toast = { show: true, message: data.message, type: 'success' };
+            setTimeout(() => { this.toast.show = false; }, 6000);
+            
+            // We don't fetch data immediately since it's queued in the background.
         } catch (e) {
-            this.showToast('Failed to generate payslips.', 'error');
+            this.showToast('Failed to queue payroll generation.', 'error');
         } finally {
             this.generating = false;
         }
@@ -1123,6 +1127,17 @@ Alpine.data('payrollManager', () => ({
     viewPayslip(ps) {
         this.selectedPayslip = ps;
         this.showDetailsModal = true;
+    },
+
+    async sendPayslip(ps) {
+        if (!confirm(`Send payslip for ${ps.month} to the employee's email?`)) return;
+        try {
+            const { data } = await axios.post(`/payroll/payslips/${ps.id}/send`);
+            this.showToast(data.message || 'Payslip emailed successfully! ✉️');
+        } catch (e) {
+            const msg = e.response?.data?.message || 'Failed to send payslip email.';
+            this.showToast(msg, 'error');
+        }
     },
 
     showToast(message, type = 'success') {
@@ -2902,4 +2917,4 @@ Alpine.data('commandPalette', () => ({
     }
 }));
 
-Alpine.start();
+Livewire.start();

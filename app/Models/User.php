@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\Employee;
 use App\Models\Concerns\BelongsToTenant;
 use App\Support\TenantContext;
 use InvalidArgumentException;
@@ -30,6 +31,9 @@ class User extends Authenticatable
         'email',
         'password',
         'require_password_change',
+        'google_id',
+        'microsoft_id',
+        'avatar',
     ];
 
     /**
@@ -77,23 +81,42 @@ class User extends Authenticatable
             ->through('roles');
     }
 
+    private ?\Illuminate\Support\Collection $cachedRoles = null;
+
+    public function getRolesAttribute()
+    {
+        if ($this->cachedRoles === null) {
+            $this->cachedRoles = $this->roles()->get();
+        }
+        return $this->cachedRoles;
+    }
+
     public function hasRole(string|array $roleName): bool
     {
+        if ($this->is_platform_admin) return true;
+
         if (is_array($roleName)) {
-            return $this->roles()->whereIn('name', $roleName)->exists();
+            return $this->roles_list->intersect($roleName)->isNotEmpty();
         }
 
-        return $this->roles()->where('name', $roleName)->exists();
+        return $this->roles_list->contains($roleName);
     }
 
     public function hasAnyRole(array $roleNames): bool
     {
-        return $this->roles()->whereIn('name', $roleNames)->exists();
+        if ($this->is_platform_admin) return true;
+        return $this->roles_list->intersect($roleNames)->isNotEmpty();
+    }
+
+    public function getRolesListAttribute(): \Illuminate\Support\Collection
+    {
+        return $this->roles->pluck('name');
     }
 
     public function hasAllRoles(array $roleNames): bool
     {
-        return count($roleNames) === $this->roles()->whereIn('name', $roleNames)->count();
+        if ($this->is_platform_admin) return true;
+        return $this->roles_list->intersect($roleNames)->count() === count($roleNames);
     }
 
     public function hasPermission(string $permissionName): bool
@@ -143,6 +166,28 @@ class User extends Authenticatable
         }
 
         $this->roles()->sync($payload);
+    }
+
+    public function employee(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Employee::class, 'email', 'email');
+    }
+
+    public function getProfilePhotoUrlAttribute(): ?string
+    {
+        if ($this->avatar) return \Illuminate\Support\Facades\Storage::url($this->avatar);
+        
+        // Use a direct query without scopes to ensure we find the employee record
+        // even if the user is currently in a different tenant context (e.g. platform admin)
+        $employee = Employee::withoutGlobalScopes()
+            ->where('email', $this->email)
+            ->first();
+
+        if ($employee && $employee->profile_photo) {
+            return \Illuminate\Support\Facades\Storage::url($employee->profile_photo);
+        }
+
+        return null;
     }
 
     private function resolveTenantId(): ?int

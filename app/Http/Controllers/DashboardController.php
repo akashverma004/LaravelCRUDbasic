@@ -6,6 +6,7 @@ use App\Services\DashboardService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Cache;
 
 class DashboardController extends Controller
 {
@@ -22,50 +23,62 @@ class DashboardController extends Controller
                 ->first();
 
             if ($employee) {
-                $myLeaves = \App\Models\LeaveRequest::where('employee_id', $employee->id)
-                    ->latest()
-                    ->take(5)
-                    ->get();
+                $myLeaves = Cache::remember("emp_dash_leaves_v2_{$employee->id}", 300, function () use ($employee) {
+                    return \App\Models\LeaveRequest::where('employee_id', $employee->id)
+                        ->latest()
+                        ->take(5)
+                        ->get();
+                });
 
-                $upcomingHolidays = \App\Models\HolidayPolicyDate::where('holiday_date', '>=', now()->toDateString())
-                    ->orderBy('holiday_date', 'asc')
-                    ->take(5)
-                    ->get();
+                $upcomingHolidays = Cache::remember("emp_dash_holidays_v2_" . ($user->tenant_id ?? 'global'), 3600, function () {
+                    return \App\Models\HolidayPolicyDate::where('holiday_date', '>=', now()->toDateString())
+                        ->orderBy('holiday_date', 'asc')
+                        ->take(5)
+                        ->get();
+                });
 
-                $colleagues = \App\Models\Employee::where('department_id', $employee->department_id)
-                    ->where('id', '!=', $employee->id)
-                    ->take(5)
-                    ->get();
+                $colleagues = Cache::remember("emp_dash_colleagues_v2_{$employee->department_id}", 300, function () use ($employee) {
+                    return \App\Models\Employee::where('department_id', $employee->department_id)
+                        ->where('id', '!=', $employee->id)
+                        ->take(5)
+                        ->get();
+                });
                     
-                $todayAttendance = \App\Models\AttendanceRecord::where('employee_id', $employee->id)
-                    ->where('attendance_date', now()->toDateString())
-                    ->first();
+                $todayAttendance = Cache::remember("emp_dash_attendance_v2_{$employee->id}_" . now()->toDateString(), 60, function () use ($employee) {
+                    return \App\Models\AttendanceRecord::where('employee_id', $employee->id)
+                        ->where('attendance_date', now()->toDateString())
+                        ->first();
+                });
 
                 // Fetch Active Policies (Zoho/BambooHR style)
                 $noticePolicy = \App\Models\NoticePeriodPolicy::active()->effectiveOn()->first();
                 $wfhPolicy = \App\Models\WfhPolicy::active()->effectiveOn()->first();
                 $attendancePolicy = \App\Models\AttendancePolicy::active()->effectiveOn()->first();
 
-                $rawLeaveChart = \App\Models\LeaveRequest::where('employee_id', $employee->id)
-                    ->where('status', 'approved')
-                    ->selectRaw('leave_type, count(*) as count')
-                    ->groupBy('leave_type')
-                    ->get();
+                $rawLeaveChart = Cache::remember("emp_dash_leave_chart_v2_{$employee->id}", 300, function () use ($employee) {
+                    return \App\Models\LeaveRequest::where('employee_id', $employee->id)
+                        ->where('status', 'approved')
+                        ->selectRaw('leave_type, count(*) as count')
+                        ->groupBy('leave_type')
+                        ->get();
+                });
                 $leaveChartData = [
                     'labels' => $rawLeaveChart->isEmpty() ? collect(['None']) : $rawLeaveChart->pluck('leave_type')->map(fn($t) => ucfirst($t)),
                     'values' => $rawLeaveChart->isEmpty() ? collect([1]) : $rawLeaveChart->pluck('count'),
                 ];
 
-                $leaveTrendChartData = [
-                    'labels' => collect(range(5, 0))->map(fn($i) => now()->subMonths($i)->format('M')),
-                    'bookings' => collect(range(5, 0))->map(function($i) use ($employee) {
-                        return \App\Models\LeaveRequest::where('employee_id', $employee->id)
-                            ->where('status', 'approved')
-                            ->whereYear('start_date', now()->subMonths($i)->year)
-                            ->whereMonth('start_date', now()->subMonths($i)->month)
-                            ->count();
-                    })
-                ];
+                $leaveTrendChartData = Cache::remember("emp_dash_leave_trend_v2_{$employee->id}", 300, function () use ($employee) {
+                    return [
+                        'labels' => collect(range(5, 0))->map(fn($i) => now()->subMonths($i)->format('M')),
+                        'bookings' => collect(range(5, 0))->map(function($i) use ($employee) {
+                            return \App\Models\LeaveRequest::where('employee_id', $employee->id)
+                                ->where('status', 'approved')
+                                ->whereYear('start_date', now()->subMonths($i)->year)
+                                ->whereMonth('start_date', now()->subMonths($i)->month)
+                                ->count();
+                        })
+                    ];
+                });
 
                 return view('hrms.employee-dashboard', [
                     'employee' => $employee,

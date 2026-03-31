@@ -9,8 +9,12 @@
             
             <div class="relative flex flex-col items-center text-center">
                 {{-- Avatar --}}
-                <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-sm font-bold text-slate-700 shadow-sm border border-slate-200 transition-all group-hover:bg-cyan-50 group-hover:text-cyan-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:group-hover:bg-cyan-500/20 dark:group-hover:text-cyan-400">
-                    {{ substr($employee->full_name, 0, 1) }}
+                <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-white text-sm font-bold shadow-sm border border-slate-200 transition-all overflow-hidden group-hover:bg-cyan-50 dark:border-slate-700 dark:bg-slate-800 dark:group-hover:bg-cyan-500/20">
+                    @if($employee->profile_photo)
+                        <img src="{{ Storage::url($employee->profile_photo) }}" class="h-full w-full object-cover">
+                    @else
+                        <span class="text-slate-400 group-hover:text-cyan-600 dark:text-slate-500 dark:group-hover:text-cyan-400 font-black text-xs">{{ substr($employee->full_name, 0, 1) }}</span>
+                    @endif
                 </div>
 
                 <p class="text-[10px] font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400 text-opacity-80 group-hover:text-opacity-100 transition-opacity">

@@ -7,6 +7,7 @@ use App\Models\Department;
 use App\Models\LeaveRequest;
 use App\Models\AttendanceRecord;
 use App\Models\WorkflowRequest;
+use Illuminate\Support\Facades\Cache;
 
 class DashboardService
 {
@@ -14,21 +15,27 @@ class DashboardService
 
     public function getDashboardStats(): array
     {
-        return [
-            'employeeCount' => Employee::count(),
-            'departmentCount' => Department::count(),
-            'leavePending' => LeaveRequest::where('status', 'pending')->count(),
-            'attendanceToday' => AttendanceRecord::whereDate('attendance_date', now()->toDateString())->count(),
-            'workflowPending' => WorkflowRequest::where('status', 'pending')->count(),
-        ];
+        $tenantId = auth()->user()->tenant_id ?? 'global';
+        return Cache::remember("dashboard_stats_v2_{$tenantId}_" . now()->toDateString(), 300, function () {
+            return [
+                'employeeCount' => Employee::count(),
+                'departmentCount' => Department::count(),
+                'leavePending' => LeaveRequest::where('status', 'pending')->count(),
+                'attendanceToday' => AttendanceRecord::whereDate('attendance_date', now()->toDateString())->count(),
+                'workflowPending' => WorkflowRequest::where('status', 'pending')->count(),
+            ];
+        });
     }
 
     public function getDepartmentBreakdown()
     {
-        return Department::query()
-            ->withCount('employees')
-            ->orderBy('name')
-            ->get();
+        $tenantId = auth()->user()->tenant_id ?? 'global';
+        return Cache::remember("dashboard_dept_breakdown_v2_{$tenantId}", 300, function () {
+            return Department::query()
+                ->withCount('employees')
+                ->orderBy('name')
+                ->get();
+        });
     }
 
     public function getRecentEmployees(int $limit = 8)
@@ -60,27 +67,36 @@ class DashboardService
 
     public function getEmploymentTypeBreakdown()
     {
-        return Employee::query()
-            ->selectRaw('employment_type, COUNT(*) as count')
-            ->groupBy('employment_type')
-            ->get();
+        $tenantId = auth()->user()->tenant_id ?? 'global';
+        return Cache::remember("dashboard_employment_type_v2_{$tenantId}", 300, function () {
+            return Employee::query()
+                ->selectRaw('employment_type, COUNT(*) as count')
+                ->groupBy('employment_type')
+                ->get();
+        });
     }
 
     public function getEmployeesByStatus()
     {
-        return Employee::query()
-            ->selectRaw('status, COUNT(*) as count')
-            ->groupBy('status')
-            ->get();
+        $tenantId = auth()->user()->tenant_id ?? 'global';
+        return Cache::remember("dashboard_emp_status_v2_{$tenantId}", 300, function () {
+            return Employee::query()
+                ->selectRaw('status, COUNT(*) as count')
+                ->groupBy('status')
+                ->get();
+        });
     }
 
     public function getTopDepartmentsByCount(int $limit = 5)
     {
-        return Department::query()
-            ->withCount('employees')
-            ->orderByDesc('employees_count')
-            ->take($limit)
-            ->get();
+        $tenantId = auth()->user()->tenant_id ?? 'global';
+        return Cache::remember("dashboard_top_depts_v2_{$tenantId}_{$limit}", 300, function () use ($limit) {
+            return Department::query()
+                ->withCount('employees')
+                ->orderByDesc('employees_count')
+                ->take($limit)
+                ->get();
+        });
     }
 
     public function getNewJoinees(int $limit = 5)
@@ -132,42 +148,48 @@ class DashboardService
 
     public function getLeaveRequestsByType()
     {
-        return LeaveRequest::query()
-            ->selectRaw('leave_type, COUNT(*) as count')
-            ->groupBy('leave_type')
-            ->get();
+        $tenantId = auth()->user()->tenant_id ?? 'global';
+        return Cache::remember("dashboard_leave_types_v2_{$tenantId}", 300, function () {
+            return LeaveRequest::query()
+                ->selectRaw('leave_type, COUNT(*) as count')
+                ->groupBy('leave_type')
+                ->get();
+        });
     }
 
     public function getLeaveTrendData(int $days = 30)
     {
-        $startDate = now()->subDays($days);
-        $totalEmployees = Employee::count();
-        $capacity = max(1, $totalEmployees);
+        $tenantId = auth()->user()->tenant_id ?? 'global';
+        return Cache::remember("dashboard_leave_trend_v2_{$tenantId}_{$days}", 300, function () use ($days) {
+            $startDate = now()->subDays($days);
+            $totalEmployees = Employee::count();
+            $capacity = max(1, $totalEmployees);
 
-        $leaves = LeaveRequest::query()
-            ->selectRaw('DATE(start_date) as date, COUNT(*) as count')
-            ->where('start_date', '>=', $startDate)
-            ->groupBy('date')
-            ->orderBy('date')
-            ->get();
+            $leaves = LeaveRequest::query()
+                ->selectRaw('DATE(start_date) as date, COUNT(*) as count')
+                ->where('start_date', '>=', $startDate)
+                ->groupBy('date')
+                ->orderBy('date')
+                ->get();
 
-        $labels = [];
-        $bookings = [];
-        $capacities = [];
+            $labels = [];
+            $bookings = [];
+            $capacities = [];
 
-        for ($i = 0; $i < $days; $i++) {
-            $date = $startDate->copy()->addDays($i)->toDateString();
-            $labels[] = date('M d', strtotime($date));
-            $found = $leaves->firstWhere('date', $date);
-            $bookings[] = $found ? $found->count : 0;
-            $capacities[] = $capacity;
-        }
+            for ($i = 0; $i < $days; $i++) {
+                $date = $startDate->copy()->addDays($i)->toDateString();
+                $labels[] = date('M d', strtotime($date));
+                $found = $leaves->firstWhere('date', $date);
+                $bookings[] = $found ? $found->count : 0;
+                $capacities[] = $capacity;
+            }
 
-        return [
-            'labels' => $labels,
-            'bookings' => $bookings,
-            'capacity' => $capacities,
-        ];
+            return [
+                'labels' => $labels,
+                'bookings' => $bookings,
+                'capacity' => $capacities,
+            ];
+        });
     }
 
     public function getActiveSessions(int $limit = 4)
@@ -181,7 +203,8 @@ class DashboardService
                 return [
                     'name' => $user->name,
                     'last_activity' => $user->updated_at->diffForHumans(),
-                    'avatar' => substr($user->name, 0, 1),
+                    'avatar' => $user->profile_photo_url, // Using dynamic URL
+                    'initial' => substr($user->name, 0, 1),
                     'role' => $user->is_platform_admin ? 'Platform Admin' : 'User'
                 ];
             });

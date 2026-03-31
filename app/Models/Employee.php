@@ -22,6 +22,7 @@ class Employee extends Model
         'role_id',
         'full_name',
         'profile_photo',
+        'cover_photo',
         'email',
         'phone',
         'job_title',
@@ -132,6 +133,19 @@ class Employee extends Model
     public function payslips(): HasMany
     {
         return $this->hasMany(Payslip::class);
+    }
+
+    public function getPhotoUrlAttribute(): ?string
+    {
+        if ($this->profile_photo) {
+            return \Illuminate\Support\Facades\Storage::url($this->profile_photo);
+        }
+        return null;
+    }
+
+    public function getInitialsAttribute(): string
+    {
+        return substr($this->full_name, 0, 1);
     }
 
     public function setCountryAttribute(?string $value): void

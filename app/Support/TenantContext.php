@@ -40,6 +40,14 @@ final class TenantContext
         app()->instance('tenant.id', $tenantId);
     }
 
+    /**
+     * Alias for set() for more descriptive usage.
+     */
+    public static function setId(?int $tenantId): void
+    {
+        self::set($tenantId);
+    }
+
     private function __construct()
     {
     }

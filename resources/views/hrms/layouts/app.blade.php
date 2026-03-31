@@ -15,26 +15,34 @@
             document.documentElement.classList.add('dark');
         }
     </script>
+    @livewireStyles
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        [x-cloak] { display: none !important; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(34, 211, 238, 0.3); }
+    </style>
 </head>
-<style>
-    body { font-family: 'Inter', sans-serif; }
-    [x-cloak] { display: none !important; }
-    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(34, 211, 238, 0.3); }
-</style>
 <body class="min-h-screen antialiased transition-colors duration-500 selection:bg-cyan-500 selection:text-white dark:bg-slate-950 dark:text-slate-100 bg-slate-50 text-slate-900 overflow-x-hidden">
     @include('hrms.components.navbar')
 
-    <main class="flex min-h-screen flex-col overflow-x-hidden max-w-full lg:pl-60">
+    <main class="flex min-h-screen flex-col overflow-x-hidden max-w-full lg:pl-52">
         {{-- Topbar --}}
-        <div x-data="{ scrolled: false }" @scroll.window="scrolled = window.scrollY > 16" class="fixed top-0 left-60 right-0 z-40 hidden lg:block">
+        <div x-data="{ scrolled: false }" @scroll.window="scrolled = window.scrollY > 16" class="fixed top-0 left-52 right-0 z-40 hidden lg:block">
             <div :class="scrolled
                     ? 'mx-3 mt-3 rounded-[22px] border-white/50 bg-white/72 px-5 shadow-[0_18px_42px_rgba(15,23,42,0.10)] dark:border-white/10 dark:bg-slate-950/70'
                     : 'mx-0 mt-0 rounded-none border-x-0 border-t-0 border-b border-slate-200/80 bg-white/92 px-6 shadow-sm dark:border-white/5 dark:bg-slate-950/82'"
                 class="flex items-center justify-end py-2.5 backdrop-blur-2xl transition-all duration-300">
                 <div class="flex items-center gap-4">
+                {{-- Quick Access --}}
+                <div class="flex items-center border-r border-slate-200 pr-4 mr-1 dark:border-white/5">
+                    <a href="{{ route('org-chart.index') }}" wire:navigate class="group flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 transition-all hover:bg-slate-100 dark:border-white/5 dark:bg-white/5 dark:hover:bg-white/10" title="Org Chart">
+                        <svg class="h-4 w-4 text-slate-500 group-hover:text-cyan-500 transition-colors dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" /></svg>
+                    </a>
+                </div>
+
                 {{-- Search --}}
                 <button @click="$dispatch('open-command-palette')" class="group flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 transition-all hover:bg-slate-100 dark:border-white/5 dark:bg-white/5 dark:hover:bg-white/10">
                     <svg class="h-4 w-4 text-slate-400 group-hover:text-cyan-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
@@ -93,9 +101,13 @@
             @endif
 
             @yield('content')
+            {{ $slot ?? '' }}
         </div>
 
         @include('hrms.components.footer')
     </main>
+
+    @livewireScriptConfig
+    @stack('scripts')
 </body>
 </html>

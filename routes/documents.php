@@ -10,10 +10,6 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::middleware(['auth', 'tenant', 'tenant.active'])->prefix('documents')->group(function () {
-    Route::get('/', [DocumentController::class, 'index'])->name('documents.index');
-    Route::get('/data', [DocumentController::class, 'data'])->name('documents.data');
-    Route::post('/', [DocumentController::class, 'store'])->name('documents.store');
-    Route::get('/{id}/download', [DocumentController::class, 'download'])->name('documents.download');
-    Route::delete('/{id}', [DocumentController::class, 'destroy'])->name('documents.destroy');
-    Route::get('/employees', [DocumentController::class, 'employees'])->name('documents.employees');
+    // Document Vault (Livewire 3)
+    Route::get('/', \App\Livewire\Documents\DocumentVault::class)->name('documents.index');
 });
