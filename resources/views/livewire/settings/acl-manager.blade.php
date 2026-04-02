@@ -1,16 +1,16 @@
 <div class="space-y-8 pb-12">
     {{-- Header --}}
-    <div class="relative overflow-hidden rounded-[2rem] bg-white px-8 py-8 shadow-sm border border-slate-200 dark:bg-slate-900/50 dark:border-white/5">
+    <div class="relative overflow-hidden rounded-[2rem] bg-white px-5 py-4 shadow-sm border border-slate-200 dark:bg-slate-900/50 dark:border-white/5">
         <div class="absolute -right-20 -top-20 h-48 w-48 rounded-full bg-indigo-500/10 blur-[60px]"></div>
         
-        <div class="relative flex flex-col items-start justify-between gap-6 lg:flex-row lg:items-center">
+        <div class="relative flex flex-col items-start justify-between gap-4 lg:flex-row lg:items-center">
             <div class="flex-1">
                 <div class="flex items-center gap-2 mb-1">
                     <span class="text-[9px] font-black uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-400">Security Grid</span>
                     <span class="h-1 w-1 rounded-full bg-slate-300 dark:bg-slate-600"></span>
                     <span class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Access Vectors</span>
                 </div>
-                <h1 class="text-2xl font-black tracking-tight text-slate-900 dark:text-white uppercase">
+                <h1 class="text-lg font-black tracking-tight text-slate-900 dark:text-white uppercase">
                     Privilege <span class="text-indigo-500">Architecture</span>
                 </h1>
                 <p class="mt-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-loose">
@@ -26,11 +26,11 @@
     </div>
 
     @if($activeTab === 'roles')
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             @foreach($roles as $role)
-                <div class="group relative flex flex-col rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm dark:border-white/5 dark:bg-slate-900 transition-all hover:shadow-md">
+                <div class="group relative flex flex-col rounded-[1.75rem] border border-slate-200 bg-white p-4 shadow-sm dark:border-white/5 dark:bg-slate-900 transition-all hover:shadow-md">
                     <div class="flex items-start justify-between mb-4">
-                        <div class="h-12 w-12 rounded-2xl bg-slate-50 flex items-center justify-center dark:bg-white/5 shadow-inner">
+                        <div class="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center dark:bg-white/5 shadow-inner">
                             <svg class="h-6 w-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.744c0 1.5.346 2.919.969 4.183a11.997 11.997 0 007.031 6.471l.032.012.032-.012a11.998 11.998 0 007.031-6.471c.623-1.264.969-2.683.969-4.183 0-1.29-.204-2.532-.581-3.688A11.959 11.959 0 0112 2.714z" /></svg>
                         </div>
                         <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -59,8 +59,8 @@
                 </div>
             @endforeach
 
-            <button wire:click="openRoleModal()" class="group relative flex flex-col items-center justify-center rounded-[1.75rem] border-2 border-dashed border-slate-200 p-8 text-center transition-all hover:bg-slate-50 hover:border-indigo-400 dark:border-white/10 dark:hover:bg-white/5">
-                <div class="h-12 w-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-300 dark:bg-white/5 group-hover:bg-indigo-500 group-hover:text-white transition-all shadow-inner">
+            <button wire:click="openRoleModal()" class="group relative flex flex-col items-center justify-center rounded-[1.75rem] border-2 border-dashed border-slate-200 p-5 text-center transition-all hover:bg-slate-50 hover:border-indigo-400 dark:border-white/10 dark:hover:bg-white/5">
+                <div class="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-300 dark:bg-white/5 group-hover:bg-indigo-500 group-hover:text-white transition-all shadow-inner">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4.5v15m7.5-7.5h-15" /></svg>
                 </div>
                 <h4 class="mt-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] group-hover:text-slate-600">Provision Role</h4>
@@ -71,7 +71,7 @@
             <div class="flex items-center justify-between px-2">
                 <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Identity Grid</h4>
                 <div class="relative w-72">
-                    <input wire:model.live.debounce.300ms="search" type="text" placeholder="Search Identifier..." class="w-full rounded-2xl border border-slate-200 bg-white px-5 py-2.5 text-[10px] font-black text-slate-900 dark:border-white/5 dark:bg-slate-900/50 dark:text-white uppercase tracking-widest">
+                    <input wire:model.live.debounce.300ms="search" type="text" placeholder="Search Identifier..." class="w-full rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-[10px] font-black text-slate-900 dark:border-white/5 dark:bg-slate-900/50 dark:text-white uppercase tracking-widest">
                 </div>
             </div>
 
@@ -122,9 +122,9 @@
     @if($showRoleModal)
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div wire:click="closeRoleModal" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"></div>
-            <div class="relative w-full max-w-4xl rounded-[2.5rem] bg-white shadow-2xl dark:bg-slate-950 border border-slate-200 dark:border-white/10 overflow-hidden animate-in fade-in zoom-in duration-300">
-                <div class="border-b border-slate-100 p-8 dark:border-white/5 flex items-center justify-between">
-                    <h2 class="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight">{{ $editingRoleId ? 'Recalibrate' : 'Provision' }} <span class="text-indigo-500">Access Role</span></h2>
+            <div class="relative w-full max-w-3xl rounded-[1.5rem] bg-white shadow-2xl dark:bg-slate-950 border border-slate-200 dark:border-white/10 overflow-hidden animate-in fade-in zoom-in duration-300">
+                <div class="border-b border-slate-100 p-5 dark:border-white/5 flex items-center justify-between">
+                    <h2 class="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">{{ $editingRoleId ? 'Recalibrate' : 'Provision' }} <span class="text-indigo-500">Access Role</span></h2>
                     <button wire:click="$set('showRoleModal', false)" class="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 hover:text-rose-500 dark:bg-white/5">
                         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
@@ -136,15 +136,15 @@
                         <div class="lg:col-span-1 space-y-8">
                             <div class="space-y-1.5">
                                 <label class="text-[9px] font-black uppercase text-slate-500 ml-1 tracking-[0.2em]">Unique Identifier (Slug)</label>
-                                <input wire:model="roleName" type="text" placeholder="hr_admin..." class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-5 py-3 text-xs font-black text-slate-900 dark:border-white/5 dark:bg-white/5 dark:text-white uppercase tracking-widest disabled:opacity-50" {{ $editingRoleId ? 'disabled' : '' }}>
+                                <input wire:model="roleName" type="text" placeholder="hr_admin..." class="w-full rounded-xl border border-slate-200 bg-slate-50 px-5 py-3 text-[10px] font-black text-slate-900 dark:border-white/5 dark:bg-white/5 dark:text-white uppercase tracking-widest disabled:opacity-50" {{ $editingRoleId ? 'disabled' : '' }}>
                             </div>
                             <div class="space-y-1.5">
                                 <label class="text-[9px] font-black uppercase text-slate-500 ml-1 tracking-[0.2em]">Display Label</label>
-                                <input wire:model="roleDisplayName" type="text" placeholder="Security Auditor..." class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-5 py-3 text-xs font-black text-slate-900 dark:border-white/5 dark:bg-white/5 dark:text-white uppercase tracking-widest">
+                                <input wire:model="roleDisplayName" type="text" placeholder="Security Auditor..." class="w-full rounded-xl border border-slate-200 bg-slate-50 px-5 py-3 text-[10px] font-black text-slate-900 dark:border-white/5 dark:bg-white/5 dark:text-white uppercase tracking-widest">
                             </div>
                             <div class="space-y-1.5">
                                 <label class="text-[9px] font-black uppercase text-slate-500 ml-1 tracking-[0.2em]">Role Narrative</label>
-                                <textarea wire:model="roleDescription" placeholder="Description of access scope..." class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-xs font-bold text-slate-900 dark:border-white/5 dark:bg-white/5 dark:text-white uppercase h-32 leading-relaxed"></textarea>
+                                <textarea wire:model="roleDescription" placeholder="Description of access scope..." class="w-full rounded-xl border border-slate-200 bg-slate-50 px-5 py-4 text-[10px] font-bold text-slate-900 dark:border-white/5 dark:bg-white/5 dark:text-white uppercase h-32 leading-relaxed"></textarea>
                             </div>
                         </div>
 
@@ -152,7 +152,7 @@
                         <div class="lg:col-span-2 space-y-8">
                             <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 px-2">Modular Permission Vectors</h4>
                             
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 @foreach($permissionsByModule as $module => $perms)
                                     <div class="space-y-4">
                                         <h5 class="text-[9px] font-black uppercase tracking-widest text-indigo-500 border-b border-indigo-100 pb-2 dark:border-white/5">{{ $module }}</h5>
@@ -173,9 +173,9 @@
                         </div>
                     </div>
 
-                    <div class="p-8 border-t border-slate-100 bg-slate-50 dark:border-white/5 dark:bg-white/2 flex justify-end gap-4">
+                    <div class="p-5 border-t border-slate-100 bg-slate-50 dark:border-white/5 dark:bg-white/2 flex justify-end gap-4">
                         <button type="button" wire:click="$set('showRoleModal', false)" class="text-[10px] font-black uppercase text-slate-500 px-6">Abort</button>
-                        <button type="submit" class="rounded-2xl bg-slate-900 px-12 py-4 text-[11px] font-black uppercase text-white shadow-2xl hover:bg-indigo-600 transition-all">Synchronize security grid</button>
+                        <button type="submit" class="rounded-xl bg-slate-900 px-8 py-2.5 text-[11px] font-black uppercase text-white shadow-2xl hover:bg-indigo-600 transition-all">Synchronize security grid</button>
                     </div>
                 </form>
             </div>
@@ -186,20 +186,20 @@
     @if($showUserRoleModal)
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div wire:click="$set('showUserRoleModal', false)" class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"></div>
-            <div class="relative w-full max-w-lg rounded-[2.5rem] bg-white shadow-2xl dark:bg-slate-950 border border-slate-200 dark:border-white/10 overflow-hidden animate-in fade-in zoom-in duration-200">
-                <div class="border-b border-slate-100 p-8 dark:border-white/5 flex items-center justify-between">
-                    <h2 class="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Identity <span class="text-indigo-500">Reprovisioning</span></h2>
+            <div class="relative w-full max-w-lg rounded-[1.5rem] bg-white shadow-2xl dark:bg-slate-950 border border-slate-200 dark:border-white/10 overflow-hidden animate-in fade-in zoom-in duration-200">
+                <div class="border-b border-slate-100 p-5 dark:border-white/5 flex items-center justify-between">
+                    <h2 class="text-base font-black text-slate-900 dark:text-white uppercase tracking-tight">Identity <span class="text-indigo-500">Reprovisioning</span></h2>
                     <button wire:click="$set('showUserRoleModal', false)" class="h-8 w-8 text-slate-400 hover:text-rose-500">
                         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
                 </div>
                 
-                <form wire:submit="saveUserRoles" class="p-8 space-y-8">
+                <form wire:submit="saveUserRoles" class="p-5 space-y-8">
                     <div class="space-y-4">
                         <h4 class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 px-2">Designated Privilege Levels</h4>
                         <div class="grid grid-cols-1 gap-3">
                             @foreach($roles as $role)
-                                <label class="group flex items-center justify-between p-4 rounded-2xl border border-slate-100 transition-all hover:bg-indigo-50/50 cursor-pointer dark:border-white/5 dark:hover:bg-white/5">
+                                <label class="group flex items-center justify-between p-4 rounded-xl border border-slate-100 transition-all hover:bg-indigo-50/50 cursor-pointer dark:border-white/5 dark:hover:bg-white/5">
                                     <div class="flex flex-col">
                                         <span class="text-[11px] font-black uppercase text-slate-900 dark:text-white tracking-tight">{{ $role->display_name }}</span>
                                         <span class="text-[8px] font-black uppercase text-indigo-500 mt-0.5">{{ $role->name }}</span>
@@ -215,7 +215,7 @@
 
                     <div class="pt-4 flex justify-end gap-4">
                         <button type="button" wire:click="$set('showUserRoleModal', false)" class="text-[10px] font-black uppercase text-slate-500 px-6">Abort</button>
-                        <button type="submit" class="rounded-2xl bg-slate-900 px-10 py-3.5 text-[10px] font-black uppercase text-white shadow-xl hover:bg-indigo-600 transition-all">Update Identity Mapping</button>
+                        <button type="submit" class="rounded-xl bg-slate-900 px-6 py-2.5 text-[10px] font-black uppercase text-white shadow-xl hover:bg-indigo-600 transition-all">Update Identity Mapping</button>
                     </div>
                 </form>
             </div>

@@ -1,6 +1,6 @@
 <div class="relative space-y-6 pb-6 mt-1">
     {{-- High-Impact Glass Header --}}
-    <div class="relative overflow-hidden rounded-xl bg-white/80 px-6 py-5 shadow-sm border border-slate-200 backdrop-blur-xl dark:bg-slate-900/60 dark:border-white/5">
+    <div class="relative overflow-hidden rounded-xl bg-white/80 px-4 py-3 shadow-sm border border-slate-200 backdrop-blur-xl dark:bg-slate-900/60 dark:border-white/5">
         <div class="absolute -right-20 -top-20 h-40 w-40 rounded-full bg-cyan-500/5 blur-[80px]"></div>
         
         <div class="relative flex flex-col items-start justify-between gap-4 lg:flex-row lg:items-center text-center lg:text-left">
@@ -10,10 +10,10 @@
                     <span class="h-0.5 w-0.5 rounded-full bg-slate-300 dark:bg-slate-600"></span>
                     <span class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Time Off</span>
                 </div>
-                <h1 class="text-xl font-black tracking-tight text-slate-900 dark:text-white uppercase transition-all">
+                <h1 class="text-sm font-black tracking-tight text-slate-900 dark:text-white uppercase transition-all">
                     {{ $employee ? 'Hi, ' . explode(' ', $employee->full_name)[0] : 'Time Off' }}
                 </h1>
-                <p class="mt-0.5 text-[10px] font-bold text-slate-500 uppercase tracking-widest opacity-80 leading-none">
+                <p class="mt-0.5 text-[8px] font-bold text-slate-500 uppercase tracking-widest opacity-80 leading-none">
                     Available balance: <span class="text-cyan-600 dark:text-cyan-400 font-black">{{ collect($balances)->sum('remaining') }}</span> days across all categories.
                 </p>
             </div>
@@ -23,7 +23,7 @@
                     <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
                     <span>Calendar Mapping</span>
                 </a>
-                <button wire:click="openCreateModal" class="inline-flex h-10 items-center gap-2 rounded-lg bg-slate-900 px-5 text-[10px] font-black uppercase tracking-widest text-white shadow-xl hover:bg-cyan-600 transition-all active:scale-95 dark:bg-white/10 dark:hover:bg-cyan-500/20 dark:hover:text-cyan-400">
+                <button wire:click="openCreateModal" class="inline-flex h-10 items-center gap-2 rounded-lg bg-slate-900 px-5 text-[8px] font-black uppercase tracking-widest text-white shadow-xl hover:bg-cyan-600 transition-all active:scale-95 dark:bg-white/10 dark:hover:bg-cyan-500/20 dark:hover:text-cyan-400">
                     <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
                     <span>Book Time Off</span>
                 </button>
@@ -32,7 +32,7 @@
     </div>
 
     {{-- Quick Stats --}}
-    <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         @php
             $stats_config = [
                 ['Days Left', collect($balances)->sum('remaining'), 'Available balance', 'cyan'],
@@ -46,7 +46,7 @@
             <h3 class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2.5">{{ $title }}</h3>
             <div class="flex items-end justify-between">
                 <div>
-                    <p class="text-2xl font-black leading-none tracking-tight text-slate-900 dark:text-white">{{ $val }}</p>
+                    <p class="text-lg font-black leading-none tracking-tight text-slate-900 dark:text-white">{{ $val }}</p>
                     <p class="mt-1 text-[9px] font-bold text-slate-500 uppercase tracking-widest opacity-80">{{ $desc }}</p>
                 </div>
                 <div class="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-100 dark:border-white/5
@@ -65,7 +65,7 @@
     </div>
 
     {{-- Main Content Grid --}}
-    <div class="grid grid-cols-1 gap-6 lg:grid-cols-12">
+    <div class="grid grid-cols-1 gap-3 lg:grid-cols-12">
         {{-- Left Column: Balances & History --}}
         <div class="space-y-6 lg:col-span-8">
 
@@ -73,7 +73,7 @@
             {{-- History Section --}}
             <section>
                 <div class="flex items-center justify-between mb-4 px-1">
-                    <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
+                    <h3 class="text-[8px] font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
                         Activity Stream
                         <span class="h-px w-8 bg-slate-200 dark:bg-white/5"></span>
                     </h3>
@@ -93,7 +93,7 @@
                             <tr class="group hover:bg-slate-50/50 dark:hover:bg-white/[0.01] transition-colors">
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-3">
-                                        <div class="h-9 w-9 flex items-center justify-center rounded-xl text-[10px] font-black border border-slate-100 dark:border-white/5 shadow-inner
+                                        <div class="h-9 w-9 flex items-center justify-center rounded-xl text-[8px] font-black border border-slate-100 dark:border-white/5 shadow-inner
                                             @if($leave->leave_type === 'annual') bg-rose-50 text-rose-500 dark:bg-rose-500/10
                                             @elseif($leave->leave_type === 'sick') bg-emerald-50 text-emerald-500 dark:bg-emerald-500/10
                                             @elseif($leave->leave_type === 'casual') bg-violet-50 text-violet-500 dark:bg-violet-500/10
@@ -107,7 +107,7 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <p class="text-[10px] font-black text-slate-700 dark:text-slate-300 uppercase tracking-tight">
+                                    <p class="text-[8px] font-black text-slate-700 dark:text-slate-300 uppercase tracking-tight">
                                         {{ $leave->start_date?->format('d M') }} - {{ $leave->end_date?->format('d M Y') }}
                                     </p>
                                 </td>
@@ -142,7 +142,7 @@
                             @empty
                             <tr>
                                 <td colspan="4" class="px-6 py-16 text-center">
-                                    <p class="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">No historical signals detected.</p>
+                                    <p class="text-[8px] font-black text-slate-300 uppercase tracking-[0.2em]">No historical signals detected.</p>
                                 </td>
                             </tr>
                             @endforelse
@@ -157,7 +157,7 @@
             {{-- Away Today --}}
             <section>
                 <div class="flex items-center justify-between mb-4 px-1">
-                    <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Team Absence Index</h3>
+                    <h3 class="text-[8px] font-black uppercase tracking-[0.2em] text-slate-400">Team Absence Index</h3>
                     <span class="rounded-lg bg-slate-100 px-2 py-0.5 text-[9px] font-black text-slate-500 dark:bg-white/5 border border-slate-200/50 dark:border-white/10">{{ $whoIsAwayToday->count() }}</span>
                 </div>
                 <div class="grid gap-3">
@@ -165,9 +165,9 @@
                     <div class="group flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition-all hover:border-cyan-500/20 dark:border-white/5 dark:bg-slate-900/50">
                         <div class="relative">
                             @if($l->employee->profile_photo)
-                                <img src="{{ $l->employee->profile_photo }}" class="h-10 w-10 rounded-xl object-cover ring-2 ring-slate-100 dark:ring-white/5">
+                                <img src="{{ $l->employee->profile_photo }}" class="h-8 w-8 rounded-xl object-cover ring-2 ring-slate-100 dark:ring-white/5">
                             @else
-                                <div class="h-10 w-10 flex items-center justify-center rounded-xl bg-slate-100 text-[10px] font-black text-slate-500 dark:bg-white/5 dark:text-cyan-400 border border-slate-200/50 dark:border-white/5">{{ substr($l->employee->full_name, 0, 1) }}</div>
+                                <div class="h-8 w-8 flex items-center justify-center rounded-xl bg-slate-100 text-[8px] font-black text-slate-500 dark:bg-white/5 dark:text-cyan-400 border border-slate-200/50 dark:border-white/5">{{ substr($l->employee->full_name, 0, 1) }}</div>
                             @endif
                             <div class="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-white bg-rose-500 dark:border-slate-950 shadow-sm animate-pulse"></div>
                         </div>
@@ -177,8 +177,8 @@
                         </div>
                     </div>
                     @empty
-                    <div class="rounded-xl border border-dashed border-slate-200 p-8 text-center dark:border-white/5">
-                        <p class="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">Personnel presence at 100%.</p>
+                    <div class="rounded-xl border border-dashed border-slate-200 p-4 text-center dark:border-white/5">
+                        <p class="text-[8px] font-black text-slate-300 uppercase tracking-[0.2em]">Personnel presence at 100%.</p>
                     </div>
                     @endforelse
                 </div>
@@ -193,8 +193,8 @@
         
         <div class="relative w-full max-w-sm rounded-xl bg-white shadow-2xl dark:bg-slate-950 border border-slate-200 dark:border-white/10 overflow-hidden animate-in fade-in zoom-in duration-200">
             {{-- Modal Header --}}
-            <div class="flex items-center justify-between border-b border-slate-100 px-6 py-5 dark:border-white/5 bg-slate-50/50 dark:bg-white/5">
-                <h3 class="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-[0.2em]">
+            <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3 dark:border-white/5 bg-slate-50/50 dark:bg-white/5">
+                <h3 class="text-[8px] font-black text-slate-900 dark:text-white uppercase tracking-[0.2em]">
                     {{ $isEditing ? 'Edit Request' : 'Book Time Off' }}
                 </h3>
                 <button wire:click="closeLeaveModal" class="text-slate-400 hover:text-slate-900 transition-colors">
@@ -203,7 +203,7 @@
             </div>
             
             {{-- Modal Body --}}
-            <div class="px-6 py-6 space-y-6">
+            <div class="px-3 py-3 space-y-6">
                 {{-- Allowances List --}}
                 <div class="space-y-3">
                     <h4 class="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Institutional Credits</h4>
@@ -218,7 +218,7 @@
                                     @else bg-slate-400 @endif shadow-sm"></div>
                                 <span class="text-[9px] font-black text-slate-600 dark:text-slate-400 uppercase tracking-tight">{{ $type }}</span>
                             </div>
-                            <span class="text-[10px] font-black text-slate-900 dark:text-white">{{ $bal['remaining'] }} Units</span>
+                            <span class="text-[8px] font-black text-slate-900 dark:text-white">{{ $bal['remaining'] }} Units</span>
                         </div>
                         @endforeach
                     </div>
@@ -276,7 +276,7 @@
 
                 <div class="space-y-1.5">
                     <label class="block text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] ml-0.5">Reason Architecture</label>
-                    <textarea wire:model="reason" rows="3" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 text-[10px] font-medium text-slate-900 focus:border-cyan-500 dark:border-white/5 dark:bg-white/10 dark:text-white transition-all" placeholder="Optional contextual metadata..."></textarea>
+                    <textarea wire:model="reason" rows="3" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 text-[8px] font-medium text-slate-900 focus:border-cyan-500 dark:border-white/5 dark:bg-white/10 dark:text-white transition-all" placeholder="Optional contextual metadata..."></textarea>
                 </div>
             </div>
 
@@ -308,7 +308,7 @@
         x-transition:leave="transition ease-in duration-200"
         x-transition:leave-start="translate-y-0 opacity-100 scale-100"
         x-transition:leave-end="translate-y-4 opacity-0 scale-95"
-        class="fixed bottom-8 right-8 z-[110] flex items-center gap-3 rounded-xl border border-white/10 bg-slate-900/90 px-5 py-3 text-[10px] font-black uppercase tracking-widest text-white shadow-2xl backdrop-blur-xl"
+        class="fixed bottom-8 right-8 z-[110] flex items-center gap-3 rounded-xl border border-white/10 bg-slate-900/90 px-5 py-3 text-[8px] font-black uppercase tracking-widest text-white shadow-2xl backdrop-blur-xl"
         style="display: none;"
     >
         <div :class="type === 'success' ? 'bg-emerald-500' : 'bg-rose-500'" class="h-2 w-2 rounded-full animate-pulse"></div>

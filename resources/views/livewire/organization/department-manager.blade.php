@@ -1,6 +1,6 @@
 <div class="space-y-5 pb-8 relative">
     {{-- High-Impact Glass Header --}}
-    <div class="relative overflow-hidden rounded-xl bg-white/80 px-6 py-5 shadow-sm border border-slate-200 backdrop-blur-xl dark:bg-slate-900/60 dark:border-white/5">
+    <div class="relative overflow-hidden rounded-xl bg-white/80 px-5 py-4 shadow-sm border border-slate-200 backdrop-blur-xl dark:bg-slate-900/60 dark:border-white/5">
         <div class="absolute -right-20 -top-20 h-40 w-40 rounded-full bg-cyan-500/5 blur-[80px]"></div>
         
         <div class="relative flex flex-col items-start justify-between gap-4 lg:flex-row lg:items-center text-center lg:text-left">
@@ -10,7 +10,7 @@
                     <span class="h-0.5 w-0.5 rounded-full bg-slate-300 dark:bg-slate-600"></span>
                     <span class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Structure</span>
                 </div>
-                <h1 class="text-xl font-black tracking-tight text-slate-900 dark:text-white uppercase transition-all">
+                <h1 class="text-base font-black tracking-tight text-slate-900 dark:text-white uppercase transition-all">
                     Department <span class="text-cyan-500">Directory</span>
                 </h1>
                 <p class="mt-0.5 text-[10px] font-bold text-slate-500 uppercase tracking-widest opacity-80 leading-none">

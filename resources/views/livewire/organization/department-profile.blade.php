@@ -1,7 +1,7 @@
 <div class="relative space-y-6 pb-12">
 
     {{-- Standardized Header --}}
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-6 border-b border-slate-200 dark:border-white/5">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200 dark:border-white/5">
         <div>
             <div class="flex items-center gap-2 mb-1">
                 <span class="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-600 dark:text-cyan-400">Organization</span>
@@ -10,7 +10,7 @@
                 <span class="h-1 w-1 rounded-full bg-slate-300 dark:bg-slate-600"></span>
                 <span class="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-600 dark:text-cyan-400">{{ $department->name }}</span>
             </div>
-            <h1 class="text-2xl font-black tracking-tight text-slate-900 dark:text-white uppercase truncate max-w-xl">
+            <h1 class="text-lg font-black tracking-tight text-slate-900 dark:text-white uppercase truncate max-w-lg">
                 Department <span class="text-cyan-500">{{ $department->name }}</span>
             </h1>
             <p class="mt-1 text-[11px] font-medium text-slate-400 uppercase tracking-wide leading-relaxed">
@@ -33,10 +33,10 @@
         @endif
     </div>
 
-    <div class="grid gap-6 lg:grid-cols-4">
+    <div class="grid gap-4 lg:grid-cols-4">
         {{-- Left Analysis Col --}}
         <div class="space-y-4 lg:col-span-1">
-            <div class="group relative rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:border-cyan-500/30 dark:border-white/5 dark:bg-slate-900/50">
+            <div class="group relative rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:border-cyan-500/30 dark:border-white/5 dark:bg-slate-900/50">
                 <div class="flex items-center justify-between mb-4">
                     <p class="text-[9px] font-black uppercase tracking-widest text-slate-400">Unit Leadership</p>
                     <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-50 text-cyan-500 dark:bg-white/5">
@@ -48,13 +48,13 @@
                         {{ substr($department->lead_name ?? '?', 0, 1) }}
                     </div>
                     <div>
-                        <p class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tight">{{ $department->lead_name ?? 'Vacant' }}</p>
+                        <p class="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-tight">{{ $department->lead_name ?? 'Vacant' }}</p>
                         <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Department Head</p>
                     </div>
                 </div>
             </div>
 
-            <div class="group relative rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:border-cyan-500/30 dark:border-white/5 dark:bg-slate-900/50">
+            <div class="group relative rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:border-cyan-500/30 dark:border-white/5 dark:bg-slate-900/50">
                 <div class="flex items-center justify-between mb-2">
                     <p class="text-[9px] font-black uppercase tracking-widest text-slate-400">Total Headcount</p>
                     <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-50 text-emerald-500 dark:bg-white/5">
@@ -70,7 +70,7 @@
 
         {{-- Right Roster Col --}}
         <div class="lg:col-span-3">
-            <div class="relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/5 dark:bg-slate-900/50">
+            <div class="relative overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/5 dark:bg-slate-900/50">
                 <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-white/5">
                     <h2 class="text-[10px] font-black uppercase tracking-widest text-slate-500">Resource Roster</h2>
                     <span class="text-[9px] font-black bg-slate-50 dark:bg-white/5 px-2 py-1 rounded-lg text-slate-400 uppercase tracking-widest">{{ collect($department->employees)->count() }} Records</span>
@@ -85,7 +85,7 @@
                                         @if($employee->profile_photo)
                                             <img src="{{ Storage::url($employee->profile_photo) }}" class="h-full w-full object-cover">
                                         @else
-                                            <div class="flex h-full w-full items-center justify-center text-xs font-black text-slate-400 uppercase">
+                                            <div class="flex h-full w-full items-center justify-center text-[10px] font-black text-slate-400 uppercase">
                                                 {{ substr($employee->full_name, 0, 1) }}
                                             </div>
                                         @endif
@@ -93,12 +93,12 @@
                                     <div class="absolute -bottom-1 -right-1 h-3.5 w-3.5 rounded-full border-2 border-white dark:border-slate-900 {{ $employee->status === 'active' ? 'bg-emerald-500' : 'bg-amber-500' }}"></div>
                                 </div>
                                 <div>
-                                    <a href="{{ route('employees.show', $employee->id) }}" wire:navigate class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tight group-hover:text-cyan-500 transition-colors block">{{ $employee->full_name }}</a>
+                                    <a href="{{ route('employees.show', $employee->id) }}" wire:navigate class="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-tight group-hover:text-cyan-500 transition-colors block">{{ $employee->full_name }}</a>
                                     <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-0.5">{{ $employee->job_title }}</p>
                                 </div>
                             </div>
                             
-                            <div class="flex items-center gap-8">
+                            <div class="flex items-center gap-3">
                                 <div class="hidden xl:block">
                                     <p class="text-[8px] font-black uppercase tracking-widest text-slate-400 mb-0.5 text-right">Identifier</p>
                                     <p class="text-[10px] font-black text-slate-600 dark:text-slate-400 uppercase text-right">{{ $employee->employee_id ?? '---' }}</p>
@@ -116,7 +116,7 @@
                         </div>
                     @empty
                         <div class="flex flex-col items-center justify-center py-20 bg-slate-50/30 dark:bg-transparent">
-                            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-sm dark:bg-white/5 mb-4">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-sm dark:bg-white/5 mb-4">
                                 <svg class="h-6 w-6 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
                             </div>
                             <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Deployment Empty</p>
@@ -130,29 +130,29 @@
     {{-- Edit Panel --}}
     @if($isEditing)
     <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-        <div class="w-full max-w-sm rounded-2xl bg-white shadow-2xl dark:bg-slate-900 border border-slate-200 dark:border-white/5 overflow-hidden">
+        <div class="w-full max-w-sm rounded-xl bg-white shadow-2xl dark:bg-slate-900 border border-slate-200 dark:border-white/5 overflow-hidden">
             <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4 dark:border-white/5">
-                <h3 class="text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white">Modify Unit</h3>
+                <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-white">Modify Unit</h3>
                 <button wire:click="closeEditModal" class="text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
 
             <form wire:submit="submitEdit">
-                <div class="p-6 space-y-4">
+                <div class="p-4 space-y-4">
                     <div>
                         <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Department Name</label>
-                        <input type="text" wire:model="form.name" class="w-full rounded-xl border border-slate-200 bg-transparent px-3.5 py-2.5 text-xs font-black uppercase-input focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 dark:border-white/10 dark:text-white">
+                        <input type="text" wire:model="form.name" class="w-full rounded-xl border border-slate-200 bg-transparent px-3.5 py-2.5 text-[10px] font-black uppercase-input focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 dark:border-white/10 dark:text-white">
                         @error('form.name') <span class="text-[9px] font-black text-rose-500 uppercase">{{ $message }}</span> @enderror
                     </div>
                     <div>
                         <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Unit Code</label>
-                        <input type="text" wire:model="form.code" class="w-full rounded-xl border border-slate-200 bg-transparent px-3.5 py-2.5 text-xs font-black uppercase uppercase-input focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 dark:border-white/10 dark:text-white">
+                        <input type="text" wire:model="form.code" class="w-full rounded-xl border border-slate-200 bg-transparent px-3.5 py-2.5 text-[10px] font-black uppercase uppercase-input focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 dark:border-white/10 dark:text-white">
                         @error('form.code') <span class="text-[9px] font-black text-rose-500 uppercase">{{ $message }}</span> @enderror
                     </div>
                     <div>
                         <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Lead Personnel</label>
-                        <select wire:model="form.lead_employee_id" class="w-full rounded-xl border border-slate-200 bg-transparent px-3.5 py-2.5 text-xs font-black focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 dark:border-white/10 dark:text-white dark:bg-slate-900">
+                        <select wire:model="form.lead_employee_id" class="w-full rounded-xl border border-slate-200 bg-transparent px-3.5 py-2.5 text-[10px] font-black focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 dark:border-white/10 dark:text-white dark:bg-slate-900">
                             <option value="" class="dark:bg-slate-900 text-slate-400">--- No Lead ---</option>
                             @foreach ($this->employeesList as $emp)
                                 <option value="{{ $emp->id }}" class="dark:bg-slate-900">{{ $emp->full_name }}</option>
@@ -176,7 +176,7 @@
     
     {{-- Error Flash Notification --}}
     @if (session()->has('error'))
-        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)" class="fixed bottom-8 right-8 z-[100] flex items-center gap-3 rounded-xl border border-white/10 bg-slate-900/90 px-5 py-3 text-xs font-bold text-white shadow-2xl backdrop-blur-xl dark:bg-slate-800/90">
+        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)" class="fixed bottom-8 right-8 z-[100] flex items-center gap-3 rounded-xl border border-white/10 bg-slate-900/90 px-5 py-3 text-[10px] font-bold text-white shadow-2xl backdrop-blur-xl dark:bg-slate-800/90">
             <div class="bg-rose-500 h-2 w-2 rounded-full animate-pulse"></div>
             {{ session('error') }}
         </div>
@@ -184,7 +184,7 @@
     
     {{-- Success Notification --}}
     @if (session()->has('success'))
-        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)" class="fixed bottom-8 right-8 z-[100] flex items-center gap-3 rounded-xl border border-white/10 bg-slate-900/90 px-5 py-3 text-xs font-bold text-white shadow-2xl backdrop-blur-xl dark:bg-slate-800/90">
+        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)" class="fixed bottom-8 right-8 z-[100] flex items-center gap-3 rounded-xl border border-white/10 bg-slate-900/90 px-5 py-3 text-[10px] font-bold text-white shadow-2xl backdrop-blur-xl dark:bg-slate-800/90">
             <div class="bg-emerald-500 h-2 w-2 rounded-full animate-pulse"></div>
             {{ session('success') }}
         </div>

@@ -4,7 +4,7 @@
         defaultEffectiveDate: '{{ now()->toDateString() }}',
         leaveTypeChartData: @js($leaveTypeChartData)
     })"
-    class="relative space-y-5">
+    class="relative space-y-3">
 
     {{-- Dashboard Header --}}
     <div class="relative mb-4">
@@ -30,7 +30,7 @@
     </div>
 
     {{-- Metrics Grid --}}
-    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         @foreach([
             ['Employees', $employeeCount, 'Total active employees', 'indigo', route('employees.index'), 'M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z'],
             ['Departments', $departmentCount, 'Total departments', 'cyan', route('departments.index'), 'M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6.75h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75H21m-3.75 3.75H21'],
@@ -38,13 +38,13 @@
             ['Approval Inbox', $workflowPending, 'Pending workflows', 'indigo', route('workflows.index'), 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01'],
             ['Present Today', $attendanceToday, 'Employees at work', 'emerald', route('employees.index'), 'M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z']
         ] as [$title, $val, $desc, $color, $link, $icon])
-        <a href="{{ $link }}" class="group relative overflow-hidden rounded-xl border p-4 shadow-[0_10px_24px_rgba(15,23,42,0.05)] transition-all hover:-translate-y-0.5 hover:shadow-[0_14px_28px_rgba(15,23,42,0.08)] dark:shadow-[0_18px_40px_rgba(2,6,23,0.35)]
+        <a href="{{ $link }}" class="group relative overflow-hidden rounded-xl border p-3 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md dark:shadow-none
             @if($color === 'indigo') border-blue-200 bg-gradient-to-br from-blue-50 via-indigo-50 to-blue-100/80 dark:border-blue-500/20 dark:bg-gradient-to-br dark:from-slate-950 dark:via-blue-950/35 dark:to-slate-900
             @elseif($color === 'cyan') border-fuchsia-200 bg-gradient-to-br from-fuchsia-50 via-violet-50 to-purple-100/80 dark:border-violet-500/20 dark:bg-gradient-to-br dark:from-slate-950 dark:via-violet-950/35 dark:to-slate-900
             @elseif($color === 'rose') border-orange-200 bg-gradient-to-br from-orange-50 via-amber-50 to-orange-100/80 dark:border-orange-500/20 dark:bg-gradient-to-br dark:from-slate-950 dark:via-orange-950/35 dark:to-slate-900
             @elseif($color === 'emerald') border-emerald-200 bg-gradient-to-br from-emerald-50 via-teal-50 to-emerald-100/80 dark:border-emerald-500/20 dark:bg-gradient-to-br dark:from-slate-950 dark:via-emerald-950/35 dark:to-slate-900
             @else border-slate-200 bg-white @endif">
-            <h3 class="mb-3 text-[8px] font-bold tracking-tight
+            <h3 class="mb-1.5 text-[8px] font-bold tracking-tight uppercase leading-none
                 @if($color === 'indigo') text-blue-700 dark:text-blue-200
                 @elseif($color === 'cyan') text-violet-700 dark:text-violet-200
                 @elseif($color === 'rose') text-orange-700 dark:text-orange-200
@@ -52,73 +52,73 @@
                 @else text-slate-500 @endif">{{ $title }}</h3>
             <div class="flex items-end justify-between">
                 <div>
-                    <p class="text-[1.8rem] font-black leading-none tracking-tight
+                    <p class="text-[1.2rem] font-black leading-none tracking-tight
                         @if($color === 'indigo') text-blue-600 dark:text-blue-100
                         @elseif($color === 'cyan') text-violet-600 dark:text-violet-100
                         @elseif($color === 'rose') text-orange-600 dark:text-orange-100
                         @elseif($color === 'emerald') text-emerald-600 dark:text-emerald-100
                         @else text-slate-900 dark:text-white @endif">{{ $val }}</p>
-                    <p class="mt-1.5 line-clamp-1 text-[9px] font-medium text-slate-500 dark:text-slate-400">{{ $desc }}</p>
+                    <p class="mt-1 line-clamp-1 text-[8px] font-medium text-slate-500 dark:text-slate-400">{{ $desc }}</p>
                 </div>
-                <div class="flex h-8 w-8 items-center justify-center rounded-lg border border-white/60 bg-white/70 shadow-sm transition-transform group-hover:scale-105 dark:border-white/10 dark:bg-white/5">
-                    <svg class="h-4 w-4
+                <div class="flex h-6 w-6 items-center justify-center rounded-md border border-white/60 bg-white/70 shadow-sm transition-transform group-hover:scale-105 dark:border-white/10 dark:bg-white/5">
+                    <svg class="h-3.5 w-3.5
                         @if($color === 'indigo') text-blue-500 dark:text-blue-200
                         @elseif($color === 'cyan') text-violet-500 dark:text-violet-200
                         @elseif($color === 'rose') text-orange-500 dark:text-orange-200
                         @elseif($color === 'emerald') text-emerald-500 dark:text-emerald-200
-                        @else text-slate-500 @endif" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $icon }}" /></svg>
+                        @else text-slate-500 @endif" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $icon }}" /></svg>
                 </div>
             </div>
         </a>
         @endforeach
     </div>
 
-    <div class="grid gap-4 xl:grid-cols-[minmax(0,1.8fr)_minmax(300px,0.95fr)]">
-        <div class="space-y-4">
-            <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
-                <div class="mb-4 flex items-center justify-between">
+    <div class="grid gap-3 xl:grid-cols-[minmax(0,1.8fr)_minmax(300px,0.95fr)]">
+        <div class="space-y-3">
+            <div class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
+                <div class="mb-3 flex items-center justify-between">
                     <div>
-                        <h2 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">Employees by Department</h2>
-                        <p class="text-[10px] text-slate-500 mt-0.5">Headcount across different departments</p>
+                        <h2 class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">Employees by Department</h2>
+                        <p class="text-[9px] text-slate-500 mt-0.5 uppercase tracking-widest">Headcount across different departments</p>
                     </div>
                 </div>
-                <div class="relative h-56">
+                <div class="relative h-44">
                     <canvas id="departmentChart"></canvas>
                 </div>
             </div>
 
             {{-- Leaves Overview --}}
-            <div class="rounded-xl border border-slate-200 bg-[#f8fbfa] p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
-                <div class="mb-5 flex items-center justify-between">
+            <div class="rounded-xl border border-slate-200 bg-[#f8fbfa] p-3 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
+                <div class="mb-3 flex items-center justify-between">
                     <div>
-                        <h2 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">Leaves Overview</h2>
+                        <h2 class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">Leaves Overview</h2>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <select id="leaveTrendRange" class="h-8 min-w-[110px] rounded-lg border border-slate-200 bg-white px-3 text-[10px] font-semibold text-slate-600 shadow-sm transition-colors focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/10 dark:border-white/5 dark:bg-slate-950 dark:text-slate-300">
+                    <div class="flex items-center gap-1.5">
+                        <select id="leaveTrendRange" class="h-6 min-w-[90px] rounded border border-slate-200 bg-white px-2 py-0 text-[9px] font-semibold text-slate-600 shadow-sm transition-colors focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/10 dark:border-white/5 dark:bg-slate-950 dark:text-slate-300">
                             <option value="7">Past 7 days</option>
                             <option value="30" selected>Past 30 days</option>
                             <option value="60">Past 60 days</option>
                             <option value="90">Past 90 days</option>
                         </select>
-                        <a href="{{ route('leaves.pending') }}" class="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 shadow-sm transition-colors hover:bg-slate-50 hover:text-slate-700 dark:border-white/5 dark:bg-slate-950 dark:text-slate-300 dark:hover:bg-slate-900">
-                            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                        <a href="{{ route('leaves.pending') }}" class="flex h-6 w-6 items-center justify-center rounded border border-slate-200 bg-white text-slate-500 shadow-sm transition-colors hover:bg-slate-50 hover:text-slate-700 dark:border-white/5 dark:bg-slate-950 dark:text-slate-300 dark:hover:bg-slate-900">
+                            <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
                         </a>
                     </div>
                 </div>
 
-                <div class="grid gap-5 lg:grid-cols-12">
+                <div class="grid gap-4 lg:grid-cols-12">
                     {{-- Doughnut Chart --}}
                     <div class="lg:col-span-5">
-                        <p class="mb-4 text-[11px] font-bold text-slate-900 dark:text-white">Leave Requests by Type ({{ now()->format('M Y') }})</p>
-                        <div class="flex items-center gap-4">
-                            <div class="h-28 w-28 shrink-0">
+                        <p class="mb-2.5 text-[9px] font-black uppercase text-slate-900 dark:text-white tracking-widest">Leave Types ({{ now()->format('M Y') }})</p>
+                        <div class="flex items-center gap-3">
+                            <div class="h-20 w-20 shrink-0">
                                 <canvas id="leaveTypeChart"></canvas>
                             </div>
-                            <div class="space-y-2">
+                            <div class="space-y-1.5">
                                 <template x-for="(label, index) in leaveTypeData.labels" :key="index">
-                                    <div class="flex items-center gap-2">
-                                        <div class="h-2 w-2 rounded-full" :style="`background-color: ${leaveTypeColors[index]}`"></div>
-                                        <span class="text-[10px] font-bold text-slate-600 dark:text-slate-400" x-text="`${label} ${leaveTypeData.values.reduce((a,b) => a+b, 0) > 0 ? Math.round((leaveTypeData.values[index] / leaveTypeData.values.reduce((a,b) => a+b, 0)) * 100) : 0}%`"></span>
+                                    <div class="flex items-center gap-1.5">
+                                        <div class="h-1.5 w-1.5 rounded-full" :style="`background-color: ${leaveTypeColors[index]}`"></div>
+                                        <span class="text-[9px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest" x-text="`${label} ${leaveTypeData.values.reduce((a,b) => a+b, 0) > 0 ? Math.round((leaveTypeData.values[index] / leaveTypeData.values.reduce((a,b) => a+b, 0)) * 100) : 0}%`"></span>
                                     </div>
                                 </template>
                             </div>
@@ -127,56 +127,56 @@
 
                     {{-- Trend Line Chart --}}
                     <div class="lg:col-span-7">
-                        <p class="mb-4 text-[11px] font-bold text-slate-900 dark:text-white">Leave Bookings vs. Capacity</p>
-                        <div class="relative h-32">
+                        <p class="mb-2.5 text-[9px] font-black uppercase text-slate-900 dark:text-white tracking-widest">Bookings vs. Capacity</p>
+                        <div class="relative h-24">
                             <canvas id="leaveTrendChart"></canvas>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="grid gap-4 md:grid-cols-2">
+            <div class="grid gap-3 md:grid-cols-2">
                 @include('hrms.components.recent-employees')
                 @include('hrms.components.latest-leaves')
             </div>
         </div>
 
-        <div class="space-y-4">
+        <div class="space-y-3">
             {{-- Quick Actions --}}
-            <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
-                <div class="mb-4 flex items-center justify-between">
-                    <h3 class="text-[11px] font-black text-slate-400 uppercase tracking-widest">Quick Department</h3>
-                    <button @click="submitDepartment()" :disabled="departmentSaving" class="group relative flex h-7 w-7 items-center justify-center rounded-lg bg-slate-900 border border-white/10 text-white shadow-lg shadow-indigo-500/10 transition-all hover:bg-cyan-600 active:scale-90 dark:bg-white/5 dark:hover:bg-cyan-500/20 dark:hover:text-cyan-400">
-                        <svg x-show="!departmentSaving" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
-                        <svg x-show="departmentSaving" class="h-3.5 w-3.5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+            <div class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
+                <div class="mb-3 flex items-center justify-between">
+                    <h3 class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Quick Department</h3>
+                    <button @click="submitDepartment()" :disabled="departmentSaving" class="group relative flex h-6 w-6 items-center justify-center rounded-md bg-slate-900 border border-white/10 text-white shadow-sm transition-all hover:bg-cyan-600 active:scale-90 dark:bg-white/5 dark:hover:bg-cyan-500/20 dark:hover:text-cyan-400">
+                        <svg x-show="!departmentSaving" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                        <svg x-show="departmentSaving" class="h-3 w-3 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
                     </button>
                 </div>
-                <div class="space-y-3">
+                <div class="space-y-2.5">
                     <div class="space-y-1">
-                        <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400">Department Name</label>
-                        <input x-model="departmentForm.name" placeholder="Engineering" class="w-full rounded-lg border border-slate-200 dark:border-white/10 bg-transparent px-3 py-2 text-[12px] font-medium text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500">
+                        <label class="block text-[8px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Department Name</label>
+                        <input x-model="departmentForm.name" placeholder="Engineering" class="w-full rounded-lg border border-slate-200 dark:border-white/10 bg-transparent px-2.5 py-1.5 text-[10px] font-black uppercase tracking-wider text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500">
                     </div>
                 </div>
             </div>
 
             {{-- Active Sessions --}}
-            <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
-                <div class="mb-4 flex items-center justify-between">
-                    <h3 class="text-xs font-black uppercase tracking-widest text-slate-400">System Activity</h3>
+            <div class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
+                <div class="mb-3 flex items-center justify-between">
+                    <h3 class="text-[9px] font-black uppercase tracking-widest text-slate-400">System Activity</h3>
                 </div>
-                <div class="space-y-4">
+                <div class="space-y-3">
                     @foreach($activeSessions as $session)
-                        <div class="flex items-center gap-3">
-                            <div class="h-9 w-9 shrink-0 flex items-center justify-center rounded-lg bg-white shadow-sm border border-slate-100 overflow-hidden dark:bg-white/5 dark:border-white/5">
+                        <div class="flex items-center gap-2.5">
+                            <div class="h-7 w-7 shrink-0 flex items-center justify-center rounded-md bg-white shadow-sm border border-slate-100 overflow-hidden dark:bg-white/5 dark:border-white/5">
                                 @if($session['avatar'])
                                     <img src="{{ $session['avatar'] }}" class="h-full w-full object-cover">
                                 @else
-                                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">{{ $session['initial'] }}</span>
+                                    <span class="text-[8px] font-black text-slate-400 uppercase tracking-widest">{{ $session['initial'] }}</span>
                                 @endif
                             </div>
                             <div class="min-w-0 flex-1">
-                                <p class="text-xs font-bold text-slate-900 dark:text-white truncate">{{ $session['name'] }}</p>
-                                <p class="text-[10px] font-medium text-slate-500">As {{ $session['last_activity'] }}</p>
+                                <p class="text-[10px] font-black uppercase text-slate-900 dark:text-white leading-none truncate">{{ $session['name'] }}</p>
+                                <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">As {{ $session['last_activity'] }}</p>
                             </div>
                         </div>
                     @endforeach

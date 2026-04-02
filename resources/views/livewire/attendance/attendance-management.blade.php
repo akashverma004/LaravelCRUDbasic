@@ -1,14 +1,15 @@
-<div class="space-y-5 pb-8">
-    {{-- Admin Header --}}
-    <div class="relative overflow-hidden rounded-xl bg-white px-6 py-5 shadow-sm border border-slate-200 dark:bg-slate-900/50 dark:border-white/5">
+<div class="space-y-5 pb-8 relative">
+    {{-- High-Impact Glass Header --}}
+    <div class="relative overflow-hidden rounded-xl bg-white/80 px-6 py-5 shadow-sm border border-slate-200 backdrop-blur-xl dark:bg-slate-900/60 dark:border-white/5">
         <div class="absolute -right-20 -top-20 h-40 w-40 rounded-full bg-cyan-500/5 blur-[80px]"></div>
+        <div class="absolute -bottom-20 -left-20 h-40 w-40 rounded-full bg-indigo-500/5 blur-[80px]"></div>
         
         <div class="relative flex flex-col items-start justify-between gap-4 lg:flex-row lg:items-center">
             <div>
                 <div class="flex items-center gap-2 mb-0.5">
-                    <span class="text-[9px] font-black uppercase tracking-[0.2em] text-cyan-600 dark:text-cyan-400">Monitoring</span>
+                    <span class="text-[9px] font-black uppercase tracking-[0.2em] text-cyan-600 dark:text-cyan-400">Monitoring Sector</span>
                     <span class="h-0.5 w-0.5 rounded-full bg-slate-300 dark:bg-slate-600"></span>
-                    <span class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Administration</span>
+                    <span class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Live Presence</span>
                 </div>
                 <h1 class="text-xl font-black tracking-tight text-slate-900 dark:text-white uppercase transition-all">
                     Attendance <span class="text-cyan-500">Management</span>
@@ -19,8 +20,8 @@
             </div>
 
             <div class="flex flex-wrap items-center gap-2.5">
-                <input type="date" wire:model.live="date" class="h-10 rounded-lg border border-slate-200 bg-white px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-700 shadow-sm transition hover:border-cyan-200 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10 dark:border-white/10 dark:bg-slate-900 dark:text-white">
-                <button wire:click="$refresh" class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-slate-900 text-white shadow-lg transition-all hover:bg-cyan-600 active:scale-95 dark:bg-white/5 dark:text-cyan-400">
+                <input type="date" wire:model.live="date" class="h-10 rounded-lg border border-slate-200 bg-white/50 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-700 shadow-sm transition hover:border-cyan-200 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10 dark:border-white/10 dark:bg-slate-900 dark:text-white backdrop-blur-md">
+                <button wire:click="$refresh" class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-slate-900 text-white shadow-xl transition-all hover:bg-cyan-600 active:scale-95 dark:bg-white/10 dark:text-cyan-400">
                     <svg wire:loading.class="animate-spin" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
                 </button>
             </div>
@@ -85,8 +86,12 @@
                         <tr wire:click="editRecord({{ $record->id }})" class="group hover:bg-slate-50/50 dark:hover:bg-white/[0.02] transition-all cursor-pointer">
                             <td class="px-5 py-3">
                                 <div class="flex items-center gap-3">
-                                    <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-[10px] font-black text-slate-500 shadow-sm dark:bg-white/10 dark:text-cyan-400 group-hover:scale-105 transition-transform">
-                                        {{ substr($record->employee->full_name, 0, 1) }}{{ str_contains($record->employee->full_name, ' ') ? substr(strrchr($record->employee->full_name, ' '), 1, 1) : '' }}
+                                    <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-white border border-slate-100 shadow-sm overflow-hidden dark:bg-white/5 dark:border-white/5 group-hover:scale-105 transition-transform">
+                                        @if($record->employee->profile_photo)
+                                            <img src="{{ Storage::url($record->employee->profile_photo) }}" class="h-full w-full object-cover">
+                                        @else
+                                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">{{ substr($record->employee->full_name, 0, 1) }}</span>
+                                        @endif
                                     </div>
                                     <div class="min-w-0">
                                         <p class="truncate text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-tight group-hover:text-cyan-500 transition-colors">{{ $record->employee->full_name }}</p>
