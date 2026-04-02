@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Analytics;
 
-use App\Models\Attendance;
+use App\Models\AttendanceRecord;
 use App\Models\Employee;
 use App\Models\LeaveRequest;
 use Carbon\Carbon;
@@ -70,8 +70,8 @@ class InsightEngine extends Component
         $this->attendanceTrend = [];
         $period = CarbonPeriod::create(now()->subDays(14), now());
         foreach ($period as $date) {
-            $count = Attendance::where('tenant_id', $tenantId)
-                ->whereDate('punch_in', $date)
+            $count = AttendanceRecord::where('tenant_id', $tenantId)
+                ->whereDate('attendance_date', $date)
                 ->distinct('employee_id')
                 ->count();
             
@@ -97,7 +97,7 @@ class InsightEngine extends Component
         $this->stats = [
             'totalEmployees' => Employee::where('tenant_id', $tenantId)->count(),
             'activeLeaves' => LeaveRequest::where('tenant_id', $tenantId)->where('status', 'approved')->whereDate('start_date', '<=', now())->whereDate('end_date', '>=', now())->count(),
-            'presentToday' => Attendance::where('tenant_id', $tenantId)->whereDate('punch_in', now())->distinct('employee_id')->count()
+            'presentToday' => AttendanceRecord::where('tenant_id', $tenantId)->whereDate('attendance_date', now())->distinct('employee_id')->count()
         ];
     }
 

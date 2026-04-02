@@ -1,24 +1,24 @@
-<div class="space-y-8 pb-12" x-data="analyticsDashboard({
+<div class="space-y-5 pb-8" x-data="analyticsDashboard({
     headcountTrend: @js($headcountTrend),
     absenceTrend: @js($absenceTrend),
     attendanceTrend: @js($attendanceTrend),
     departmentDistribution: @js($departmentDistribution)
 })">
     {{-- Header --}}
-    <div class="relative overflow-hidden rounded-2xl bg-white px-8 py-8 shadow-sm border border-slate-200 dark:bg-slate-900/50 dark:border-white/5">
+    <div class="relative overflow-hidden rounded-xl bg-white px-4 py-4 shadow-sm border border-slate-200 dark:bg-slate-900/50 dark:border-white/5">
         <div class="absolute -right-20 -top-20 h-48 w-48 rounded-full bg-cyan-500/10 blur-[60px]"></div>
         
-        <div class="relative flex flex-col items-start justify-between gap-6 lg:flex-row lg:items-center">
+        <div class="relative flex flex-col items-start justify-between gap-3 lg:flex-row lg:items-center">
             <div class="flex-1">
                 <div class="flex items-center gap-2 mb-1">
                     <span class="text-[9px] font-black uppercase tracking-[0.2em] text-cyan-600 dark:text-cyan-400">Strategic Intelligence</span>
                     <span class="h-1 w-1 rounded-full bg-slate-300 dark:bg-slate-600"></span>
                     <span class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Insight Engine</span>
                 </div>
-                <h1 class="text-2xl font-black tracking-tight text-slate-900 dark:text-white uppercase">
+                <h1 class="text-base font-black tracking-tight text-slate-900 dark:text-white uppercase">
                     Organizational <span class="text-cyan-500">Analytics</span>
                 </h1>
-                <p class="mt-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-loose">
+                <p class="mt-2 text-[8px] font-bold text-slate-500 uppercase tracking-widest leading-loose">
                     High-fidelity visualization of personnel velocity, absenteeism patterns, and workforce distribution.
                 </p>
             </div>
@@ -26,50 +26,50 @@
             <div class="flex gap-4">
                 <div class="text-right">
                     <p class="text-[9px] font-black uppercase text-slate-400 tracking-widest">Present Today</p>
-                    <p class="text-2xl font-black text-slate-900 dark:text-white">{{ $stats['presentToday'] }} / {{ $stats['totalEmployees'] }}</p>
+                    <p class="text-base font-black text-slate-900 dark:text-white">{{ $stats['presentToday'] }} / {{ $stats['totalEmployees'] }}</p>
                 </div>
                 <div class="h-10 w-px bg-slate-100 dark:bg-white/5"></div>
                 <div class="text-right">
                     <p class="text-[9px] font-black uppercase text-slate-400 tracking-widest">On Leave</p>
-                    <p class="text-2xl font-black text-rose-500">{{ $stats['activeLeaves'] }}</p>
+                    <p class="text-base font-black text-rose-500">{{ $stats['activeLeaves'] }}</p>
                 </div>
             </div>
         </div>
     </div>
 
     {{-- Main Charts Grid --}}
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {{-- Headcount Trend --}}
-        <div class="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm dark:border-white/5 dark:bg-slate-900">
+        <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/5 dark:bg-slate-900">
             <h4 class="text-[11px] font-black text-slate-900 dark:text-white uppercase tracking-widest mb-6 py-2 border-b border-slate-50 dark:border-white/5 flex items-center justify-between">
                 <span>Headcount Velocity</span>
                 <span class="text-[9px] text-slate-400 uppercase tracking-widest">+{{ $headcountTrend[5]['count'] - $headcountTrend[0]['count'] }} net gain (6mo)</span>
             </h4>
-            <div class="h-[300px]">
+            <div class="h-[250px]">
                 <canvas id="headcountChart"></canvas>
             </div>
         </div>
 
         {{-- Absence Trend --}}
-        <div class="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm dark:border-white/5 dark:bg-slate-900">
+        <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/5 dark:bg-slate-900">
             <h4 class="text-[11px] font-black text-slate-900 dark:text-white uppercase tracking-widest mb-6 py-2 border-b border-slate-50 dark:border-white/5">Absence Magnitude (Leave Days)</h4>
-            <div class="h-[300px]">
+            <div class="h-[250px]">
                 <canvas id="absenceChart"></canvas>
             </div>
         </div>
 
         {{-- Department Distribution --}}
-        <div class="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm dark:border-white/5 dark:bg-slate-900">
+        <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/5 dark:bg-slate-900">
             <h4 class="text-[11px] font-black text-slate-900 dark:text-white uppercase tracking-widest mb-6 py-2 border-b border-slate-50 dark:border-white/5">Force Distribution</h4>
-            <div class="h-[300px] flex items-center justify-center">
+            <div class="h-[250px] flex items-center justify-center">
                 <canvas id="deptDistributionChart" class="max-w-[280px]"></canvas>
             </div>
         </div>
 
         {{-- Attendance Heat --}}
-        <div class="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm dark:border-white/5 dark:bg-slate-900">
+        <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/5 dark:bg-slate-900">
             <h4 class="text-[11px] font-black text-slate-900 dark:text-white uppercase tracking-widest mb-6 py-2 border-b border-slate-50 dark:border-white/5">Presence Amplitude (Last 14 Days)</h4>
-            <div class="h-[300px]">
+            <div class="h-[250px]">
                 <canvas id="attendanceChart"></canvas>
             </div>
         </div>
