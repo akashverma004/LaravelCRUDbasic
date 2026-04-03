@@ -171,7 +171,7 @@ class AttendanceDashboard extends Component
         $user = auth()->user();
         $employee = Employee::where('email', $user->email)->where('tenant_id', $user->tenant_id)->first();
         
-        $history = collect();
+        $history = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10);
         $weeklyStats = [
             'total_hours' => 0,
             'days_present' => 0,

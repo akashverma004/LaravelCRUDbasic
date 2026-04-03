@@ -89,11 +89,28 @@
                                     <input wire:model="admin_name" 
                                         class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-black text-slate-900 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/5 placeholder-slate-200"
                                         placeholder="Full Name" required>
+                                    @error('admin_name')<p class="mt-0.5 text-[7px] font-black text-rose-500 ml-1 uppercase tracking-widest">{{ $message }}</p>@enderror
+                                </div>
+
+                                <div class="space-y-0.5">
+                                    <label class="ml-1 block text-[8px] font-black uppercase tracking-[0.3em] text-slate-400">Admin Email</label>
+                                    <input wire:model="admin_email" type="email"
+                                        class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-black text-slate-900 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/5 placeholder-slate-200"
+                                        placeholder="admin@company.com" required>
+                                    @error('admin_email')<p class="mt-0.5 text-[7px] font-black text-rose-500 ml-1 uppercase tracking-widest">{{ $message }}</p>@enderror
                                 </div>
 
                                 <div class="space-y-0.5">
                                     <label class="ml-1 block text-[8px] font-black uppercase tracking-[0.3em] text-slate-400">Password</label>
                                     <input type="password" wire:model="password" 
+                                        class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-black text-slate-900 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/5 placeholder-slate-200"
+                                        placeholder="••••••••••••" required>
+                                    @error('password')<p class="mt-0.5 text-[7px] font-black text-rose-500 ml-1 uppercase tracking-widest">{{ $message }}</p>@enderror
+                                </div>
+
+                                <div class="space-y-0.5">
+                                    <label class="ml-1 block text-[8px] font-black uppercase tracking-[0.3em] text-slate-400">Confirm Password</label>
+                                    <input type="password" wire:model="password_confirmation" 
                                         class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-black text-slate-900 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/5 placeholder-slate-200"
                                         placeholder="••••••••••••" required>
                                 </div>

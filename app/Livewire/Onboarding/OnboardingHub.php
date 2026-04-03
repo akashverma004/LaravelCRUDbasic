@@ -26,6 +26,13 @@ class OnboardingHub extends Component
     public $selectedTemplateId = '';
     public bool $showAssignModal = false;
 
+    // Template Builder Form
+    public bool $templateBuilderMode = false;
+    public $builderId = null;
+    public $builderName = '';
+    public $builderDescription = '';
+    public $builderTasks = [];
+
     public function mount()
     {
         $user = Auth::user();
@@ -127,6 +134,86 @@ class OnboardingHub extends Component
         $this->reset(['selectedEmployeeId', 'selectedTemplateId']);
         $this->loadData();
         $this->dispatch('notify', message: 'Employee launched into onboarding sequence.', type: 'success');
+    }
+
+    // --- Template Builder Logic ---
+
+    public function openTemplateBuilder($templateId = null)
+    {
+        $this->templateBuilderMode = true;
+        if ($templateId) {
+            $template = OnboardingTemplate::where('tenant_id', Auth::user()->tenant_id)->with('tasks')->findOrFail($templateId);
+            $this->builderId = $template->id;
+            $this->builderName = $template->name;
+            $this->builderDescription = $template->description;
+            $this->builderTasks = $template->tasks->map(fn($t) => ['title' => $t->title, 'description' => $t->description])->toArray();
+        } else {
+            $this->builderId = null;
+            $this->builderName = '';
+            $this->builderDescription = '';
+            $this->builderTasks = [['title' => '', 'description' => '']];
+        }
+    }
+
+    public function addBuilderTask()
+    {
+        $this->builderTasks[] = ['title' => '', 'description' => ''];
+    }
+
+    public function removeBuilderTask($index)
+    {
+        unset($this->builderTasks[$index]);
+        $this->builderTasks = array_values($this->builderTasks); // Re-index array
+    }
+
+    public function saveTemplate()
+    {
+        $this->validate([
+            'builderName' => 'required|string|max:255',
+            'builderDescription' => 'nullable|string',
+            'builderTasks' => 'required|array|min:1',
+            'builderTasks.*.title' => 'required|string|max:255',
+            'builderTasks.*.description' => 'nullable|string',
+        ]);
+
+        $tenantId = Auth::user()->tenant_id;
+        
+        $template = OnboardingTemplate::updateOrCreate(
+            ['id' => $this->builderId, 'tenant_id' => $tenantId],
+            ['name' => $this->builderName, 'description' => $this->builderDescription]
+        );
+
+        // Nuke old tasks and rebuild to preserve sort_order natively
+        \App\Models\OnboardingTemplateTask::where('template_id', $template->id)->delete();
+
+        foreach ($this->builderTasks as $idx => $taskData) {
+            \App\Models\OnboardingTemplateTask::create([
+                'template_id' => $template->id,
+                'title' => $taskData['title'],
+                'description' => $taskData['description'] ?? '',
+                'sort_order' => $idx
+            ]);
+        }
+
+        $this->closeTemplateBuilder();
+        $this->dispatch('notify', message: 'Blueprint generated and saved to the matrix.', type: 'success');
+        $this->loadData();
+    }
+
+    public function deleteTemplate($templateId)
+    {
+        OnboardingTemplate::where('tenant_id', Auth::user()->tenant_id)->findOrFail($templateId)->delete();
+        $this->loadData();
+        $this->dispatch('notify', message: 'Blueprint wiped from storage.', type: 'info');
+    }
+
+    public function closeTemplateBuilder()
+    {
+        $this->templateBuilderMode = false;
+        $this->builderId = null;
+        $this->builderName = '';
+        $this->builderDescription = '';
+        $this->builderTasks = [];
     }
 
     public function render()

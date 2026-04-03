@@ -34,6 +34,16 @@
                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
                         <span>Log 1-on-1</span>
                     </button>
+                @elseif($activeTab === 'feedback')
+                    <button wire:click="$set('showFeedbackModal', true)" class="h-12 inline-flex items-center justify-center gap-3 rounded-xl bg-slate-900 px-8 text-[11px] font-black uppercase tracking-widest text-white shadow-xl hover:bg-cyan-600 transition-all active:scale-95 dark:bg-white/5 dark:text-cyan-400">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" /></svg>
+                        <span>Request Feedback</span>
+                    </button>
+                @elseif($activeTab === 'praise')
+                    <button wire:click="$set('showPraiseModal', true)" class="h-12 inline-flex items-center justify-center gap-3 rounded-xl bg-slate-900 px-8 text-[11px] font-black uppercase tracking-widest text-white shadow-xl hover:bg-amber-500 transition-all active:scale-95 dark:bg-white/5 dark:text-amber-400">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" /></svg>
+                        <span>Publish Praise</span>
+                    </button>
                 @endif
             </div>
         </div>
@@ -43,6 +53,8 @@
             <button wire:click="setTab('goals')" class="px-6 py-3 text-[10px] font-black uppercase tracking-widest transition-all {{ $activeTab === 'goals' ? 'text-violet-600 border-b-2 border-violet-500 bg-violet-50/30' : 'text-slate-400 hover:text-slate-600 dark:hover:text-white' }}">Goal Tracking</button>
             <button wire:click="setTab('reviews')" class="px-6 py-3 text-[10px] font-black uppercase tracking-widest transition-all {{ $activeTab === 'reviews' ? 'text-indigo-600 border-b-2 border-indigo-500 bg-indigo-50/30' : 'text-slate-400 hover:text-slate-600 dark:hover:text-white' }}">Performance Reviews</button>
             <button wire:click="setTab('meetings')" class="px-6 py-3 text-[10px] font-black uppercase tracking-widest transition-all {{ $activeTab === 'meetings' ? 'text-emerald-600 border-b-2 border-emerald-500 bg-emerald-50/30' : 'text-slate-400 hover:text-slate-600 dark:hover:text-white' }}">1-on-1 Meetings</button>
+            <button wire:click="setTab('feedback')" class="px-6 py-3 text-[10px] font-black uppercase tracking-widest transition-all {{ $activeTab === 'feedback' ? 'text-cyan-600 border-b-2 border-cyan-500 bg-cyan-50/30' : 'text-slate-400 hover:text-slate-600 dark:hover:text-white' }}">360º Feedback</button>
+            <button wire:click="setTab('praise')" class="px-6 py-3 text-[10px] font-black uppercase tracking-widest transition-all {{ $activeTab === 'praise' ? 'text-amber-500 border-b-2 border-amber-400 bg-amber-50/30' : 'text-slate-400 hover:text-slate-600 dark:hover:text-white' }}">Public Praise</button>
         </div>
     </div>
 
@@ -169,6 +181,77 @@
                 @empty
                     <div class="py-20 text-center uppercase bg-white rounded-2xl border border-slate-200 dark:bg-slate-900 dark:border-white/5">
                         <p class="text-[10px] font-black text-slate-400 tracking-widest">Meeting documentation history is empty.</p>
+                    </div>
+                @endforelse
+            </div>
+        @elseif($activeTab === 'feedback')
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                @forelse($feedbackRequests as $fb)
+                    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/5 dark:bg-slate-900 relative">
+                        <div class="flex items-center justify-between mb-4 pb-4 border-b border-slate-100 dark:border-white/5">
+                            <div class="flex items-center gap-2">
+                                <span class="h-6 w-6 flex items-center justify-center rounded bg-cyan-50 text-[8px] font-black text-cyan-600 uppercase">{{ substr($fb->requester->full_name, 0, 1) }}</span>
+                                <p class="text-[10px] font-black uppercase text-slate-900 dark:text-white">{{ $fb->requester->full_name }}</p>
+                            </div>
+                            <span class="text-[8px] font-black uppercase tracking-widest text-slate-400">Asked</span>
+                            <div class="flex items-center gap-2">
+                                <p class="text-[10px] font-black uppercase text-slate-900 dark:text-white">{{ $fb->reviewer->full_name }}</p>
+                                <span class="h-6 w-6 flex items-center justify-center rounded bg-slate-50 text-[8px] font-black text-slate-500 uppercase">{{ substr($fb->reviewer->full_name, 0, 1) }}</span>
+                            </div>
+                        </div>
+                        <p class="text-[11px] font-bold text-slate-600 dark:text-slate-400 italic mb-4">"{{ $fb->request_note }}"</p>
+                        
+                        @if($fb->status === 'pending')
+                            <div class="flex justify-end mt-4">
+                                @if($employee && $fb->reviewer_id === $employee->id)
+                                    <button class="text-[9px] font-black uppercase tracking-widest text-white bg-slate-900 shadow-lg px-4 py-2 rounded-lg hover:bg-cyan-600 transition-all">Submit Feedback</button>
+                                @else
+                                    <span class="text-[9px] font-black uppercase tracking-widest text-amber-500 bg-amber-50 px-3 py-1 rounded-md">Pending Response</span>
+                                @endif
+                            </div>
+                        @else
+                            <div class="bg-slate-50 dark:bg-white/5 p-4 rounded-xl mt-4">
+                                <p class="text-[10px] font-bold text-slate-700 dark:text-slate-300">{{ $fb->feedback }}</p>
+                            </div>
+                        @endif
+                    </div>
+                @empty
+                    <div class="col-span-full py-20 text-center uppercase bg-white rounded-2xl border border-slate-200 dark:bg-slate-900 dark:border-white/5">
+                        <p class="text-[10px] font-black text-slate-400 tracking-widest">No continuous feedback requests found.</p>
+                    </div>
+                @endforelse
+            </div>
+        @elseif($activeTab === 'praise')
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                @forelse($praises as $praise)
+                    <div class="rounded-2xl border border-slate-200 bg-gradient-to-br from-white to-amber-50/30 p-6 shadow-sm dark:border-white/5 dark:from-slate-900 dark:to-amber-900/10 group overflow-hidden relative">
+                        <div class="absolute -right-10 -top-10 opacity-20 group-hover:scale-110 transition-transform">
+                            @if($praise->badge === 'kudos')
+                                <span class="text-8xl">👍</span>
+                            @elseif($praise->badge === 'team_player')
+                                <span class="text-8xl">🤝</span>
+                            @else
+                                <span class="text-8xl">💡</span>
+                            @endif
+                        </div>
+                        <div class="flex items-center gap-3 mb-6 relative">
+                            <div class="h-12 w-12 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center font-black dark:bg-slate-800 dark:border-white/5">
+                                {{ substr($praise->receiver->full_name, 0, 1) }}
+                            </div>
+                            <div>
+                                <p class="text-[11px] font-black uppercase text-slate-900 dark:text-white">{{ $praise->receiver->full_name }}</p>
+                                <p class="text-[8px] font-black uppercase text-amber-500 tracking-widest mt-0.5">{{ str_replace('_', ' ', $praise->badge) }}</p>
+                            </div>
+                        </div>
+                        <p class="text-[11px] font-bold text-slate-600 dark:text-slate-300 leading-relaxed relative">{{ $praise->message }}</p>
+                        <div class="mt-6 pt-4 border-t border-slate-100 dark:border-white/5 flex items-center justify-between relative">
+                            <span class="text-[8px] font-black text-slate-400 uppercase tracking-widest">From {{ $praise->sender->full_name }}</span>
+                            <span class="text-[8px] font-black text-slate-400 uppercase tracking-widest">{{ $praise->created_at->diffForHumans() }}</span>
+                        </div>
+                    </div>
+                @empty
+                    <div class="col-span-full py-20 text-center uppercase bg-white rounded-2xl border border-slate-200 dark:bg-slate-900 dark:border-white/5">
+                        <p class="text-[10px] font-black text-slate-400 tracking-widest">Be the first to recognize a peer's hard work!</p>
                     </div>
                 @endforelse
             </div>
@@ -303,6 +386,78 @@
                 <div class="border-t border-slate-100 bg-slate-50 p-6 dark:border-white/5 dark:bg-white/5 flex justify-end gap-3">
                     <button wire:click="$set('showMeetingModal', false)" class="text-[10px] font-black uppercase text-slate-500 px-4">Cancel</button>
                     <button wire:click="saveMeeting" class="rounded-xl bg-slate-900 px-8 py-2.5 text-[10px] font-black uppercase text-white shadow-xl hover:bg-emerald-600 transition-all">Log Session</button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- Feedback Request Modal --}}
+    @if($showFeedbackModal)
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div wire:click="$set('showFeedbackModal', false)" class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"></div>
+            <div class="relative w-full max-w-lg rounded-2xl bg-white shadow-2xl dark:bg-slate-900 border border-slate-200 dark:border-white/10 overflow-hidden animate-in fade-in zoom-in duration-200">
+                <div class="border-b border-slate-100 p-6 dark:border-white/5 flex items-center justify-between">
+                    <h2 class="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Request <span class="text-cyan-500">Feedback</span></h2>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div class="space-y-1.5">
+                        <label class="text-[9px] font-black uppercase text-slate-500">Ask Peer</label>
+                        <select wire:model="feedbackReviewerId" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-black text-slate-900 dark:border-white/5 dark:bg-white/5 dark:text-white uppercase">
+                            <option value="">Select Coworker</option>
+                            @foreach($allEmployees as $emp)
+                                <option value="{{ $emp->id }}">{{ $emp->full_name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-[9px] font-black uppercase text-slate-500">Context / What to focus on</label>
+                        <textarea wire:model="feedbackNote" rows="4" placeholder="I'd love your thoughts on my recent presentation..." class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-black text-slate-900 dark:border-white/5 dark:bg-white/5 dark:text-white uppercase tracking-tighter"></textarea>
+                    </div>
+                </div>
+                <div class="border-t border-slate-100 bg-slate-50 p-6 dark:border-white/5 dark:bg-white/5 flex justify-end gap-3">
+                    <button wire:click="$set('showFeedbackModal', false)" class="text-[10px] font-black uppercase text-slate-500 px-4">Cancel</button>
+                    <button wire:click="requestFeedback" class="rounded-xl bg-slate-900 px-8 py-2.5 text-[10px] font-black uppercase text-white shadow-xl hover:bg-cyan-600 transition-all">Send Request</button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- Public Praise Modal --}}
+    @if($showPraiseModal)
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div wire:click="$set('showPraiseModal', false)" class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"></div>
+            <div class="relative w-full max-w-lg rounded-2xl bg-white shadow-2xl dark:bg-slate-900 border border-slate-200 dark:border-white/10 overflow-hidden animate-in fade-in zoom-in duration-200">
+                <div class="border-b border-slate-100 p-6 dark:border-white/5 flex items-center justify-between">
+                    <h2 class="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Recognize <span class="text-amber-500">Peer</span></h2>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-1.5">
+                            <label class="text-[9px] font-black uppercase text-slate-500">Who to praise</label>
+                            <select wire:model="praiseReceiverId" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-black text-slate-900 dark:border-white/5 dark:bg-white/5 dark:text-white uppercase">
+                                <option value="">Select Coworker</option>
+                                @foreach($allEmployees as $emp)
+                                    <option value="{{ $emp->id }}">{{ $emp->full_name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="text-[9px] font-black uppercase text-slate-500">Badge Type</label>
+                            <select wire:model="praiseBadge" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-black text-slate-900 dark:border-white/5 dark:bg-white/5 dark:text-white uppercase">
+                                <option value="kudos">👍 Kudos</option>
+                                <option value="team_player">🤝 Team Player</option>
+                                <option value="innovator">💡 Innovator</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-[9px] font-black uppercase text-slate-500">Message</label>
+                        <textarea wire:model="praiseMessage" rows="4" placeholder="Amazing job delivering the project on time!" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-black text-slate-900 dark:border-white/5 dark:bg-white/5 dark:text-white uppercase tracking-tighter"></textarea>
+                    </div>
+                </div>
+                <div class="border-t border-slate-100 bg-slate-50 p-6 dark:border-white/5 dark:bg-white/5 flex justify-end gap-3">
+                    <button wire:click="$set('showPraiseModal', false)" class="text-[10px] font-black uppercase text-slate-500 px-4">Cancel</button>
+                    <button wire:click="publishPraise" class="rounded-xl bg-slate-900 px-8 py-2.5 text-[10px] font-black uppercase text-white shadow-xl hover:bg-amber-500 transition-all">Publish</button>
                 </div>
             </div>
         </div>

@@ -38,7 +38,7 @@
             ['Approval Inbox', $workflowPending, 'Pending workflows', 'indigo', route('workflows.index'), 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01'],
             ['Present Today', $attendanceToday, 'Employees at work', 'emerald', route('employees.index'), 'M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z']
         ] as [$title, $val, $desc, $color, $link, $icon])
-        <a href="{{ $link }}" class="group relative overflow-hidden rounded-xl border p-3 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md dark:shadow-none
+        <a href="{{ $link }}" wire:navigate class="group relative overflow-hidden rounded-xl border p-3 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md dark:shadow-none
             @if($color === 'indigo') border-blue-200 bg-gradient-to-br from-blue-50 via-indigo-50 to-blue-100/80 dark:border-blue-500/20 dark:bg-gradient-to-br dark:from-slate-950 dark:via-blue-950/35 dark:to-slate-900
             @elseif($color === 'cyan') border-fuchsia-200 bg-gradient-to-br from-fuchsia-50 via-violet-50 to-purple-100/80 dark:border-violet-500/20 dark:bg-gradient-to-br dark:from-slate-950 dark:via-violet-950/35 dark:to-slate-900
             @elseif($color === 'rose') border-orange-200 bg-gradient-to-br from-orange-50 via-amber-50 to-orange-100/80 dark:border-orange-500/20 dark:bg-gradient-to-br dark:from-slate-950 dark:via-orange-950/35 dark:to-slate-900
@@ -100,7 +100,7 @@
                             <option value="60">Past 60 days</option>
                             <option value="90">Past 90 days</option>
                         </select>
-                        <a href="{{ route('leaves.pending') }}" class="flex h-6 w-6 items-center justify-center rounded border border-slate-200 bg-white text-slate-500 shadow-sm transition-colors hover:bg-slate-50 hover:text-slate-700 dark:border-white/5 dark:bg-slate-950 dark:text-slate-300 dark:hover:bg-slate-900">
+                        <a href="{{ route('leaves.pending') }}" wire:navigate class="flex h-6 w-6 items-center justify-center rounded border border-slate-200 bg-white text-slate-500 shadow-sm transition-colors hover:bg-slate-50 hover:text-slate-700 dark:border-white/5 dark:bg-slate-950 dark:text-slate-300 dark:hover:bg-slate-900">
                             <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
                         </a>
                     </div>

@@ -6,6 +6,8 @@ use App\Models\Employee;
 use App\Models\Goal;
 use App\Models\OneOnOneNote;
 use App\Models\PerformanceReview;
+use App\Models\PeerFeedback;
+use App\Models\PublicPraise;
 use App\Support\TenantContext;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
@@ -19,7 +21,7 @@ class PerformanceHub extends Component
 {
     use WithPagination;
 
-    public string $activeTab = 'goals'; // goals, reviews, meetings
+    public string $activeTab = 'goals'; // goals, reviews, meetings, feedback, praise
     public bool $isManager = false;
     public ?Employee $employee = null;
 
@@ -27,6 +29,17 @@ class PerformanceHub extends Component
     public bool $showGoalModal = false;
     public bool $showReviewModal = false;
     public bool $showMeetingModal = false;
+    public bool $showFeedbackModal = false;
+    public bool $showPraiseModal = false;
+
+    // Form fields (Feedback)
+    public ?int $feedbackReviewerId = null;
+    public string $feedbackNote = '';
+    
+    // Form fields (Praise)
+    public ?int $praiseReceiverId = null;
+    public string $praiseBadge = 'kudos';
+    public string $praiseMessage = '';
 
     // Form fields (Goal)
     public string $goalTitle = '';
@@ -142,6 +155,48 @@ class PerformanceHub extends Component
         $this->dispatch('notify', message: '1-on-1 meeting session documented.', type: 'success');
     }
 
+    public function requestFeedback()
+    {
+        $this->validate([
+            'feedbackReviewerId' => 'required|exists:employees,id',
+            'feedbackNote' => 'required|max:500',
+        ]);
+
+        PeerFeedback::create([
+            'tenant_id' => Auth::user()->tenant_id,
+            'requester_id' => $this->employee ? $this->employee->id : Auth::id(), // Fallback
+            'reviewer_id' => $this->feedbackReviewerId,
+            'request_note' => $this->feedbackNote,
+            'status' => 'pending',
+        ]);
+
+        $this->showFeedbackModal = false;
+        $this->reset(['feedbackReviewerId', 'feedbackNote']);
+        $this->dispatch('notify', message: '360° Peer Feedback request sent.', type: 'success');
+    }
+
+    public function publishPraise()
+    {
+        $this->validate([
+            'praiseReceiverId' => 'required|exists:employees,id',
+            'praiseBadge' => 'required|in:kudos,team_player,innovator',
+            'praiseMessage' => 'required|max:1000',
+        ]);
+
+        PublicPraise::create([
+            'tenant_id' => Auth::user()->tenant_id,
+            'sender_id' => $this->employee ? $this->employee->id : Auth::id(), // Fallback for admin without employee record
+            'receiver_id' => $this->praiseReceiverId,
+            'badge' => $this->praiseBadge,
+            'message' => $this->praiseMessage,
+            'is_public' => true,
+        ]);
+
+        $this->showPraiseModal = false;
+        $this->reset(['praiseReceiverId', 'praiseMessage', 'praiseBadge']);
+        $this->dispatch('notify', message: 'Public praise published to the company board!', type: 'success');
+    }
+
     public function render()
     {
         $tenantId = Auth::user()->tenant_id;
@@ -164,6 +219,22 @@ class PerformanceHub extends Component
             ->orderByDesc('meeting_date')
             ->paginate(10, pageName: 'meetings-page');
 
+        $feedbackRequests = PeerFeedback::where('tenant_id', $tenantId)
+            ->with(['requester', 'reviewer'])
+            ->where(function($q) {
+                if (!$this->isManager && $this->employee) {
+                    $q->where('requester_id', $this->employee->id)
+                      ->orWhere('reviewer_id', $this->employee->id);
+                }
+            })
+            ->orderByDesc('created_at')
+            ->paginate(10, pageName: 'feedback-page');
+
+        $praises = PublicPraise::where('tenant_id', $tenantId)
+            ->with(['sender', 'receiver'])
+            ->orderByDesc('created_at')
+            ->paginate(15, pageName: 'praises-page');
+
         $employees = $this->isManager 
             ? Employee::where('tenant_id', $tenantId)->get(['id', 'full_name']) 
             : collect();
@@ -172,7 +243,10 @@ class PerformanceHub extends Component
             'goals' => $goals,
             'reviews' => $reviews,
             'meetings' => $meetings,
+            'feedbackRequests' => $feedbackRequests,
+            'praises' => $praises,
             'employees' => $employees,
+            'allEmployees' => Employee::where('tenant_id', $tenantId)->get(['id', 'full_name']), // needed for feedback and praise
         ]);
     }
 }
