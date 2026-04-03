@@ -96,6 +96,14 @@ class PayrollHub extends Component
         $this->isGenerating = true;
     }
 
+    public function checkGenerationStatus()
+    {
+        $this->loadStats();
+        if (\Illuminate\Support\Facades\DB::table('jobs')->count() === 0) {
+            $this->isGenerating = false;
+        }
+    }
+
     public function markAsPaid(int $id)
     {
         Payslip::where('id', $id)

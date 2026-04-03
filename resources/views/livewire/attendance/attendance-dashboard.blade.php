@@ -122,13 +122,31 @@
                 {{-- Control Pad --}}
                 <div class="mt-4 flex flex-wrap items-center justify-between gap-2.5 border-t border-slate-100 pt-4 dark:border-white/5 relative z-10 bg-slate-50/50 -mx-4 -mb-4 px-4 pb-4 dark:bg-slate-950/20">
                     @if(!$todayRecord)
-                        <button wire:click="punchIn" wire:loading.attr="disabled"
+                        <button x-data="{
+                                loadingLoc: false,
+                                doPunch() {
+                                    if(this.loadingLoc) return;
+                                    this.loadingLoc = true;
+                                    if (navigator.geolocation) {
+                                        navigator.geolocation.getCurrentPosition(
+                                            (pos) => { $wire.punchIn(pos.coords.latitude, pos.coords.longitude); this.loadingLoc = false; },
+                                            (err) => { $wire.punchIn(); this.loadingLoc = false; },
+                                            { timeout: 5000, maximumAge: 0 }
+                                        );
+                                    } else {
+                                        $wire.punchIn();
+                                        this.loadingLoc = false;
+                                    }
+                                }
+                            }" 
+                            @click="doPunch()" :disabled="loadingLoc" wire:loading.attr="disabled"
                                 class="w-full sm:w-auto flex-1 inline-flex h-8 items-center justify-center gap-1.5 rounded bg-slate-900 px-4 text-[8px] font-black uppercase tracking-[0.2em] text-white shadow transition-all hover:bg-cyan-600 active:scale-95 dark:bg-white/10 dark:hover:bg-cyan-500/20 dark:hover:text-cyan-400 disabled:opacity-50">
-                            <span wire:loading.remove wire:target="punchIn" class="flex items-center gap-1.5">
+                            <span x-show="!loadingLoc" wire:loading.remove wire:target="punchIn" class="flex items-center gap-1.5">
                                 <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
                                 <span>Initialize Shift</span>
                             </span>
-                            <span wire:loading wire:target="punchIn">Processing...</span>
+                            <span x-show="loadingLoc" style="display: none;">Acquiring Satellites...</span>
+                            <span x-show="!loadingLoc" wire:loading wire:target="punchIn" style="display: none;">Processing...</span>
                         </button>
                     @elseif(!$isCompleted)
                         <div class="flex w-full sm:w-auto items-center gap-1.5">

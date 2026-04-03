@@ -37,8 +37,40 @@
     </div>
 
     {{-- Asset Grid --}}
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" wire:loading.class="opacity-50">
-        @forelse($assets as $asset)
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        
+        {{-- Shimmering Skeleton State --}}
+        <div wire:loading class="contents">
+            @for($i = 0; $i < 8; $i++)
+                <div class="relative overflow-hidden rounded-xl border border-slate-100 bg-white/60 p-4 shadow-sm backdrop-blur-md dark:border-white/5 dark:bg-slate-900/60 isolate">
+                    {{-- Shimmer Effect --}}
+                    <div class="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/40 to-transparent dark:via-white/10 z-10 w-[200%]"></div>
+                    
+                    <div class="flex items-start justify-between mb-3 relative z-0">
+                        <div class="h-10 w-10 shrink-0 rounded-xl bg-slate-200/80 dark:bg-slate-800/80"></div>
+                        <div class="h-6 w-20 rounded-xl bg-slate-200/80 dark:bg-slate-800/80"></div>
+                    </div>
+                    <div class="mb-4 space-y-2 relative z-0">
+                        <div class="h-4 w-3/4 rounded bg-slate-200/80 dark:bg-slate-800/80"></div>
+                        <div class="h-3 w-1/2 rounded bg-slate-200/80 dark:bg-slate-800/80"></div>
+                    </div>
+                    <div class="pt-3 border-t border-slate-100 dark:border-white/5 flex items-center justify-between relative z-0">
+                        <div class="flex items-center gap-3">
+                            <div class="h-8 w-8 rounded-xl bg-slate-200/80 dark:bg-slate-800/80"></div>
+                            <div class="space-y-1.5">
+                                <div class="h-2 w-12 rounded bg-slate-200/80 dark:bg-slate-800/80"></div>
+                                <div class="h-2 w-20 rounded bg-slate-200/80 dark:bg-slate-800/80"></div>
+                            </div>
+                        </div>
+                        <div class="h-8 w-8 rounded-xl bg-slate-200/80 dark:bg-slate-800/80"></div>
+                    </div>
+                </div>
+            @endfor
+        </div>
+
+        {{-- Real Verified Content --}}
+        <div wire:loading.remove class="contents">
+            @forelse($assets as $asset)
             <div class="group relative overflow-hidden rounded-xl border-2 border-white bg-white/60 p-4 shadow-[0_4px_12px_rgba(0,0,0,0.05)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(0,0,0,0.08)] hover:border-orange-400/50 dark:border-white/5 dark:bg-slate-900/60">
                 {{-- Dynamic Accent Glow based on status --}}
                 @php
@@ -134,6 +166,7 @@
                 </div>
             </div>
         @endforelse
+        </div>
     </div>
 
     <div class="mt-8">

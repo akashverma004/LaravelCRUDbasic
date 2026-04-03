@@ -48,6 +48,9 @@
     </div>
 
     @if($activeTab === 'generator')
+        @if($isGenerating)
+            <div wire:poll.3s="checkGenerationStatus" class="hidden"></div>
+        @endif
         {{-- Generator Section: Stats, Controls, and Table --}}
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
             @foreach([

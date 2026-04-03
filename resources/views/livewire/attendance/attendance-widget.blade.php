@@ -41,9 +41,26 @@
 
     <div class="mt-8 grid grid-cols-2 gap-3">
         @if(!$todayRecord)
-            <button wire:click="punchIn" class="col-span-2 inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-slate-900 text-[10px] font-black uppercase tracking-widest text-white transition-all hover:bg-cyan-600 active:scale-95 dark:bg-white/5 dark:hover:bg-cyan-500">
-                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
-                <span>Punch In</span>
+            <button x-data="{
+                    loadingLoc: false,
+                    doPunch() {
+                        if(this.loadingLoc) return;
+                        this.loadingLoc = true;
+                        if (navigator.geolocation) {
+                            navigator.geolocation.getCurrentPosition(
+                                (pos) => { $wire.punchIn(pos.coords.latitude, pos.coords.longitude); this.loadingLoc = false; },
+                                (err) => { $wire.punchIn(); this.loadingLoc = false; },
+                                { timeout: 3000, maximumAge: 0 }
+                            );
+                        } else {
+                            $wire.punchIn();
+                            this.loadingLoc = false;
+                        }
+                    }
+                }" @click="doPunch()" :disabled="loadingLoc" wire:loading.attr="disabled" class="col-span-2 inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-slate-900 text-[10px] font-black uppercase tracking-widest text-white transition-all hover:bg-cyan-600 active:scale-95 dark:bg-white/5 dark:hover:bg-cyan-500 disabled:opacity-50">
+                <svg x-show="!loadingLoc" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                <span x-show="!loadingLoc">Punch In</span>
+                <span x-show="loadingLoc" style="display: none;">Locating...</span>
             </button>
         @elseif(!$isCompleted)
             @if($isClockedIn)

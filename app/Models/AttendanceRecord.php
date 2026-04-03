@@ -21,6 +21,8 @@ class AttendanceRecord extends Model
         'intervals',
         'status',
         'total_work_seconds',
+        'ip_address',
+        'location_metadata',
     ];
 
     protected $casts = [
@@ -28,6 +30,7 @@ class AttendanceRecord extends Model
         'clock_in_at' => 'datetime:H:i',
         'clock_out_at' => 'datetime:H:i',
         'intervals' => 'array',
+        'location_metadata' => 'array',
     ];
 
     public function employee(): BelongsTo

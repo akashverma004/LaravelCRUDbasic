@@ -52,7 +52,7 @@ class AttendanceDashboard extends Component
         }
     }
 
-    public function punchIn()
+    public function punchIn(float $latitude = null, float $longitude = null)
     {
         $user = auth()->user();
         $employee = Employee::where('email', $user->email)->where('tenant_id', $user->tenant_id)->first();
@@ -61,6 +61,7 @@ class AttendanceDashboard extends Component
 
         $now = now()->toDateTimeString();
         $today = now()->toDateString();
+        $ip = request()->ip();
 
         $this->todayRecord = AttendanceRecord::firstOrCreate(
             ['employee_id' => $employee->id, 'attendance_date' => $today],
@@ -69,6 +70,8 @@ class AttendanceDashboard extends Component
                 'clock_in_at' => now()->toTimeString(),
                 'work_mode' => 'onsite',
                 'status' => 'clocked_in',
+                'ip_address' => $ip,
+                'location_metadata' => ($latitude && $longitude) ? ['lat' => $latitude, 'lng' => $longitude] : null,
                 'intervals' => [
                     ['type' => 'work', 'start' => $now, 'end' => null]
                 ]

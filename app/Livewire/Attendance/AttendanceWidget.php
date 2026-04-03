@@ -37,19 +37,23 @@ class AttendanceWidget extends Component
         }
     }
 
-    public function punchIn()
+    public function punchIn(float $latitude = null, float $longitude = null)
     {
         $user = auth()->user();
         $employee = Employee::where('email', $user->email)->where('tenant_id', $user->tenant_id)->first();
         if (!$employee) return;
 
         $now = now()->toDateTimeString();
+        $ip = request()->ip();
+
         $this->todayRecord = AttendanceRecord::firstOrCreate(
             ['employee_id' => $employee->id, 'attendance_date' => now()->toDateString()],
             [
                 'tenant_id' => $user->tenant_id,
                 'clock_in_at' => now()->toTimeString(),
                 'status' => 'clocked_in',
+                'ip_address' => $ip,
+                'location_metadata' => ($latitude && $longitude) ? ['lat' => $latitude, 'lng' => $longitude] : null,
                 'intervals' => [['type' => 'work', 'start' => $now, 'end' => null]]
             ]
         );

@@ -18,6 +18,9 @@
 
             <div class="flex items-center gap-2">
                 @auth
+                <button @click.stop="$dispatch('open-command-palette')" class="rounded-lg border border-sky-100 bg-sky-50 p-2 text-sky-700 transition-all hover:bg-sky-100 dark:border-white/10 dark:bg-slate-900/80 dark:text-slate-200 dark:hover:bg-slate-800/90 mr-1">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
+                </button>
                 <div x-data="notificationBell()" x-init="init()" class="relative">
                     <button @click="toggleDropdown()" class="relative rounded-lg border border-sky-100 bg-sky-50 p-2 text-sky-700 transition-all hover:bg-sky-100 dark:border-white/10 dark:bg-slate-900/80 dark:text-slate-200 dark:hover:bg-slate-800/90">
                         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" /></svg>

@@ -44,7 +44,7 @@
                 </div>
 
                 {{-- Search --}}
-                <button @click="$dispatch('open-command-palette')" class="group flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 transition-all hover:bg-slate-100 dark:border-white/5 dark:bg-white/5 dark:hover:bg-white/10">
+                <button @click.stop="$dispatch('open-command-palette')" class="group flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 transition-all hover:bg-slate-100 dark:border-white/5 dark:bg-white/5 dark:hover:bg-white/10">
                     <svg class="h-4 w-4 text-slate-400 group-hover:text-cyan-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                     <span class="text-xs font-medium text-slate-500 group-hover:text-slate-700 dark:text-slate-400 dark:group-hover:text-white">Search...</span>
                     <div class="flex items-center gap-1 rounded bg-white border border-slate-200 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
@@ -84,9 +84,7 @@
                 </div>
             </div>
         </div>
-
-        @include('hrms.components.command-palette')
-
+        <livewire:shared.command-palette />
         <div class="relative w-full flex-grow overflow-hidden px-4 pb-8 pt-24 lg:px-5">
             {{-- Background Decoration --}}
             <div class="absolute -left-20 top-20 -z-10 h-80 w-80 rounded-full bg-cyan-500/5 blur-[100px] pointer-events-none"></div>
